@@ -13,38 +13,40 @@ let
   '';
 in
 {
-  #home.file.".config/nvim".source = ./nvim;
-  #home.file.".config/nvim/lua".source = ./nvim/lua;
   programs = {
     nixneovim = {
       enable = true;
-#       extraConfigLua = ''
-#         ${lib.strings.fileContents ./nvim/init.lua}
-# 	'';
-
-    plugins = {
-      firenvim.enable = true;
-      lsp = {
-        enable = true;
-	servers = {
-	  html.enable = true;
-	  jsonls.enable = true;
-	  rnix-lsp.enable = true;
-	  vuels.enable = true;
-	  };
+      extraConfigLua = ''
+        require("functions")
+        require("keymappings")
+        require("settings")
+      '';
+      plugins = {
+        firenvim.enable = true;
+        lsp = {
+          enable = true;
+          servers = {
+            html.enable = true;
+            jsonls.enable = true;
+            rnix-lsp.enable = true;
+            vuels.enable = true;
+          };
+        };
+        treesitter = {
+          enable = true;
+          indent = true;
+          extraLua.post = ''
+            require("language_parsing.treesitter")
+          '';
+        };
+        nvim-cmp = {
+          enable = true;
+          completion = {
+            autocomplete = "true";
+          };
+          snippet.luasnip.enable = true;
+      	};
       };
-      treesitter = {
-        enable = true;
-        indent = true;
-      };
-      nvim-cmp = {
-        enable = true;
-	completion = {
-	  autocomplete = "true";
-	  };
-	snippet.luasnip.enable = true;
-      	 };
-       };
     };
   };
   home = {
@@ -73,5 +75,5 @@ in
   };
 
   # home.file.".config/nvim/init.lua".source = ./nvim/init.lua;
-  # home.file.".config/nvim/lua".source = ./nvim/lua;
+  home.file.".config/nvim/lua".source = ./nvim/lua;
 }
