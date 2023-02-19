@@ -21,7 +21,7 @@
       $mainMod = ALT
       # $scripts=$HOME/.config/hypr/scripts
 
-      monitor=,preferred,auto,1
+      monitor=eDP-1,highrr,0.5x0.5,1
 
       # Source a file (multi-file configs)
       # source = ~/.config/hypr/myColors.conf

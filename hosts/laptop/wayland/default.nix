@@ -23,22 +23,21 @@
     kernelPackages = pkgs.linuxPackages_xanmod_latest;
     loader = {
       systemd-boot = {
-        enable = false;
+        enable = true;
         consoleMode = "auto";
       };
-      grub = {
-	enable = true;
-        efiSupport = true;
-	# efiInstallAsRemovable = true;
-	useOSProber = true;
-	devices = [
-          "nodev"
-	];
-      };
-      efi = {
-        canTouchEfiVariables = true;
-        efiSysMountPoint = "/boot/efi";
-      };
+      # grub = {
+      #   enable = true;
+      #   efiSupport = true;
+      #   useOSProber = true;
+      #   devices = [
+      #     "nodev"
+      #   ];
+      # };
+      # efi = {
+      #   canTouchEfiVariables = true;
+      #   efiSysMountPoint = "/boot/efi";
+      # };
       timeout = 3;
     };
     kernelParams = [

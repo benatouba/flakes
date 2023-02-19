@@ -4,7 +4,7 @@
   nixpkgs.system = "x86_64-linux";
 
   networking = {
-    hostName = "bens-home"; # Define your hostname.
+    hostName = "thinkpad"; # Define your hostname.
     networkmanager.enable = true;
     hosts = {
       "185.199.109.133" = [ "raw.githubusercontent.com" ];
