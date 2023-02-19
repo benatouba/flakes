@@ -32,6 +32,7 @@ in
               # (import ./laptop/x11/home.nix)
             ] ++ [
               inputs.hyprland.homeManagerModules.default
+	      inputs.nixneovim.nixosModules.default
             ];
           };
         };
@@ -41,6 +42,7 @@ in
               ++ [
               self.overlays.default
               inputs.picom.overlays.default
+	      inputs.nixneovim.overlays.default
             ];
         };
       }

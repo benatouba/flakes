@@ -4,7 +4,7 @@
   nixpkgs.system = "x86_64-linux";
 
   networking = {
-    hostName = "bens-thinkpad"; # Define your hostname.
+    hostName = "bens-home"; # Define your hostname.
     networkmanager.enable = true;
     hosts = {
       "185.199.109.133" = [ "raw.githubusercontent.com" ];
@@ -31,6 +31,7 @@
       git
       neovim
       wget
+      curl
       neofetch
       ripgrep
       ripgrep-all

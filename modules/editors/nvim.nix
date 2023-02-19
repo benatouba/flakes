@@ -9,20 +9,39 @@ let
       else 
              npm set prefix ~/.npm-global
     fi
-    npm i -g npm vscode-langservers-extracted vscode-langservers-extracted typescript typescript-language-server bash-language-server
+    npm i -g npm vscode-langservers-extracted typescript typescript-language-server bash-language-server
   '';
 in
 {
   programs = {
-    neovim = {
+    nixneovim = {
       enable = true;
-      withPython3 = true;
-      withNodeJs = true;
-      extraPackages = [
-      ];
-      #-- Plugins --#
-      plugins = with pkgs.vimPlugins;[ ];
-      #-- --#
+      extraConfigLua = ''
+        {lib.strings.fileContents ./nvim/init.lua}
+	'';
+
+    plugins = {
+      lsp = {
+        enable = true;
+	servers = {
+	  html.enable = true;
+	  jsonls.enable = true;
+	  rnix-lsp.enable = true;
+	  vuels.enable = true;
+	  };
+      };
+      treesitter = {
+        enable = true;
+        indent = true;
+      };
+      nvim-cmp = {
+        enable = true;
+	completion = {
+	  autocomplete = "true";
+	  };
+	snippet.luasnip.enable = true;
+      	 };
+       };
     };
   };
   home = {
@@ -50,6 +69,6 @@ in
     ];
   };
 
-  home.file.".config/nvim/init.lua".source = ./nvim/init.lua;
-  home.file.".config/nvim/lua".source = ./nvim/lua;
+  # home.file.".config/nvim".source = ./myNvim;
+  # home.file.".config/nvim/lua".source = ./nvim/lua;
 }
