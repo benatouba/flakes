@@ -13,12 +13,11 @@ let
   '';
 in
 {
+  #home.file.".config/nvim".source = ./nvim;
+  #home.file.".config/nvim/lua".source = ./nvim/lua;
   programs = {
     nixneovim = {
       enable = true;
-      extraConfigLua = ''
-        {lib.strings.fileContents ./nvim/init.lua}
-	'';
 
     plugins = {
       lsp = {
@@ -69,6 +68,4 @@ in
     ];
   };
 
-  # home.file.".config/nvim".source = ./myNvim;
-  # home.file.".config/nvim/lua".source = ./nvim/lua;
 }
