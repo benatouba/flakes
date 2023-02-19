@@ -22,6 +22,7 @@
       # $scripts=$HOME/.config/hypr/scripts
 
       monitor=,preferred,auto,1
+      monitor=eDP-1,highrr,0x0,1.35
 
       # Source a file (multi-file configs)
       # source = ~/.config/hypr/myColors.conf
@@ -253,7 +254,7 @@
       #------------------------#
       # quickly launch program #
       #------------------------# 
-      bind=$mainMod,B,exec,nvidia-offload firefox
+      bind=$mainMod, B, exec, $BROWSER
       bind=$mainMod,M,exec,netease-cloud-music-gtk4 
       bind=$mainMod SHIFT,M,exec,kitty --class="musicfox" --hold sh -c "musicfox" 
       bind=$mainMod SHIFT,D,exec,kitty  --class="danmufloat" --hold sh -c "cd /home/ruixi/Codelearning/go/src/bilibili_live_tui/  && export TERM=xterm-256color && go run main.go -c config.toml"
@@ -315,7 +316,7 @@
       #-----------------------#
       # wall(by swww service) #
       #-----------------------#
-      # exec-once = dynamic_wallpaper
+      exec-once = dynamic_wallpaper
       # exec-once = default_wall 
 
       #------------#
