@@ -16,20 +16,36 @@ in
   programs = {
     nixneovim = {
       enable = true;
-      extraConfigLua = ''
-        require("functions")
-        require("keymappings")
-        require("settings")
-      '';
+      globals.mapleader = "<space>";
       plugins = {
+        barbar = {
+          enable = true;
+          autoHide = true;
+          animation = true;
+        };
         firenvim.enable = true;
+        indent-blankline.enable = true;
         lsp = {
           enable = true;
           servers = {
             html.enable = true;
             jsonls.enable = true;
             rnix-lsp.enable = true;
+            # lua_ls.enable = true;
             vuels.enable = true;
+          };
+        };
+        lualine = {
+          enable = true;
+        };
+        project-nvim = {
+          enable = true;
+        };
+        telescope = {
+          enable = true;
+          useBat = true;
+          extensions = {
+            manix.enable = true;
           };
         };
         treesitter = {
@@ -41,12 +57,12 @@ in
         };
         nvim-cmp = {
           enable = true;
-          completion = {
-            autocomplete = "true";
-          };
           snippet.luasnip.enable = true;
       	};
       };
+      extraPlugins = with pkgs.vimExtraPlugins; [
+        which-key-nvim
+      ];
     };
   };
   home = {
@@ -75,5 +91,5 @@ in
   };
 
   # home.file.".config/nvim/init.lua".source = ./nvim/init.lua;
-  home.file.".config/nvim/lua".source = ./nvim/lua;
+  home.file.".config/nvim".source = ./nvim;
 }
