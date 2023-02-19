@@ -45,6 +45,7 @@
       spotifyd
       brave
       libglvnd
+      zoom-us
     ];
   };
   services.dbus.enable = true;

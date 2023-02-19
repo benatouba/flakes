@@ -16,11 +16,12 @@ in
   programs = {
     nixneovim = {
       enable = true;
-      extraConfigLua = ''
-        {lib.strings.fileContents ./nvim/init.lua}
-	'';
+#       extraConfigLua = ''
+#         ${lib.strings.fileContents ./nvim/init.lua}
+# 	'';
 
     plugins = {
+      firenvim.enable = true;
       lsp = {
         enable = true;
 	servers = {
