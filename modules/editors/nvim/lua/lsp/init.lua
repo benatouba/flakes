@@ -66,7 +66,6 @@ local installed_servers = {
   "fortls",
   "html",
   "jsonls",
-  "lua_ls",
   "pylsp",
   "r_language_server",
   "ruff_lsp",
@@ -77,6 +76,7 @@ local installed_servers = {
   "vimls",
   "yamlls",
   "rnix",
+  "nil_ls",
   "zk",
 }
 
@@ -102,6 +102,7 @@ lspconfig.lua_ls.setup({
         library = {
           vim.api.nvim_get_runtime_file("", true),
         },
+				checkThirdParty = false,
         maxPreload = 10000,
         preloadFileSize = 1000,
       },
@@ -165,7 +166,7 @@ end
 
 lspconfig.volar.setup({
   -- cmd = { "vue-language-server", "--stdio" },
-  filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
+  filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
   init_options = {
     documentFeatures = {
       documentColor = false,

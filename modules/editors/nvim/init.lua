@@ -23,3 +23,4 @@ require("toggleterm").setup({
 	},
 })
 require("misc.neogen")
+require('hlslens').setup()

@@ -18,7 +18,7 @@ in
       enable = true;
       globals.mapleader = "<space>";
       plugins = {
-        # nvim-autopairs.enable = true;
+        nvim-autopairs.enable = true;
         barbar = {
           enable = true;
           autoHide = true;
@@ -89,7 +89,7 @@ in
         nvim-dap.enable = true;
         nvim-dap-ui.enable = true;
         trouble.enable = true;
-        # neogit.enable = true;
+        neogit.enable = true;
         gitsigns = {
           enable = true;
           extraLua.post = "require('git.gitsigns')";
