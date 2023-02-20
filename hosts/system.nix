@@ -28,8 +28,8 @@
       lshw
       neofetch
       neovim
-      nodePackages.pnpm
-      nodejs-18_x
+      nodePackages_latest.pnpm
+      nodejs-19_x
       obsidian
       pciutils
       ranger
@@ -38,7 +38,7 @@
       socat
       spotifyd
       tmux
-      wezterm
+      # wezterm
       wget
       zoom-us
     ];
