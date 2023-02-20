@@ -22,8 +22,9 @@
       # $scripts=$HOME/.config/hypr/scripts
 
       monitor=,preferred,auto,1
-      monitor=eDP-1,highrr,0x0,1.35
       monitor=HDMI-A-1,highres,0x0,1
+      monitor=eDP-1,highrr,0x0,1.85
+      monitor=DP-1,highres,auto,1
 
       # Source a file (multi-file configs)
       # source = ~/.config/hypr/myColors.conf
@@ -53,17 +54,17 @@
         col.active_border = rgb(ffc0cb)
         col.inactive_border = rgba(595959aa)
 
-        layout = dwindle # master|dwindle 
+        layout = dwindle # master|dwindle
       }
 
       dwindle {
         no_gaps_when_only = false
-        force_split = 0 
+        force_split = 0
         special_scale_factor = 0.8
-        split_width_multiplier = 1.0 
+        split_width_multiplier = 1.0
         use_active_for_splits = true
-        pseudotile = yes 
-        preserve_split = yes 
+        pseudotile = yes
+        preserve_split = yes
       }
 
       master {
@@ -80,7 +81,7 @@
         inactive_opacity = 1.0
         fullscreen_opacity = 1.0
         rounding = 0
-        blur = yes 
+        blur = yes
         blur_size = 3
         blur_passes = 1
         blur_new_optimizations = true
@@ -90,7 +91,7 @@
         shadow_range = 4
         shadow_render_power = 3
         shadow_ignore_window = true
-      # col.shadow = 
+      # col.shadow =
       # col.shadow_inactive
       # shadow_offset
         dim_inactive = false
@@ -202,7 +203,7 @@
 
       #-------------------------------#
       # special workspace(scratchpad) #
-      #-------------------------------# 
+      #-------------------------------#
       bind = $mainMod, minus, movetoworkspace,special
       bind = $mainMod, equal, togglespecialworkspace
 
@@ -248,18 +249,18 @@
       # switch between current and last workspace #
       #-------------------------------------------#
       binds {
-           workspace_back_and_forth = 1 
+           workspace_back_and_forth = 1
            allow_workspace_cycles = 1
       }
       bind=$mainMod,slash,workspace,previous
 
       #------------------------#
       # quickly launch program #
-      #------------------------# 
+      #------------------------#
       bind=$mainMod, B, exec, $BROWSER
-      bind=$mainMod,M,exec,netease-cloud-music-gtk4 
-      bind=$mainMod SHIFT,M,exec,kitty --class="musicfox" --hold sh -c "musicfox" 
-      bind=$mainMod SHIFT,D,exec,kitty  --class="danmufloat" --hold sh -c "cd /home/ruixi/Codelearning/go/src/bilibili_live_tui/  && export TERM=xterm-256color && go run main.go -c config.toml"
+      bind=$mainMod,M,exec,netease-cloud-music-gtk4
+      bind=$mainMod SHIFT,M,exec,kitty --class="musicfox" --hold sh -c "musicfox"
+      bind=$mainMod SHIFT,D,exec,kitty  --class="danmufloat" --hold sh -c "cd /home/ben/Codelearning/go/src/bilibili_live_tui/  && export TERM=xterm-256color && go run main.go -c config.toml"
       bind=$mainMod SHIFT,X,exec,myswaylock
       bind=$mainMod,T,exec,telegram-desktop
       bind=$mainMod,Q,exec,nvidia-offload icalingua-plus-plus --enable-features=UseOzonePlatform --ozone-platform=wayland
@@ -278,8 +279,8 @@
       bind=,XF86AudioMicMute,exec, pamixer --default-source -t
       bind=,XF86MonBrightnessUp,exec, light -A 5
       bind=,XF86MonBrightnessDown, exec, light -U 5
-      bind=,XF86AudioPlay,exec, mpc -q toggle 
-      bind=,XF86AudioNext,exec, mpc -q next 
+      bind=,XF86AudioPlay,exec, mpc -q toggle
+      bind=,XF86AudioNext,exec, mpc -q next
       bind=,XF86AudioPrev,exec, mpc -q prev
 
       #---------------#
@@ -300,7 +301,7 @@
       binde=,h,resizeactive,-15 0
       binde=,k,resizeactive,0 -15
       binde=,j,resizeactive,0 15
-      bind=,escape,submap,reset 
+      bind=,escape,submap,reset
       submap=reset
 
       bind=CTRL SHIFT, left, resizeactive,-15 0
@@ -319,7 +320,7 @@
       # wall(by swww service) #
       #-----------------------#
       exec-once = dynamic_wallpaper
-      # exec-once = default_wall 
+      # exec-once = default_wall
 
       #------------#
       # auto start #

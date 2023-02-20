@@ -18,13 +18,19 @@ in
       enable = true;
       globals.mapleader = "<space>";
       plugins = {
+        # nvim-autopairs.enable = true;
         barbar = {
           enable = true;
           autoHide = true;
           animation = true;
         };
+        comment = {
+          enable = true;
+          extraLua.pre = "require('base.comment_nvim').config()";
+        };
         firenvim.enable = true;
         indent-blankline.enable = true;
+        undotree.enable = true;
         lsp = {
           enable = true;
           servers = {
@@ -48,20 +54,64 @@ in
             manix.enable = true;
           };
         };
+        nvim-tree = {
+          enable = true;
+        };
         treesitter = {
           enable = true;
           indent = true;
+          installAllGrammars = true;
           extraLua.post = ''
             require("language_parsing.treesitter")
           '';
         };
+        luasnip.enable = true;
+        lspkind.enable = true;
         nvim-cmp = {
           enable = true;
           snippet.luasnip.enable = true;
-      	};
+          sources = {
+            buffer.enable = true;
+            cmdline.enable = true;
+            dap.enable = true;
+            emoji.enable = true;
+            git.enable = true;
+            look.enable = true;
+            luasnip.enable = true;
+            nvim_lsp.enable = true;
+            nvim_lua.enable = true;
+            path.enable = true;
+            rg.enable = true;
+            tmux.enable = true;
+            treesitter.enable = true;
+          };
+        };
+        nvim-dap.enable = true;
+        nvim-dap-ui.enable = true;
+        trouble.enable = true;
+        # neogit.enable = true;
+        gitsigns = {
+          enable = true;
+          extraLua.post = "require('git.gitsigns')";
+        };
+        todo-comments = {
+          enable = true;
+          extraLua.post = "require('todo-comments').setup()";
+        };
       };
       extraPlugins = with pkgs.vimExtraPlugins; [
         which-key-nvim
+        lsp-status-nvim
+        catppuccin
+        cmp-under-comparator
+        dial-nvim
+        nvim-surround
+        lsp-signature-nvim
+        nvim-ts-context-commentstring
+        nvim-lsp-ts-utils
+        nvim-bqf
+        toggleterm-nvim
+        neogen
       ];
     };
   };

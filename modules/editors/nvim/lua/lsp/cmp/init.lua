@@ -80,7 +80,7 @@ M.config = function()
 					end
 
 					if entry.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
-							and string.sub(vim_item.abbr, -1, -1) == "~"
+						and string.sub(vim_item.abbr, -1, -1) == "~"
 					then
 						word = word .. "~"
 					end
@@ -123,7 +123,7 @@ M.config = function()
 			},
 		},
 		mapping = {
-			["<C-d>"] = cmp.mapping.scroll_docs(-4),
+			["<C-d>"] = cmp.mapping.scroll_docs( -4),
 			-- ["<C-f>"] = cmp.mapping.scroll_docs(4),
 			["<C-u>"] = cmp.mapping.scroll_docs(4),
 			["<C-Space>"] = cmp.mapping.complete(),
@@ -143,8 +143,8 @@ M.config = function()
 				end
 			end, { "i", "s" }),
 			["<C-b>"] = cmp.mapping(function(fallback)
-				if luasnip.jumpable(-1) then
-					luasnip.jump(-1)
+				if luasnip.jumpable( -1) then
+					luasnip.jump( -1)
 				else
 					fallback()
 				end
@@ -164,8 +164,8 @@ M.config = function()
 			["<S-Tab>"] = cmp.mapping(function(fallback)
 				if cmp.visible() then
 					cmp.select_prev_item()
-				elseif luasnip.jumpable(-1) then
-					luasnip.jump(-1)
+				elseif luasnip.jumpable( -1) then
+					luasnip.jump( -1)
 				else
 					fallback()
 				end
@@ -175,22 +175,22 @@ M.config = function()
 
 		sources = {
 			-- { name = "copilot", group_index = 2 },
-			{ name = "nvim_lsp", keyword_length = 1 },
+			{ name = "nvim_lsp",               keyword_length = 1 },
 			{ name = "nvim_lsp_signature_help" },
-			{ name = "luasnip", keyword_length = 2 },
-			{ name = "treesitter", keyword_length = 3 },
-			{ name = "nvim_lua", keyword_length = 3 },
-			{ name = "path", keyword_length = 3 },
+			{ name = "luasnip",                keyword_length = 2 },
+			{ name = "treesitter",             keyword_length = 3 },
+			{ name = "nvim_lua",               keyword_length = 3 },
+			{ name = "path",                   keyword_length = 3 },
 			{ name = "cmp_git" },
 			-- { name = "tmux" },
 			{ name = "orgmode" },
 			-- { name = 'zsh', },
 			{ name = "calc" },
 			{ name = "emoji" },
-			{ name = "tags", keyword_length = 5, max_item_count = 5 },
+			{ name = "tags",                   keyword_length = 5, max_item_count = 5 },
 			-- { name = "look", },
 			-- { name = "vim-dadbod-completion" },
-			{ name = "buffer", keyword_length = 5, max_item_count = 5 },
+			{ name = "buffer",                 keyword_length = 5, max_item_count = 5 },
 		},
 	})
 
@@ -287,7 +287,12 @@ M.config = function()
 	vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
 
 	vim.lsp.handlers["textDocument/signatureHelp"] =
-	vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
+		vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
+	-- local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+	-- cmp.event:on(
+	-- 	'confirm_done',
+	-- 	cmp_autopairs.on_confirm_done()
+	-- )
 end
 
 return M

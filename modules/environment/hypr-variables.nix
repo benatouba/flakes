@@ -4,7 +4,7 @@
   home = {
     sessionVariables = {
       EDITOR = "nvim";
-      BROWSER = "firefox";
+      BROWSER = "brave";
       TERMINAL = "kitty";
       QT_QPA_PLATFORMTHEME = "gtk3";
       QT_SCALE_FACTOR = "1";
@@ -16,7 +16,7 @@
       QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
       QT_AUTO_SCREEN_SCALE_FACTOR = "1";
       # WLR_DRM_DEVICES = "/dev/fb0:/dev/dri/card1:/dev/dri/card0";
-      # WLR_NO_HARDWARE_CURSORS = "1"; # if no cursor,uncomment this line  
+      # WLR_NO_HARDWARE_CURSORS = "1"; # if no cursor,uncomment this line
       # GBM_BACKEND = "nvidia-drm";
       CLUTTER_BACKEND = "wayland";
       # __GLX_VENDOR_LIBRARY_NAME = "nvidia";

@@ -57,7 +57,29 @@ lsp_status.register_progress()
 
 lspconfig.util.default_config = vim.tbl_deep_extend("force", lspconfig.util.default_config, lsp_defaults)
 
-local installed_servers = { "pyright" }
+local installed_servers = {
+  "ansiblels",
+  "bashls",
+  "cssls",
+  "docker_compose_language_service",
+  "dockerls",
+  "fortls",
+  "html",
+  "jsonls",
+  "lua_ls",
+  "pylsp",
+  "r_language_server",
+  "ruff_lsp",
+  "salt_ls",
+  "sqls", -- deprecated
+  "taplo",
+  "tsserver",
+  "vimls",
+  "yamlls",
+  "rnix",
+  "zk",
+}
+
 for _, server in ipairs(installed_servers) do
   lspconfig[server].setup({})
 end
@@ -120,6 +142,76 @@ lspconfig.pylsp.setup({
   },
 })
 
+
+local util = require("lspconfig.util")
+local function get_typescript_server_path(root_dir)
+  local global_ts = "/usr/local/lib/node_modules/typescript/lib"
+  local found_ts = ""
+  local function check_dir(path)
+    found_ts = util.path.join(path, "node_modules", "typescript", "lib")
+    if util.path.exists(found_ts) then
+      return path
+    end
+  end
+
+  if util.search_ancestors(root_dir, check_dir) then
+    return found_ts
+  else
+    util.path.exists(global_ts)
+    vim.notify("Using global typescript")
+    return global_ts
+  end
+end
+
+lspconfig.volar.setup({
+  -- cmd = { "vue-language-server", "--stdio" },
+  filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
+  init_options = {
+    documentFeatures = {
+      documentColor = false,
+      documentFormatting = {
+        defaultPrintWidth = 120,
+      },
+      documentSymbol = true,
+      foldingRange = true,
+      linkedEditingRange = true,
+      selectionRange = true,
+    },
+    languageFeatures = {
+      callHierarchy = true,
+      codeAction = true,
+      codeLens = true,
+      completion = {
+        defaultAttrNameCase = "kebabCase",
+        defaultTagNameCase = "both",
+      },
+      definition = true,
+      diagnostics = true,
+      documentHighlight = true,
+      documentLink = true,
+      hover = true,
+      implementation = true,
+      references = true,
+      rename = true,
+      renameFileRefactoring = true,
+      schemaRequestService = true,
+      semanticTokens = false,
+      signatureHelp = true,
+      typeDefinition = true,
+    },
+    typescript = {
+      tsdk = "",
+    },
+  },
+  -- on_attach = function(client)
+  --   client.server_capabilities.documentFormattingProvider = true
+  --   client.server_capabilities.documentRangeFormattingProvider = true
+  --   client.server_capabilities.renameProvider = true
+  -- end,
+  on_new_config = function(new_config, new_root_dir)
+    new_config.init_options.typescript.tsdk = get_typescript_server_path(new_root_dir)
+  end,
+})
 
 -- local opts = {}
 -- opts.capabilities = capabilities
