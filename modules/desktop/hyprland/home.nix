@@ -23,12 +23,13 @@
 
       monitor=,preferred,auto,1
       monitor=eDP-1,highrr,0x0,1.35
+      monitor=HDMI-A-1,highres,0x0,1
 
       # Source a file (multi-file configs)
       # source = ~/.config/hypr/myColors.conf
 
       input {
-        kb_layout = de,us
+        kb_layout = us,de
         kb_variant =
         kb_model =
         kb_options = caps:swapescape
@@ -166,6 +167,7 @@
       #------------#
       bind = $mainMod SHIFT, G, exec, hyprctl --batch "keyword general:gaps_out 5;keyword general:gaps_in 3"
       bind = $mainMod, G, exec, hyprctl --batch "keyword general:gaps_out 0;keyword general:gaps_in 0"
+      bind = $mainMod, SPACE, exec, hyprctl switchxkblayout cherry-usb-keyboard next
 
       #--------------------------------------#
       # Move focus with mainMod + arrow keys #
