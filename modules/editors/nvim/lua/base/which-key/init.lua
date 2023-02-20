@@ -58,6 +58,7 @@ local maps = {
 		u = { "<cmd>PackerUpdate<cr>", "Update" },
 	},
 
+        b = { "<cmd>Telescope buffers<cr>", "Buffers" },
 	s = {
 		name = "+Search",
 		b = { "<cmd>Telescope git_branches<cr>", "Branches" },

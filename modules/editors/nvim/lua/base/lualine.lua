@@ -50,11 +50,7 @@ M.config = function()
   config.sections.lualine_c = {"filename", "lsp_progress"}
   config.sections.lualine_x = {{get_lsp_client}, 'encoding', 'fileformat', 'filetype'}
   config.options.extensions = { "quickfix", "fugitive",}
-  if O.colorscheme == 'catppuccin' then
-    config.options.theme = O.colorscheme
-  else
-    config.options.theme = "tokyonight"
-  end
+  config.options.theme = 'catppuccin'
   ll.setup(config)
 end
 

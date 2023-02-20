@@ -18,23 +18,28 @@
     shells = with pkgs; [ fish ];
     systemPackages = with pkgs; [
       bitwarden
-      git
-      neovim
-      wget
+      brave
       curl
+      exa
+      fd
+      git
+      killall
+      libglvnd
+      lshw
       neofetch
+      neovim
+      nodePackages.pnpm
+      nodejs-18_x
+      obsidian
+      pciutils
+      ranger
       ripgrep
       ripgrep-all
-      fd
-      lshw
-      pciutils
-      exa
-      ranger
-      killall
       socat
       spotifyd
-      brave
-      libglvnd
+      tmux
+      wezterm
+      wget
       zoom-us
     ];
   };

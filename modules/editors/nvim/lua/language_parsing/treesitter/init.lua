@@ -7,8 +7,6 @@ if not ts_ok then
 	return
 end
 ts.setup({
-	ensure_installed = 'all',
-	ignore_install = {},
 	highlight = {
 		enable = true,
 		additional_vim_regex_highlighting = false,
