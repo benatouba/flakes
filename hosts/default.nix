@@ -6,7 +6,7 @@ let
     config.allowUnfree = true; # Allow proprietary software
   };
 
-  lib = pkgs.lib;
+  lib = nixpkgs.lib;
 in
 {
   laptop = lib.nixosSystem {
@@ -43,7 +43,7 @@ in
               self.overlays.default
               inputs.picom.overlays.default
               inputs.nixneovim.overlays.default
-              inputs.gdal.overlays.default
+              # inputs.gdal.overlays.default
             ];
         };
       }

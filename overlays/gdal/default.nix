@@ -2,7 +2,7 @@ self: super:
 {
   gdal = super.gdal.overrideAttrs (old: {
     name = "gdal-3.4.0";
-    pname = "gdal-3.4.0";
+    pname = "gdal";
     src = self.fetchFromGitHub {
       owner = "OSGeo";
       repo = "gdal";

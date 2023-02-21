@@ -17,6 +17,7 @@
     binsh = "${pkgs.dash}/bin/dash";
     shells = with pkgs; [ fish ];
     systemPackages = with pkgs; [
+      auto-cpufreq
       bitwarden
       brave
       curl

@@ -112,6 +112,7 @@ in
         nvim-bqf
         toggleterm-nvim
         neogen
+        nvim-hlslens
       ];
     };
   };
@@ -126,6 +127,7 @@ in
       zk
       rust-analyzer
       clang-tools
+      nil
       #-- tree-sitter --#
       tree-sitter
       #-- format --#

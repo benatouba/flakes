@@ -16,7 +16,11 @@
     # shell = pkgs.fish;
     isNormalUser = true;
     extraGroups = [ "wheel" "video" "audio" ];
-    packages = [ ];
+    packages = [
+      pkgs.gdal
+      pkgs.hugo
+      pkgs.gimp
+    ];
   };
   boot = {
     supportedFilesystems = [ "ntfs" ];
@@ -85,7 +89,7 @@
       pkgs.sway-contrib.grimshot
       flameshot
       grim
-      gdal
+      # tlp
     ];
   };
 
