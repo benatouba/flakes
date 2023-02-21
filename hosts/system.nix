@@ -20,6 +20,7 @@
       bitwarden
       brave
       curl
+      micromamba
       exa
       fd
       git
