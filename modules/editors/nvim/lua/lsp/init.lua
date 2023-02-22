@@ -68,7 +68,7 @@ local installed_servers = {
   "jsonls",
   "pylsp",
   "r_language_server",
-  "ruff_lsp",
+  -- "ruff_lsp",
   "salt_ls",
   "sqls", -- deprecated
   "taplo",
@@ -113,31 +113,31 @@ lspconfig.lua_ls.setup({
   },
 })
 
-lspconfig.sourcery.setup({
-  filetypes = { "python" },
-  init_options = {
-    token = "user_re1CDsCNaWsCXRrWENblMoIhU8INKHMGuiqQDG1FG0CKWTC7Td_93Ilq7FA",
-    extension_version = "vim.lsp",
-    editor_version = "vim",
-  },
-  settings = {
-    sourcery = {
-      metricsEnabled = false,
-    },
-  },
-})
+-- lspconfig.sourcery.setup({
+--   filetypes = { "python" },
+--   init_options = {
+--     token = "user_re1CDsCNaWsCXRrWENblMoIhU8INKHMGuiqQDG1FG0CKWTC7Td_93Ilq7FA",
+--     extension_version = "vim.lsp",
+--     editor_version = "vim",
+--   },
+--   settings = {
+--     sourcery = {
+--       metricsEnabled = false,
+--     },
+--   },
+-- })
 
 lspconfig.pylsp.setup({
   plugins = {
-    autopep8 = { enabled = false },
-    flake8 = { enabled = false },
-    pycodestyle = { enabled = false },
+    autopep8 = { enabled = true },
+    flake8 = { enabled = true },
+    pycodestyle = { enabled = true },
     pyflakes = { enabled = false },
     -- pydocstyle = {enabled = false},
     pylint = { enabled = false },
-    rope_autimport = { enabled = true },
-    rope_completion = { enabled = true },
-    black = { enabled = false },
+    rope_autimport = { enabled = false },
+    rope_completion = { enabled = false },
+    black = { enabled = true },
     yapf = { enabled = false },
     -- jedi = {auto_import_modules = ["numpy", "pandas", "salem", "matplotlib"]}
   },
