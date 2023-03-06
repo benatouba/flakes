@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  programs = {
+  services = {
     mako = {
       font = "Iosevka Nerd Font 12";
       width = 256;

@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 {
-  programs = {
+  services = {
     mako = {
       enable = true;
     };

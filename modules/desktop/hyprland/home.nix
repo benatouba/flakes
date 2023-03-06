@@ -23,8 +23,8 @@
 
       monitor=,preferred,auto,1
       monitor=HDMI-A-1,highres,0x0,1
-      monitor=eDP-1,highrr,0x0,1.85
-      monitor=DP-1,highres,auto,1
+      monitor=eDP-1,highrr,auto,1.85,bitdepth,10
+      monitor=serial:0x5A5A4158,highres,2076x0,1
 
       # Source a file (multi-file configs)
       # source = ~/.config/hypr/myColors.conf

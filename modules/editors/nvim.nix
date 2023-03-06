@@ -124,10 +124,16 @@ in
       lua-language-server
       gopls
       pyright
+      python3Packages.python-lsp-server
+      python3Packages.pylsp-mypy
+      python3Packages.pyls-isort
+      python3Packages.python-lsp-black
+      python3Packages.pyls-flake8
       zk
       rust-analyzer
       clang-tools
       nil
+	  taplo
       #-- tree-sitter --#
       tree-sitter
       #-- format --#

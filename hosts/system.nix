@@ -40,7 +40,7 @@
       socat
       spotifyd
       tmux
-      # wezterm
+      wezterm
       wget
       zoom-us
     ];
