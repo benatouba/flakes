@@ -29,7 +29,6 @@
       libglvnd
       lshw
       neofetch
-      neovim
       nodePackages_latest.pnpm
       nodejs-19_x
       obsidian

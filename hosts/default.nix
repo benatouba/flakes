@@ -32,7 +32,7 @@ in
               # (import ./laptop/x11/home.nix)
             ] ++ [
               inputs.hyprland.homeManagerModules.default
-              inputs.nixneovim.nixosModules.default
+              # inputs.nixvim.homeManagerModules.nixvim
             ];
           };
         };
@@ -42,7 +42,7 @@ in
               ++ [
               self.overlays.default
               inputs.picom.overlays.default
-              inputs.nixneovim.overlays.default
+              # inputs.nixvim.overlays.default
               # inputs.gdal.overlays.default
             ];
         };

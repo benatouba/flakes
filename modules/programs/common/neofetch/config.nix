@@ -5,10 +5,16 @@
       info underline
       info " " distro
       info " " kernel
-      info " " packages
-      info " " de
-      info " " wm
+	  info " " cpu
+	  info "󰂒 " gpu
       info " " memory
+      info " " packages
+      info " " de
+	  info " " term_font
+	  info "󰻀 " icons
+	  info " " wm
+	  info "󱁏 " wm_theme
+	  info " " song
       info " " uptime
       info cols
   }
@@ -65,8 +71,8 @@
   battery_display="off"
   disk_display="off"
   image_backend="kitty"
-  # image_source="${./sakurafetch.png}"
-  image_source="${./nixgirl.png}"
+  image_source="${./sakurafetch.png}"
+  # image_source="${./nixgirl.png}"
   ascii_distro="auto"
   ascii_colors=(distro)
   ascii_bold="on"

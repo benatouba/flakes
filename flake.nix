@@ -3,12 +3,14 @@
 
   inputs =
     {
-      nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+      nixpkgs = {
+        url = "github:nixos/nixpkgs/nixos-unstable";
+      };
       hyprpicker.url = "github:hyprwm/hyprpicker";
       hypr-contrib.url = "github:hyprwm/contrib";
       flake-utils.url = "github:numtide/flake-utils";
       picom.url = "github:yaocccc/picom";
-      nixneovim.url = "github:nixneovim/nixneovim";
+      # nixvim.url = "github:pta2002/nixvim";
       hyprland = {
         url = "github:hyprwm/Hyprland";
         inputs.nixpkgs.follows = "nixpkgs";
@@ -37,7 +39,7 @@
         in
         {
           devShells = {
-            #run by `nix devlop` or `nix-shell`(legacy)
+            #run by `nix develop` or `nix-shell`(legacy)
             default = import ./shell.nix { inherit pkgs; };
           };
         }
