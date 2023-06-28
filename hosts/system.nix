@@ -30,7 +30,7 @@
       lshw
       neofetch
       nodePackages_latest.pnpm
-      nodejs-19_x
+      nodejs
       obsidian
       pciutils
       ranger
@@ -41,7 +41,7 @@
       tmux
       wezterm
       wget
-      zoom-us
+      # zoom-us
     ];
   };
   services.dbus.enable = true;

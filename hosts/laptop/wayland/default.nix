@@ -76,7 +76,6 @@
       wl-clipboard
       wlr-randr
       wireplumber
-      pipewire-media-session
       cinnamon.nemo
       networkmanagerapplet
       wev

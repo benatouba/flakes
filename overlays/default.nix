@@ -1,5 +1,5 @@
 [
   (import ./cinnamon.nemo)
   (import ./flameshot)
-  (import ./gdal)
+  # (import ./gdal)
 ]
