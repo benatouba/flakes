@@ -2,10 +2,12 @@
 {
   programs.git = {
     enable = true;
-    userName = "Benjamin Schmidt";
-    userEmail = "benschmidt@live.de";
 
-    extraConfig = {
+    settings = {
+      user = {
+        name = "Benjamin Schmidt";
+        email = "benschmidt@live.de";
+      };
       core = {
         editor = "nvim";
         whitespace = "fix,-indent-with-non-tab,trailing-space,cr-at-eol";

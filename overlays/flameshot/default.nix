@@ -7,6 +7,7 @@ self: super:
       rev = "3ededae";
       hash = "sha256-4SMg63MndCctpfoOX3OQ1vPoLP/90l/KGLifyUzYD5g=";
     };
+    patches = [ ];
     cmakeFlags = [ "-DUSE_WAYLAND_GRIM=true" ];
   });
 }

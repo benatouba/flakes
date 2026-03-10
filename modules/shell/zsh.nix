@@ -1,4 +1,4 @@
-{ pkgs, user, ... }:
+{ pkgs, lib, user, ... }:
 
 let
   flakesPath = "/home/${user}/projects/flakes";
@@ -40,46 +40,47 @@ in
       ];
     };
 
-    initExtraFirst = ''
-      # Auto-start Hyprland on TTY1
-      if [[ "$(tty)" == "/dev/tty1" ]]; then
-        exec dbus-run-session Hyprland
-      fi
+    initContent = lib.mkMerge [
+      (lib.mkBefore ''
+        # Auto-start Hyprland on TTY1
+        if [[ "$(tty)" == "/dev/tty1" ]]; then
+          exec dbus-run-session Hyprland
+        fi
 
-      fastfetch
-    '';
+        fastfetch
+      '')
+      ''
+        # Custom zsh modules
+        [ -f ~/.zsh/export.zsh ] && source ~/.zsh/export.zsh
+        [ -f ~/.zsh/settings.zsh ] && source ~/.zsh/settings.zsh
+        [ -f ~/.zsh/functions.zsh ] && source ~/.zsh/functions.zsh
+        [ -f ~/.zsh/fzf.zsh ] && source ~/.zsh/fzf.zsh
+        [ -f ~/.zsh/github.zsh ] && source ~/.zsh/github.zsh
+        [ -f ~/.zsh/bindings.zsh ] && source ~/.zsh/bindings.zsh
+        [ -f ~/.zsh/alias.zsh ] && source ~/.zsh/alias.zsh
 
-    initExtra = ''
-      # Custom zsh modules
-      [ -f ~/.zsh/export.zsh ] && source ~/.zsh/export.zsh
-      [ -f ~/.zsh/settings.zsh ] && source ~/.zsh/settings.zsh
-      [ -f ~/.zsh/functions.zsh ] && source ~/.zsh/functions.zsh
-      [ -f ~/.zsh/fzf.zsh ] && source ~/.zsh/fzf.zsh
-      [ -f ~/.zsh/github.zsh ] && source ~/.zsh/github.zsh
-      [ -f ~/.zsh/bindings.zsh ] && source ~/.zsh/bindings.zsh
-      [ -f ~/.zsh/alias.zsh ] && source ~/.zsh/alias.zsh
+        # Tokens (secrets — persisted in ~/.secrets/, not in flakes repo)
+        [ -f ~/.secrets/tokens.zsh ] && source ~/.secrets/tokens.zsh
 
-      # Tokens (secrets — persisted in ~/.secrets/, not in flakes repo)
-      [ -f ~/.secrets/tokens.zsh ] && source ~/.secrets/tokens.zsh
+        # Zoxide
+        export ZOXIDE_CMD_OVERRIDE=cd
 
-      # Zoxide
-      export ZOXIDE_CMD_OVERRIDE=cd
+        # Case-sensitive completion
+        CASE_SENSITIVE="true"
+        COMPLETION_WAITING_DOTS="true"
+        DISABLE_AUTO_TITLE="true"
 
-      # Case-sensitive completion
-      CASE_SENSITIVE="true"
-      COMPLETION_WAITING_DOTS="true"
-      DISABLE_AUTO_TITLE="true"
+        # ssh-agent
+        zstyle ':omz:plugins:ssh-agent' 'quiet' yes
+        zstyle ':omz:plugins:ssh-agent' 'lazy' yes
+        zstyle ':omz:plugins:ssh-agent' agent-forwarding yes
+        zstyle ':omz:plugins:eza' 'dirs-first' yes
+        zstyle ':omz:plugins:eza' 'git-status' yes
 
-      # ssh-agent
-      zstyle ':omz:plugins:ssh-agent' 'quiet' yes
-      zstyle ':omz:plugins:ssh-agent' 'lazy' yes
-      zstyle ':omz:plugins:ssh-agent' agent-forwarding yes
-      zstyle ':omz:plugins:eza' 'dirs-first' yes
-      zstyle ':omz:plugins:eza' 'git-status' yes
-
-      # Starship prompt
-      eval "$(starship init zsh)"
-    '';
+        # Starship prompt
+        eval "$(starship init zsh)"
+      ''
+    ];
   };
 
   # Deploy custom zsh modules from flakes dotfiles
