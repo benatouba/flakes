@@ -3,7 +3,6 @@
   ./gpg
   ./lazygit
   ./music
-  ./neofetch
   ./obs-studio
   ./ranger
   ./resource_monitor

@@ -4,8 +4,8 @@
   home = {
     packages = with pkgs; [
       cava
-      mpc-cli
-      youtube-music
+      mpc
+      pear-desktop
       netease-cloud-music-gtk
       go-musicfox
     ];

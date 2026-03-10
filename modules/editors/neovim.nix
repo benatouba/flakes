@@ -33,7 +33,7 @@ in
     matlab-language-server          # MATLAB
     nil                             # Nix
     nginx-language-server           # Nginx
-    postgres-lsp                    # PostgreSQL
+    postgres-language-server        # PostgreSQL
     sqls                            # SQL
     taplo                           # TOML
     texlab                          # LaTeX
@@ -47,7 +47,7 @@ in
     python3Packages.docformatter    # Python docstrings
     jq                              # JSON
     texlivePackages.latexindent     # LaTeX
-    nixfmt-rfc-style                # Nix
+    nixfmt                          # Nix
     nodePackages.prettier           # JS/TS/JSON/YAML/MD fallback
     prettierd                       # Prettier daemon
     ruff                            # Python (lint + format)
@@ -58,7 +58,6 @@ in
 
     # -- Linters --
     actionlint                      # GitHub Actions
-    nodePackages.alex               # Natural language
     codespell                       # Spell checker
     commitlint                      # Git commit messages
     editorconfig-checker            # EditorConfig

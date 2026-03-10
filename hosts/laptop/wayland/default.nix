@@ -66,7 +66,7 @@ in {
       pulsemixer
       imagemagick
       pkgs.sway-contrib.grimshot
-      flameshot
+      # flameshot
       grim
       brightnessctl
       playerctl

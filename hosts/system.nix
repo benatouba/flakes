@@ -18,8 +18,7 @@
     binsh = "${pkgs.dash}/bin/dash";
     shells = with pkgs; [ fish zsh ];
     systemPackages = with pkgs; [
-      bitwarden
-
+      bitwarden-desktop
       claude-code
       curl
       eza

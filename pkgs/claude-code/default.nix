@@ -12,8 +12,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-    # Run `nix build` once — the error will show the correct hash to paste here
-    hash = lib.fakeHash;
+    sha256 = "sha256-4R+JdPZrwJv+BCKwebJb2nMYHLxcyert/FRP5MMXuhI=";
   };
 
   sourceRoot = "package";
