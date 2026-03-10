@@ -2,7 +2,7 @@
 
 let
   pw_hash =
-    "$6$JLIrmQOf4ku.qNkw$qpdNHeLlbeQeRGyJl8uKZBNXryYsOCtd2xB/8IFOwCRPtUGcIaIso9RMQtZ7bQF5R1lm5ig4CByla0ImKp2XH/";
+    "$6$BZzEOzRA6HhPkaaH$LjiNzZaWzRiEfgjx99CFcu1064u6z7J2QtCQi1hZzC7dwT8u8FoX6ZzyyD8iLrVEJDkBuG/VN6ggPxOx2moye/";
 in {
   imports = (import ../../../modules/hardware)
     ++ [ ../hardware-configuration.nix ../../../modules/fonts ]
@@ -18,7 +18,7 @@ in {
   };
   boot = {
     supportedFilesystems = [ "btrfs" ];
-    kernelPackages = pkgs.linuxPackages_xanmod_latest;
+    kernelPackages = pkgs.linuxPackages_latest;
     loader = {
       systemd-boot = {
         enable = false;
@@ -69,6 +69,13 @@ in {
       pkgs.sway-contrib.grimshot
       flameshot
       grim
+      playerctl
+      cliphist
+      rofi-rbw
+      hyprshot
+      hyprpaper
+      hypridle
+      wlsunset
     ];
   };
 

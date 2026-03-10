@@ -17,6 +17,14 @@
   };
   programs = {
     home-manager.enable = true;
+    chromium = {
+      enable = true;
+      package = pkgs.brave;
+      extensions = [
+        { id = "nngceckbapebfimnlniiiahkandclblb"; }  # Bitwarden
+        { id = "hfjbmagddngcpeloejdejnfgbamkjaeg"; }  # Vimium C
+      ];
+    };
   };
 
   home.stateVersion = "25.05";

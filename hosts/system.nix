@@ -19,22 +19,19 @@
     shells = with pkgs; [ fish zsh ];
     systemPackages = with pkgs; [
       bitwarden
-      brave
+
       claude-code
       curl
       eza
-      fd
       git
       killall
       libglvnd
       lshw
-      fastfetch
       nodejs
       obsidian
       pciutils
       pnpm
       yazi
-      ripgrep
       ripgrep-all
       socat
       tmux
@@ -45,17 +42,35 @@
   };
   services.dbus.enable = true;
 
-  services.auto-cpufreq = {
+  services.tlp = {
     enable = true;
     settings = {
-      charger = {
-        governor = "performance";
-        turbo = "auto";
-      };
-      battery = {
-        governor = "powersave";
-        turbo = "auto";
-      };
+      # CPU
+      CPU_SCALING_GOVERNOR_ON_AC = "powersave";
+      CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+      CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "balance_power";
+      CPU_BOOST_ON_AC = 1;
+      CPU_BOOST_ON_BAT = 0;
+
+      # Platform profile (ThinkPad DYTC)
+      PLATFORM_PROFILE_ON_AC = "performance";
+      PLATFORM_PROFILE_ON_BAT = "low-power";
+
+      # ThinkPad battery charge thresholds (preserves battery longevity)
+      START_CHARGE_THRESH_BAT0 = 20;
+      STOP_CHARGE_THRESH_BAT0 = 80;
+
+      # PCIe power management
+      RUNTIME_PM_ON_AC = "auto";
+      RUNTIME_PM_ON_BAT = "auto";
+
+      # WiFi power saving
+      WIFI_PWR_ON_AC = "off";
+      WIFI_PWR_ON_BAT = "on";
+
+      # USB autosuspend
+      USB_AUTOSUSPEND = 1;
     };
   };
 
