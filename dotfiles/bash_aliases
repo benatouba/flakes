@@ -1,0 +1,35 @@
+alias mkdir="mkdir -pv"
+alias svim="sudo vim -u $XDG_CONFIG_HOME/nvim/init.lua"
+if [ $USER = "ben" ]
+then
+    # alias vim="~/.programs/nvim.appimage"
+    alias vim="nvim"
+    alias oni2="~/.programs/onivim2.appimage"
+    alias upapt="sudo apt update && sudo apt upgrade -y && sudo apt autoremove && sudo apt clean && sudo apt autoclean"
+    alias upconda="upcondabaseenv && upcondadashboardsenv"
+    alias upvim="vim +PackerSync +UpdateRemotePlugins"
+    alias upcondabaseenv="conda update -y -n base --file ~/.dotfiles/conda_base.yaml"
+    alias upcondadashboardsenv="conda update -y -n dashboards --file ~/.dotfiles/conda_dashboards.yaml"
+    alias upall="upapt && upconda && upvim"
+    alias config="/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME"
+    alias watchman_reset="watchman watch-del-all && watchman shutdown-server"
+fi
+
+if [ $USER = "schmidt" ]; then
+    alias "qtipdata=cd /sim/wrf/datasets/qtip/"
+    alias "qtipwdir=cd /local_data/wrf/qtip/wdir"
+    alias "qtipproducts=cd /local_data/wrf/qtip/products"
+    alias "qtipforcing=cd /sim/forcing_data/GCM/"
+    alias "qtipgps=cd /local_data/gps/qtip/"
+    alias idl="/usr/local/harris/idl87/bin/idl"
+    alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+fi
+
+# alias fd="fdfind"
+alias ls="exa"
+alias l="exa -l"
+alias ll="exa -l"
+alias la="exa -la"
+alias isntall="install"
+alias ref="source ~/.bashrc"
+alias activate="source venv/bin/activate"

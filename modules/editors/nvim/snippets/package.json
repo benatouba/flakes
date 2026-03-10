@@ -1,0 +1,121 @@
+{
+	"name": "snippet-collected-from-the-net",
+	"engines": {
+		"vscode": "^1.11.0"
+	},
+	"contributes": {
+		"snippets": [
+			{
+				"language": "sls",
+				"path": "./sls/salt.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/file.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/apt.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/cmd.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/git.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/pip.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/pkg.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/cron.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/disk.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/ddns.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/http.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/raid.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/test.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/user.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/alias.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/ipset.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/group.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/mount.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/pyenv.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/rsync.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/beacon.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/grains.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/docker_container.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/mssql_database.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/environ.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/network.json"
+			},
+			{
+				"language": "sls",
+				"path": "./sls/service.json"
+			},
+			{
+				"language": ["sls", "jinja2", "jinja"],
+				"path": "./jinja2.json"
+			}
+		]
+	}}

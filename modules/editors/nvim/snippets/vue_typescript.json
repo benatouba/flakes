@@ -1,0 +1,21 @@
+{
+    "piniaStore": {
+        "prefix": "piniaStore",
+        "body": [
+            "const state = () => ({",
+            "\titems: [$1]",
+            "});",
+            "",
+            "const getters = {$2};",
+            "",
+            "const actions = {$3};",
+            "",
+            "export const $4 = defineStore('$5', {",
+            "\tstate,",
+            "\tgetters,",
+            "\tactions",
+            "});"
+        ],
+        "description": "new piniaStore. Please make sure to import defineStore from pinia."
+    }
+}

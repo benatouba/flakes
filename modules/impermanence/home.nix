@@ -1,0 +1,73 @@
+{ config, lib, pkgs, user, ... }:
+{
+  home.persistence."/persist/home/${user}" = {
+    allowOther = true;
+
+    directories = [
+      # Projects (includes nvim config + flakes)
+      "projects"
+
+      # Browsers
+      ".mozilla"
+      ".config/BraveSoftware"
+
+      # Neovim state
+      ".local/share/nvim"
+      ".local/state/nvim"
+
+      # Shell history & state
+      ".local/share/fish"
+      ".local/share/zoxide"           # zoxide directory database
+
+      # Tmux plugins (tpm bootstraps here)
+      ".tmux"
+
+      # Credentials & security
+      ".ssh"
+      ".gnupg"
+      ".secrets"                      # tokens.zsh and other secrets
+
+      # User data dirs (lowercase) — downloads intentionally excluded (wiped each boot)
+      "documents"
+      "music"
+      "pictures"
+      "videos"
+
+      # Python / uv
+      ".cache/uv"                     # downloaded wheels & packages
+      ".local/share/uv"              # managed toolchains
+
+      # Node / pnpm
+      ".local/share/pnpm"
+
+      # Music
+      ".local/share/mpd"
+
+      # Bitwarden (Electron desktop app)
+      ".config/Bitwarden"
+
+      # Keyrings
+      ".local/share/keyrings"
+
+      # Obsidian
+      ".config/obsidian"
+
+      # OBS Studio
+      ".config/obs-studio"
+
+      # Claude Code
+      ".claude"
+
+      # Zoom
+      ".zoom"
+
+      # Nix
+      ".cache/nix"
+    ];
+
+    files = [
+      ".zsh_history"
+      ".bash_history"
+    ];
+  };
+}

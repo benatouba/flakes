@@ -1,0 +1,142 @@
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = false
+# A minimal left prompt
+# format = """$directory$character"""
+right_format = """$git_branch$git_status$cmd_duration$directory"""
+palette = "catppuccin_mocha"
+# move the rest of the prompt to the right
+# format = "$all"
+format = """
+[░▒▓](#a3aed2)\
+[  ](bg:#a3aed2 fg:#090c0c)\
+[](bg:#769ff0 fg:#a3aed2)\
+$directory\
+[](fg:#769ff0 bg:#394260)\
+$git_branch\
+$git_status\
+[](fg:#394260 bg:#212736)\
+$nodejs\
+$rust\
+$golang\
+$php\
+[](fg:#212736 bg:#1d2230)\
+$time\
+[ ](fg:#1d2230)\
+\n$character"""
+
+[aws]
+format = 'on [$symbol($profile )(\($region\) )]($style)'
+style = 'bold blue'
+symbol = "  "
+
+[line_break]
+disabled = true
+[character]
+success_symbol = " [](#6791c9)"
+error_symbol = " [](#df5b61)"
+vimcmd_symbol = "[ ](#78b892)"
+[hostname]
+ssh_only = true
+format = "[$hostname](bold blue) "
+disabled = false
+
+[sudo]
+disabled = false
+
+[nodejs]
+format = 'via [🤖 $version](bold green) '
+
+[git_branch]
+format = "[](fg:#1c252c bg:none)[$branch]($style)[](fg:#1c252c bg:#1c252c)[](fg:#78b892 bg:#1c252c)[](fg:#282c34 bg:#78b892)[](fg:#78b892 bg:none) "
+style = "fg:#d9d7d6 bg:#1c252c"
+symbol = '🌱 '
+truncation_length = 4
+truncation_symbol = ''
+ignore_branches = ['master', 'main']
+
+[git_status]
+format = "[](fg:#1c252c bg:none)[$all_status$ahead_behind]($style)[](fg:#1c252c bg:#1c252c)[](fg:#67afc1 bg:#1c252c)[](fg:#1c252c bg:#67afc1)[](fg:#67afc1 bg:none) "
+style = "fg:#d9d7d6 bg:#1c252c"
+conflicted = "="
+ahead = "🏎💨 ${count}"
+behind = "😰${count}"
+diverged = "😵${ahead_count}⇣${behind_count}"
+up_to_date = "✓"
+untracked = "🤷${count}"
+stashed = "📦"
+modified = "📝${count}"
+staged = '[++\($count\)](green)'
+renamed = "👅${count}"
+deleted = "🗑${count}"
+
+[git_commit]
+format = "[\\($hash\\)]($style) [\\($tag\\)]($style)"
+tag_symbol = '🔖 '
+commit_hash_length = 8
+style = "green"
+
+[git_state]
+rebase = "REBASING"
+merge = "MERGING"
+revert = "REVERTING"
+cherry_pick = '[🍒 PICKING](bold red)'
+bisect = "BISECTING"
+am = "AM"
+am_or_rebase = "AM/REBASE"
+style = "yellow"
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
+
+[python]
+symbol = '👾 '
+pyenv_version_name = true
+python_binary = ['python', 'python3']
+
+[golang]
+format = '[ ](bold cyan)'
+
+[kubernetes]
+symbol = '☸ '
+disabled = false
+detect_files = ['Dockerfile']
+format = '[$context(\[$namespace\])]($style) '
+[kubernetes.context_aliases]
+'arn:aws:eks:us-west-2:577926974532:cluster/gal-kub-demo-cluster' = 'gal'
+
+[docker_context]
+disabled = true
+
+[palettes.catppuccin_mocha]
+rosewater = "#f5e0dc"
+flamingo = "#f2cdcd"
+pink = "#f5c2e7"
+mauve = "#cba6f7"
+red = "#f38ba8"
+maroon = "#eba0ac"
+peach = "#fab387"
+yellow = "#f9e2af"
+green = "#a6e3a1"
+teal = "#94e2d5"
+sky = "#89dceb"
+sapphire = "#74c7ec"
+blue = "#89b4fa"
+lavender = "#b4befe"
+text = "#cdd6f4"
+subtext1 = "#bac2de"
+subtext0 = "#a6adc8"
+overlay2 = "#9399b2"
+overlay1 = "#7f849c"
+overlay0 = "#6c7086"
+surface2 = "#585b70"
+surface1 = "#45475a"
+surface0 = "#313244"
+base = "#1e1e2e"
+mantle = "#181825"
+crust = "#11111b"
+
+[directory.substitutions]
+documents = "󰈙 "
+downloads = " "
+music = " "
+pictures = " "

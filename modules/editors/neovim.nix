@@ -1,0 +1,80 @@
+{ config, lib, pkgs, user, ... }:
+
+let
+  nvimConfigPath = "/home/${user}/projects/nvim";
+in
+{
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+    package = pkgs.neovim;  # nightly via neovim-nightly-overlay
+    viAlias = true;
+    vimAlias = true;
+    withNodeJs = true;
+    withPython3 = true;
+  };
+
+  # Symlink directly to the local nvim repo — editable, no rebuild needed
+  xdg.configFile."nvim".source =
+    config.lib.file.mkOutOfStoreSymlink nvimConfigPath;
+
+  home.packages = with pkgs; [
+    # -- LSP servers --
+    basedpyright                    # Python
+    bash-language-server            # Bash
+    vscode-langservers-extracted    # CSS, HTML, JSON, ESLint LSPs
+    docker-language-server          # Dockerfiles
+    fortls                          # Fortran
+    hyprls                          # Hyprland config
+    lemminx                         # XML
+    ltex-ls-plus                    # Grammar checking
+    lua-language-server             # Lua
+    marksman                        # Markdown
+    matlab-language-server          # MATLAB
+    nil                             # Nix
+    nginx-language-server           # Nginx
+    postgres-lsp                    # PostgreSQL
+    sqls                            # SQL
+    taplo                           # TOML
+    texlab                          # LaTeX
+    tinymist                        # Typst
+    vtsls                           # TypeScript/JavaScript
+    vim-language-server             # Vim
+    vue-language-server             # Vue
+    yaml-language-server            # YAML
+
+    # -- Formatters --
+    python3Packages.docformatter    # Python docstrings
+    jq                              # JSON
+    texlivePackages.latexindent     # LaTeX
+    nixfmt-rfc-style                # Nix
+    nodePackages.prettier           # JS/TS/JSON/YAML/MD fallback
+    prettierd                       # Prettier daemon
+    ruff                            # Python (lint + format)
+    stylua                          # Lua
+    typstyle                        # Typst
+    xmlformat                       # XML
+    yamlfmt                         # YAML
+
+    # -- Linters --
+    actionlint                      # GitHub Actions
+    nodePackages.alex               # Natural language
+    codespell                       # Spell checker
+    commitlint                      # Git commit messages
+    editorconfig-checker            # EditorConfig
+    markdownlint-cli                # Markdown
+    oxlint                          # JS/TS
+    proselint                       # Prose
+    selene                          # Lua
+
+    # -- Debug --
+    vscode-js-debug                 # JS/TS debug adapter
+
+    # -- Supporting tools --
+    tree-sitter                     # Parser generator
+    gcc                             # Needed by treesitter to compile parsers
+    gnumake                         # Build tool for parsers
+    fd                              # Used by telescope
+    ripgrep                         # Used by telescope + conform
+  ];
+}

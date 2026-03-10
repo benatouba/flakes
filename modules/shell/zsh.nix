@@ -1,0 +1,96 @@
+{ pkgs, user, ... }:
+
+let
+  flakesPath = "/home/${user}/projects/flakes";
+in
+{
+  programs.zsh = {
+    enable = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
+    enableCompletion = true;
+
+    history = {
+      size = 100000;
+      save = 100000;
+      ignoreDups = true;
+      ignoreAllDups = true;
+      share = true;
+    };
+
+    oh-my-zsh = {
+      enable = true;
+      plugins = [
+        "fzf"
+        "zoxide"
+        "git"
+        "tmux"
+        "history"
+        "emoji"
+        "eza"
+        "encode64"
+        "sudo"
+        "copypath"
+        "web-search"
+        "colored-man-pages"
+        "pnpm"
+        "pip"
+        "ssh-agent"
+        "uv"
+      ];
+    };
+
+    initExtraFirst = ''
+      fastfetch
+    '';
+
+    initExtra = ''
+      # Custom zsh modules
+      [ -f ~/.zsh/export.zsh ] && source ~/.zsh/export.zsh
+      [ -f ~/.zsh/settings.zsh ] && source ~/.zsh/settings.zsh
+      [ -f ~/.zsh/functions.zsh ] && source ~/.zsh/functions.zsh
+      [ -f ~/.zsh/fzf.zsh ] && source ~/.zsh/fzf.zsh
+      [ -f ~/.zsh/github.zsh ] && source ~/.zsh/github.zsh
+      [ -f ~/.zsh/bindings.zsh ] && source ~/.zsh/bindings.zsh
+      [ -f ~/.zsh/alias.zsh ] && source ~/.zsh/alias.zsh
+
+      # Tokens (secrets — persisted in ~/.secrets/, not in flakes repo)
+      [ -f ~/.secrets/tokens.zsh ] && source ~/.secrets/tokens.zsh
+
+      # Zoxide
+      export ZOXIDE_CMD_OVERRIDE=cd
+
+      # Case-sensitive completion
+      CASE_SENSITIVE="true"
+      COMPLETION_WAITING_DOTS="true"
+      DISABLE_AUTO_TITLE="true"
+
+      # ssh-agent
+      zstyle ':omz:plugins:ssh-agent' 'quiet' yes
+      zstyle ':omz:plugins:ssh-agent' 'lazy' yes
+      zstyle ':omz:plugins:ssh-agent' agent-forwarding yes
+      zstyle ':omz:plugins:eza' 'dirs-first' yes
+      zstyle ':omz:plugins:eza' 'git-status' yes
+
+      # Starship prompt
+      eval "$(starship init zsh)"
+    '';
+  };
+
+  # Deploy custom zsh modules from flakes dotfiles
+  home.file.".zsh" = {
+    source = ../../dotfiles/zsh;
+    recursive = true;
+  };
+
+  home.packages = with pkgs; [
+    starship
+    zoxide
+    fzf
+    bat
+    vivid
+  ];
+
+  # Starship config
+  xdg.configFile."starship.toml".source = ../../dotfiles/starship.toml;
+}
