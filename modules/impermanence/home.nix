@@ -1,8 +1,6 @@
 { config, lib, pkgs, user, ... }:
 {
-  home.persistence."/persist/home/${user}" = {
-    allowOther = true;
-
+  home.persistence."/persist" = {
     directories = [
       # Projects (includes nvim config + flakes)
       "projects"
@@ -16,7 +14,6 @@
       ".local/state/nvim"
 
       # Shell history & state
-      ".local/share/fish"
       ".local/share/zoxide"           # zoxide directory database
 
       # Tmux plugins (tpm bootstraps here)

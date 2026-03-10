@@ -41,6 +41,11 @@ in
     };
 
     initExtraFirst = ''
+      # Auto-start Hyprland on TTY1
+      if [[ "$(tty)" == "/dev/tty1" ]]; then
+        exec dbus-run-session Hyprland
+      fi
+
       fastfetch
     '';
 

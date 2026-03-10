@@ -32,7 +32,6 @@ in
             imports = [
               (import ./laptop/wayland/home.nix)
             ] ++ [
-              inputs.impermanence.homeManagerModules.impermanence
               (import ../modules/impermanence/home.nix)
             ] ++ [
               inputs.hyprland.homeManagerModules.default

@@ -47,7 +47,6 @@ in {
 
   programs = {
     dconf.enable = true;
-    light.enable = true;
   };
 
   i18n = { supportedLocales = [ "de_DE.UTF-8/UTF-8" "en_US.UTF-8/UTF-8" ]; };
@@ -69,6 +68,7 @@ in {
       pkgs.sway-contrib.grimshot
       flameshot
       grim
+      brightnessctl
       playerctl
       cliphist
       rofi-rbw
