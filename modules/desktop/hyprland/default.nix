@@ -6,21 +6,22 @@
   programs.hyprland.enable = true;
 
   environment.systemPackages = with pkgs; [
-    inputs.hypr-contrib.packages.${pkgs.system}.grimblast
-    inputs.hyprpicker.packages.${pkgs.system}.hyprpicker
-    swaylock-effects
+    inputs.hyprpicker.packages.${pkgs.stdenv.hostPlatform.system}.hyprpicker
+    hyprlock
     pamixer
   ];
 
-  security.pam.services.swaylock = { };
+  security.pam.services.hyprlock = { };
 
   xdg.portal = {
     enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
     config = {
+      hyprland = {
+        default = [ "hyprland" "gtk" ];
+      };
       common = {
-        default = [
-          "*"
-        ];
+        default = [ "gtk" ];
       };
     };
   };

@@ -3,6 +3,7 @@
 {
   hardware.bluetooth = {
     enable = true;
+    powerOnBoot = true;
     settings = {
       General = {
         Enable = "Source,Sink,Media,Socket";
@@ -16,11 +17,4 @@
   #   Service.ExecStart = "${pkgs.bluez}/bin/mpris-proxy";
   #   Install.WantedBy = [ "default.target" ];
   # };
-  services.pulseaudio = {
-    extraModules = [ pkgs.pulseaudio-modules-bt ];
-    package = pkgs.pulseaudioFull;
-    extraConfig = "
-      load-module module-switch-on-connect
-    ";
-  };
 }

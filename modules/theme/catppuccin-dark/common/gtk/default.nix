@@ -10,6 +10,11 @@
     size = 16;
   };
   home.pointerCursor.gtk.enable = true;
+  dconf.settings = {
+    "org/gnome/desktop/interface" = {
+      color-scheme = "prefer-dark";
+    };
+  };
   gtk = {
     enable = true;
     theme = {
@@ -29,6 +34,7 @@
       size = 12;
     };
     gtk3.extraConfig = {
+      gtk-application-prefer-dark-theme = 1;
       gtk-xft-antialias = 1;
       gtk-xft-hinting = 1;
       gtk-xft-hintstyle = "hintslight";

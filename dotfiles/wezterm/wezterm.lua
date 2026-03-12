@@ -51,40 +51,12 @@ config.adjust_window_size_when_changing_font_size = false
 -- config.unix_domains = { { name = "unix" } }
 config.default_gui_startup_args = { "connect", "unix" }
 
-local function get_appearance()
-  if wezterm.gui then
-    return wezterm.gui.get_appearance()
-  end
-  return 'Dark'
-end
-
-local function scheme_for_appearance(appearance)
-  if appearance:find("Dark") then
-    return "catppuccin-mocha"
-  else
-    return "Catppuccin Latte"
-  end
-end
-
--- Set the color scheme using an event handler instead
-wezterm.on('window-config-reloaded', function(window, pane)
-  local overrides = window:get_config_overrides() or {}
-  local appearance = get_appearance()
-  local scheme = scheme_for_appearance(appearance)
-  if overrides.color_scheme ~= scheme then
-    overrides.color_scheme = scheme
-    window:set_config_overrides(overrides)
-  end
-end)
-
--- Set initial color scheme
--- config.color_scheme = scheme_for_appearance(get_appearance())
-config.color_scheme = "catppuccin-mocha"
+config.color_scheme = "Catppuccin Mocha"
 
 -- This is where you actually apply your config choices
 config.audible_bell = "Disabled"
 config.font = wezterm.font_with_fallback({
-  { family = "JetBrains Mono", weight = "Regular", harfbuzz_features = { "calt=1", "clig=1", "liga=1" } },
+  { family = "JetBrainsMono Nerd Font", weight = "Regular", harfbuzz_features = { "calt=1", "clig=1", "liga=1" } },
   "Fira Code",
   "Noto Color Emoji",
   "Noto Emoji",

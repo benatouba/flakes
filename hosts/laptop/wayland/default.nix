@@ -1,16 +1,13 @@
 { config, pkgs, user, inputs, ... }:
 
-let
-  pw_hash =
-    "$6$BZzEOzRA6HhPkaaH$LjiNzZaWzRiEfgjx99CFcu1064u6z7J2QtCQi1hZzC7dwT8u8FoX6ZzyyD8iLrVEJDkBuG/VN6ggPxOx2moye/";
-in {
+{
   imports = (import ../../../modules/hardware)
     ++ [ ../hardware-configuration.nix ../../../modules/fonts ]
     ++ [ ../../../modules/desktop/hyprland ];
 
-  users.users.root.initialHashedPassword = pw_hash;
+  users.users.root.hashedPasswordFile = "/persist/passwords/root";
   users.users.${user} = {
-    initialHashedPassword = pw_hash;
+    hashedPasswordFile = "/persist/passwords/${user}";
     shell = pkgs.zsh;
     isNormalUser = true;
     extraGroups = [ "wheel" "video" "audio" "networkmanager" ];
@@ -20,18 +17,24 @@ in {
     supportedFilesystems = [ "btrfs" ];
     kernelPackages = pkgs.linuxPackages_latest;
     loader = {
-      systemd-boot = {
-        enable = false;
-        consoleMode = "auto";
-      };
       grub = {
         enable = true;
         efiSupport = true;
-        useOSProber = true;
-        devices = [ "nodev" ];
+        efiInstallAsRemovable = true;
+        useOSProber = false;
+        configurationLimit = 10;
+        # Use mirroredBoots with path = efiSysMountPoint to work around NixOS regression
+        # where the default mirroredBoots uses path = "/boot" (tmpfs on impermanence setups)
+        mirroredBoots = [
+          {
+            path = "/boot/efi";
+            efiSysMountPoint = "/boot/efi";
+            devices = [ "nodev" ];
+          }
+        ];
       };
       efi = {
-        canTouchEfiVariables = true;
+        canTouchEfiVariables = false;
         efiSysMountPoint = "/boot/efi";
       };
       timeout = 3;
@@ -76,6 +79,9 @@ in {
       hyprpaper
       hypridle
       wlsunset
+      waypaper
+      jq
+      wlogout
     ];
   };
 

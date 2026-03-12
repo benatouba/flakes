@@ -60,11 +60,14 @@
 
       # Nix
       ".cache/nix"
+
+      # Zsh state (history, compdump)
+      ".local/state/zsh"
+
+      # GTK bookmarks & settings
+      ".config/gtk-3.0"
+      ".config/gtk-4.0"
     ];
 
-    files = [
-      ".zsh_history"
-      ".bash_history"
-    ];
-  };
+};
 }

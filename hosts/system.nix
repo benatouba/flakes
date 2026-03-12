@@ -1,7 +1,7 @@
 { config, pkgs, lib, inputs, user, ... }:
 
 {
-  nixpkgs.system = "x86_64-linux";
+  networking.hostName = "thinkpad";
 
   time.timeZone = "Europe/Berlin";
 
@@ -105,7 +105,7 @@
     gc = {
       automatic = true;
       dates = "weekly";
-      options = "--delete-older-than 2d";
+      options = "--delete-older-than 14d";
     };
     package = pkgs.nixVersions.latest;
     registry.nixpkgs.flake = inputs.nixpkgs;

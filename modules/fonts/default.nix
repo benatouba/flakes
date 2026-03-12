@@ -9,7 +9,9 @@
       noto-fonts
       noto-fonts-cjk-sans
       noto-fonts-color-emoji
-      # nerd-fonts.symbols
+      nerd-fonts.symbols-only
+      nerd-fonts.jetbrains-mono
+      nerd-fonts.hack
       twemoji-color-font
     ];
     fontconfig = {

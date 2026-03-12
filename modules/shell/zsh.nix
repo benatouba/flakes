@@ -11,6 +11,7 @@ in
     enableCompletion = true;
 
     history = {
+      path = "$HOME/.local/state/zsh/.zsh_history";
       size = 100000;
       save = 100000;
       ignoreDups = true;

@@ -23,6 +23,7 @@
     device = "/dev/disk/by-uuid/4e9ef302-7d6f-48f8-a881-d0bd5c47ff02";
     fsType = "ext4";
     neededForBoot = true;
+    options = [ "defaults" ];
   };
 
   fileSystems."/nix" = {
@@ -51,14 +52,17 @@
   # (the default) this is the recommended approach. When using systemd-networkd it's
   # still possible to use this option, but it's recommended to use it in conjunction
   # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
-  networking.useDHCP = lib.mkDefault true;
+  networking.useDHCP = false;
   # networking.interfaces.enp2s0f0.useDHCP = lib.mkDefault true;
-  networking.interfaces.enp5s0.useDHCP = lib.mkDefault true;
-  networking.interfaces.wlp3s0.useDHCP = lib.mkDefault true;
+  # networking.interfaces.enp5s0.useDHCP = lib.mkDefault true;
+  # networking.interfaces.wlp3s0.useDHCP = lib.mkDefault true;
   networking.networkmanager.enable = true;
+  networking.networkmanager.dns = "none";
+  networking.firewall.enable = true;
+  environment.systemPackages = [ pkgs.networkmanager pkgs.networkmanagerapplet ];
   networking.nameservers = [
     "1.1.1.1"
-    "8.8.8.8"
+    "1.0.0.1"
   ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
