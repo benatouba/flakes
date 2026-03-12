@@ -2,39 +2,39 @@
 
 {
   home.sessionVariables = {
-    GTK_THEME = "Catppuccin-Latte-Green";
+    GTK_THEME = lib.mkDefault "Catppuccin-Latte-Green";
   };
   home.pointerCursor = {
-    package = pkgs.catppuccin-cursors;
-    name = "Catppuccin-Frappe-Dark";
-    size = 16;
+    package = lib.mkDefault pkgs.catppuccin-cursors;
+    name = lib.mkDefault "Catppuccin-Frappe-Dark";
+    size = lib.mkDefault 16;
   };
-  home.pointerCursor.gtk.enable = true;
+  home.pointerCursor.gtk.enable = lib.mkDefault true;
   gtk = {
-    enable = true;
+    enable = lib.mkDefault true;
     theme = {
-      name = "Catppuccin-Latte-Green";
-      package = pkgs.catppuccin-latte-gtk;
+      name = lib.mkDefault "Catppuccin-Latte-Green";
+      package = lib.mkDefault pkgs.catppuccin-latte-gtk;
     };
     cursorTheme = {
-      name = "Catppuccin-Frappe-Dark";
+      name = lib.mkDefault "Catppuccin-Frappe-Dark";
     };
     iconTheme = {
-      name = "Papirus-Light";
-      package = pkgs.papirus-icon-theme;
+      name = lib.mkDefault "Papirus-Light";
+      package = lib.mkDefault pkgs.papirus-icon-theme;
     };
 
     font = {
-      name = "JetBrainsMono Nerd Font";
-      size = 12;
+      name = lib.mkDefault "JetBrainsMono Nerd Font";
+      size = lib.mkDefault 12;
     };
     gtk3.extraConfig = {
-      gtk-xft-antialias = 1;
-      gtk-xft-hinting = 1;
-      gtk-xft-hintstyle = "hintslight";
-      gtk-xft-rgba = "rgb";
+      gtk-xft-antialias = lib.mkDefault 1;
+      gtk-xft-hinting = lib.mkDefault 1;
+      gtk-xft-hintstyle = lib.mkDefault "hintslight";
+      gtk-xft-rgba = lib.mkDefault "rgb";
     };
-    gtk2.extraConfig = ''
+    gtk2.extraConfig = lib.mkDefault ''
       gtk-xft-antialias=1
       gtk-xft-hinting=1
       gtk-xft-hintstyle="hintslight"

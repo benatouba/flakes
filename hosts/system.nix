@@ -16,7 +16,7 @@
   programs.zsh.enable = true;
   environment = {
     binsh = "${pkgs.dash}/bin/dash";
-    shells = with pkgs; [ fish zsh ];
+    shells = with pkgs; [ zsh ];
     systemPackages = with pkgs; [
       bitwarden-desktop
       claude-code
@@ -33,8 +33,6 @@
       yazi
       ripgrep-all
       socat
-      tmux
-      wezterm
       wget
       zoom-us
     ];

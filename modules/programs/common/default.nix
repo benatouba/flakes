@@ -1,5 +1,4 @@
 [
-  # ./firefox
   ./gpg
   ./lazygit
   ./music
@@ -9,9 +8,11 @@
   ./search
   ./yt-dlp
   ./zathura
-  ./kitty
   ./wezterm
   ./tmux
   ./fastfetch
   ./rofi
+  ./bat
+  ./matugen
+  ./desktop-integration
 ]

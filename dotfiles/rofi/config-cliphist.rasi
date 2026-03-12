@@ -27,8 +27,22 @@ configuration {
     window-format:              "{w} · {c} · {t}";
     
 }
+
+/* ---- Load font ---- */
+@import "~/.config/ml4w/settings/rofi-font.rasi"
+
 /* ---- Load colors ---- */
 @theme "~/.config/rofi/colors.rasi"
+
+/* ---- Load wallpaper ---- */
+@import "~/.cache/ml4w/hyprland-dotfiles/current_wallpaper.rasi"
+
+/* ---- Load border width ---- */
+@import "~/.config/ml4w/settings/rofi-border.rasi"
+
+/* ---- Load border radius ---- */
+@import "~/.config/ml4w/settings/rofi-border-radius.rasi"
+
 /* ---- Map colors ---- */
 * {
     color11: @primary;
@@ -45,7 +59,7 @@ window {
     padding:                      0px;
     margin:                       0px; 
     color:                      #FFFFFF;
-    border:                       2px;
+    border:                       @border-width;
     border-color:                 @primary;
     cursor:                       "default";
     transparency:                 "real";
@@ -53,7 +67,7 @@ window {
     anchor:                       northeast;
     fullscreen:                   false;
     enabled:                      true;
-    border-radius:                16px;
+    border-radius:                @border-radius;
     background-color:             transparent;
 }
 
@@ -64,7 +78,7 @@ mainbox {
     orientation:                 horizontal;
     children:                    [ "listbox" ];
     background-color:            transparent;
-    background-image:            none;
+    background-image:            @current-image;
 }
 
 /* ---- Imagebox ---- */

@@ -1,8 +1,9 @@
 { config, pkgs, ... }:
 {
-  services = {
-    mako = {
-      enable = true;
-    };
+  home.packages = with pkgs; [ swaynotificationcenter ];
+
+  xdg.configFile."swaync" = {
+    source = ../../../../dotfiles/swaync;
+    recursive = true;
   };
 }

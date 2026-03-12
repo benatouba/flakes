@@ -3,7 +3,8 @@ let
 in
 [
   ./imgview
-  ./launcher
   ./notice
   ./mpv
+  ./wlogout
+  ./walker
 ] ++ common

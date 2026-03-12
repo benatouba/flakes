@@ -17,15 +17,6 @@
     ]);
   };
 
-  xdg.portal.config = {
-    hyprland = {
-      default = [ "hyprland" "gtk" ];
-    };
-    common = {
-      default = [ "gtk" ];
-    };
-  };
-
   xdg.configFile."hypr/hypridle.conf".source = ./hypridle.conf;
   xdg.configFile."hypr/hyprpaper.conf".source = ./hyprpaper.conf;
   xdg.configFile."hypr/hyprlock.conf".source = ./hyprlock.conf;
@@ -35,6 +26,10 @@
   };
   xdg.configFile."hypr/scripts/refresh.sh" = {
     source = ./scripts/refresh.sh;
+    executable = true;
+  };
+  xdg.configFile."hypr/scripts/power.sh" = {
+    source = ./scripts/power.sh;
     executable = true;
   };
   xdg.configFile."hypr/assets/blank.png".source = ./assets/blank.png;
