@@ -1,18 +1,20 @@
 [
+  ./bat
+  ./desktop-integration
+  ./fastfetch
   ./gpg
   ./lazygit
+  ./matugen
   ./music
   ./obs-studio
   ./ranger
   ./resource_monitor
+  ./rofi
   ./search
+  ./tmux
+  ./user-packages.nix
+  ./wezterm
+  ./yazi.nix
   ./yt-dlp
   ./zathura
-  ./wezterm
-  ./tmux
-  ./fastfetch
-  ./rofi
-  ./bat
-  ./matugen
-  ./desktop-integration
 ]

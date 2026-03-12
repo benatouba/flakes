@@ -14,8 +14,8 @@
   ];
 
   home-manager.users.${user} = {
-    xdg.configFile."waybar/config".source = ./config/config;
     xdg.configFile."waybar/modules.json".source = ./config/modules.json;
-    xdg.configFile."waybar/style.css".source = ./config/style.css;
+    xdg.configFile."waybar/waybar-quicklinks.json".source = ./config/waybar-quicklinks.json;
+    xdg.configFile."waybar/themes".source = ./config/themes;
   };
 }

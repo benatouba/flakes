@@ -12,7 +12,7 @@ else
 fi
 
 # Get walker theme
-walker_theme=$(cat $HOME/.config/ml4w/settings/walker-theme)
+walker_theme=$(cat $HOME/.config/themes/settings/walker-theme)
 
 # Send this diagnostic message to Standard Error (2>&1)
 echo ":: Launching walker with arguments: $* ::" >&2

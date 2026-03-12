@@ -31,6 +31,11 @@
     "on-click": "pkill rofi || rofi -show drun -replace",
     "tooltip-format": "Application launcher"
   },
+  "custom/appmenuicon": {
+    "format": "",
+    "on-click": "pkill rofi || rofi -show drun -replace",
+    "tooltip-format": "Application launcher"
+  },
   "custom/exit": {
     "format": "",
     "on-click": "wlogout",
@@ -57,6 +62,39 @@
     "on-click-right": "cliphist wipe",
     "tooltip-format": "Left: Clipboard\nRight: Clear"
   },
+  "custom/themeswitcher": {
+    "format": "",
+    "on-click": "waybar-themeswitcher",
+    "tooltip-format": "Switch waybar theme"
+  },
+  "custom/hyprshade": {
+    "format": "",
+    "on-click": "pkill wlsunset || wlsunset -t 5200 -S 9:00 -s 19:30",
+    "tooltip-format": "Toggle night light"
+  },
+  "custom/notification": {
+    "format": "{icon}",
+    "format-icons": {
+      "notification": "<span foreground='red'><sup></sup></span>",
+      "none": "",
+      "dnd-notification": "<span foreground='red'><sup></sup></span>",
+      "dnd-none": "",
+      "inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "inhibited-none": "",
+      "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "dnd-inhibited-none": ""
+    },
+    "return-type": "json",
+    "exec-if": "which swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true,
+    "tooltip-format": "Notifications"
+  },
+  "custom/empty": {
+    "format": ""
+  },
   "custom/system": {
     "format": "",
     "tooltip": false
@@ -79,13 +117,10 @@
     "spacing": 10
   },
   "clock": {
-    "format": "{:%H:%M}",
+    "format": "{:%H:%M:%S  %a %d.%m}",
+    "interval": 1,
     "tooltip-format": "<tt>{calendar}</tt>",
     "tooltip": true
-  },
-  "clock#date": {
-    "format": "{:%a %d.%m}",
-    "tooltip": false
   },
   "cpu": {
     "format": "/ C {usage}% ",
@@ -128,7 +163,8 @@
     "modules": [
       "custom/tools",
       "custom/cliphist",
-      "custom/hypridle"
+      "custom/hypridle",
+      "custom/hyprshade",
     ]
   },
   "network": {
@@ -136,9 +172,10 @@
     "format-wifi": " {signalStrength}%",
     "format-ethernet": "  {ifname}",
     "format-disconnected": "Disconnected",
-    "tooltip-format-wifi": "  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%",
+    "tooltip-format-wifi": "  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nDown: {bandwidthDownBits}\nUp: {bandwidthUpBits}",
     "tooltip-format-ethernet": " {ifname}\nIP: {ipaddr}",
     "tooltip-format-disconnected": "Disconnected",
+    "interval": 2,
     "max-length": 50,
     "on-click": "nm-connection-editor"
   },

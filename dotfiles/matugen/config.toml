@@ -57,19 +57,19 @@ output_path = '~/.cache/wal/sequences'
 
 [templates.primary]
 input_path = '~/.config/matugen/templates/primary'
-output_path = '~/.config/ml4w/colors/primary'
+output_path = '~/.config/themes/colors/primary'
 
 [templates.secondary]
 input_path = '~/.config/matugen/templates/secondary'
-output_path = '~/.config/ml4w/colors/secondary'
+output_path = '~/.config/themes/colors/secondary'
 
 [templates.on_surface]
 input_path = '~/.config/matugen/templates/onsurface'
-output_path = '~/.config/ml4w/colors/onsurface'
+output_path = '~/.config/themes/colors/onsurface'
 
 [templates.on_primary]
 input_path = '~/.config/matugen/templates/onprimary'
-output_path = '~/.config/ml4w/colors/onprimary'
+output_path = '~/.config/themes/colors/onprimary'
 
 [templates.ohmyposh]
 input_path = '~/.config/matugen/templates/ohmyposh-colors.json'

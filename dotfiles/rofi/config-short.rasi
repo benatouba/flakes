@@ -29,19 +29,19 @@ configuration {
 }
 
 /* ---- Load font ---- */
-@import "~/.config/ml4w/settings/rofi-font.rasi"
+@import "~/.config/themes/settings/rofi-font.rasi"
 
 /* ---- Load colors ---- */
 @theme "~/.config/rofi/colors.rasi"
 
 /* ---- Load wallpaper ---- */
-@import "~/.cache/ml4w/hyprland-dotfiles/current_wallpaper.rasi"
+@import "~/.cache/themes/hyprland-dotfiles/current_wallpaper.rasi"
 
 /* ---- Load border width ---- */
-@import "~/.config/ml4w/settings/rofi-border.rasi"
+@import "~/.config/themes/settings/rofi-border.rasi"
 
 /* ---- Load border radius ---- */
-@import "~/.config/ml4w/settings/rofi-border-radius.rasi"
+@import "~/.config/themes/settings/rofi-border-radius.rasi"
 
 /* ---- Map colors ---- */
 * {

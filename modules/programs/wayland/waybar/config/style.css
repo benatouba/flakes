@@ -15,7 +15,7 @@
 @define-color sky             #89dceb;
 @define-color blue            #89b4fa;
 
-/* ml4w-style aliases */
+/* themes-style aliases */
 @define-color workspacesbackground1  rgba(49, 50, 68, 0.85);
 @define-color workspacesbackground2  rgba(69, 71, 90, 0.6);
 @define-color backgroundlight        rgba(49, 50, 68, 0.85);

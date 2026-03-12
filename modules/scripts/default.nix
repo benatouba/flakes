@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 
 let
   cava-internal = pkgs.writeShellScriptBin "cava-internal" ''
@@ -168,14 +168,121 @@ let
         fi
     fi
   '';
-  launch_waybar = pkgs.writeShellScriptBin "launch_waybar" ''
-    #!/bin/bash
-    killall .waybar-wrapped
+  launch-waybar = pkgs.writeShellScriptBin "launch-waybar" ''
+    killall .waybar-wrapped || true
+    sleep 0.3
+
     SDIR="$HOME/.config/waybar"
-    if [[ "$GTK_THEME" == "Catppuccin-Frappe-Pink" ]]; then
-      waybar -c "$SDIR"/config -s "$SDIR"/style.css > /dev/null 2>&1 & 
-    elif [[ "$GTK_THEME" == "Catppuccin-Latte-Green" ]]; then
-      waybar -c "$SDIR"/light_config -s "$SDIR"/light_style.css > /dev/null 2>&1 &
+    STATE_DIR="$HOME/.local/state/waybar"
+    STATE_FILE="$STATE_DIR/waybar-theme.sh"
+    DISABLED_FILE="$STATE_DIR/waybar-disabled"
+
+    # If waybar is disabled, don't launch
+    if [[ -f "$DISABLED_FILE" ]]; then
+      exit 0
+    fi
+
+    # Default theme
+    THEME_FOLDER="/nixos"
+    VARIATION="/nixos/default"
+
+    # Read saved theme if it exists
+    if [[ -f "$STATE_FILE" ]]; then
+      IFS=';' read -r THEME_FOLDER VARIATION < "$STATE_FILE"
+    fi
+
+    CONFIG="$SDIR/themes$THEME_FOLDER/config"
+    STYLE="$SDIR/themes$VARIATION/style.css"
+
+    # Fallback to nixos theme if selected theme is missing
+    if [[ ! -f "$CONFIG" ]] || [[ ! -f "$STYLE" ]]; then
+      THEME_FOLDER="/nixos"
+      VARIATION="/nixos/default"
+      CONFIG="$SDIR/themes$THEME_FOLDER/config"
+      STYLE="$SDIR/themes$VARIATION/style.css"
+    fi
+
+    waybar -c "$CONFIG" -s "$STYLE" > /dev/null 2>&1 &
+  '';
+  waybar-themeswitcher = pkgs.writeShellScriptBin "waybar-themeswitcher" ''
+    SDIR="$HOME/.config/waybar"
+    STATE_DIR="$HOME/.local/state/waybar"
+    STATE_FILE="$STATE_DIR/waybar-theme.sh"
+
+    mkdir -p "$STATE_DIR"
+
+    # Build list of available themes (variant dirs containing style.css)
+    options=""
+    while IFS= read -r css; do
+      variant_dir="$(dirname "$css")"
+      theme_dir="$(dirname "$variant_dir")"
+      theme_name="$(basename "$theme_dir")/$(basename "$variant_dir")"
+
+      # Source config.sh for display name if available
+      display_name="$theme_name"
+      if [[ -f "$variant_dir/config.sh" ]]; then
+        source "$variant_dir/config.sh"
+        display_name="$theme_name"
+      fi
+
+      options="$options$theme_name\n"
+    done < <(find "$SDIR/themes" -mindepth 3 -name "style.css" -type f 2>/dev/null | sort)
+
+    # Also check for themes where style.css is directly in the theme dir (themes-minimal)
+    while IFS= read -r css; do
+      theme_dir="$(dirname "$css")"
+      parent="$(dirname "$theme_dir")"
+      # Only include if this is a direct child of themes/ (not a variant)
+      if [[ "$(basename "$parent")" == "themes" ]]; then
+        theme_name="$(basename "$theme_dir")"
+        # Only if there's no subdirs with style.css (i.e., it's a standalone theme)
+        if ! find "$theme_dir" -mindepth 2 -name "style.css" -type f 2>/dev/null | grep -q .; then
+          options="$options$theme_name\n"
+        fi
+      fi
+    done < <(find "$SDIR/themes" -mindepth 2 -maxdepth 2 -name "style.css" -type f 2>/dev/null | sort)
+
+    # Remove trailing newline and duplicates
+    options=$(echo -e "$options" | sed '/^$/d' | sort -u)
+
+    # Show rofi menu
+    choice=$(echo -e "$options" | rofi -dmenu -replace -i -p "Waybar Theme" -config ~/.config/rofi/config-themes.rasi)
+
+    if [[ -z "$choice" ]]; then
+      exit 0
+    fi
+
+    # Determine theme folder and variation from choice
+    if [[ "$choice" == */* ]]; then
+      # Format: theme/variant (e.g., themes/default)
+      theme_base="$(echo "$choice" | cut -d/ -f1)"
+      variant="$(echo "$choice" | cut -d/ -f2)"
+      THEME_FOLDER="/$theme_base"
+      VARIATION="/$theme_base/$variant"
+    else
+      # Standalone theme (e.g., themes-minimal)
+      THEME_FOLDER="/$choice"
+      VARIATION="/$choice"
+    fi
+
+    # Save selection
+    echo "$THEME_FOLDER;$VARIATION" > "$STATE_FILE"
+
+    # Restart waybar with new theme
+    launch-waybar
+  '';
+  waybar-toggle = pkgs.writeShellScriptBin "waybar-toggle" ''
+    STATE_DIR="$HOME/.local/state/waybar"
+    DISABLED_FILE="$STATE_DIR/waybar-disabled"
+
+    mkdir -p "$STATE_DIR"
+
+    if [[ -f "$DISABLED_FILE" ]]; then
+      rm "$DISABLED_FILE"
+      launch-waybar
+    else
+      touch "$DISABLED_FILE"
+      killall .waybar-wrapped 2>/dev/null
     fi
   '';
   border_color = pkgs.writeShellScriptBin "border_color" ''
@@ -193,7 +300,7 @@ let
   '';
 in
 {
-  home.packages = with pkgs; [
+  home.packages = [
     cava-internal
     wallpaper_random
     grimshot_watermark
@@ -202,7 +309,9 @@ in
     myswaylock
     dynamic_wallpaper
     default_wall
-    launch_waybar
+    launch-waybar
+    waybar-themeswitcher
+    waybar-toggle
     border_color
   ];
 }

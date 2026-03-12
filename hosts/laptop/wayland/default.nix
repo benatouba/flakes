@@ -11,7 +11,7 @@
     shell = pkgs.zsh;
     isNormalUser = true;
     extraGroups = [ "wheel" "video" "audio" "networkmanager" ];
-    packages = [ pkgs.gdal pkgs.hugo pkgs.gimp ];
+    packages = with pkgs; [ gdal hugo gimp nodejs pnpm ];
   };
   boot = {
     supportedFilesystems = [ "btrfs" ];

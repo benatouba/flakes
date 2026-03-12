@@ -14,27 +14,27 @@
     };
   };
   programs.zsh.enable = true;
+  environment.etc."brave/policies/managed/extensions.json".text =
+    builtins.toJSON {
+      ExtensionInstallForcelist = [
+        "nngceckbapebfimnlniiiahkandclblb"
+        "hfjbmagddngcpeloejdejnfgbamkjaeg"
+      ];
+    };
   environment = {
     binsh = "${pkgs.dash}/bin/dash";
     shells = with pkgs; [ zsh ];
     systemPackages = with pkgs; [
-      bitwarden-desktop
-      claude-code
       curl
       eza
+      fzf
       git
       killall
       libglvnd
       lshw
-      nodejs
-      obsidian
       pciutils
-      pnpm
-      yazi
-      ripgrep-all
       socat
       wget
-      zoom-us
     ];
   };
   services.dbus.enable = true;

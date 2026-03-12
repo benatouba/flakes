@@ -1,4 +1,10 @@
-{ config, lib, pkgs, user, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  user,
+  ...
+}:
 {
   home.persistence."/persist" = {
     directories = [
@@ -9,12 +15,14 @@
       ".mozilla"
       ".config/BraveSoftware"
 
+      # programs state
+      ".local/state"
+
       # Neovim state
       ".local/share/nvim"
-      ".local/state/nvim"
 
       # Shell history & state
-      ".local/share/zoxide"           # zoxide directory database
+      ".local/share/zoxide" # zoxide directory database
 
       # Tmux plugins (tpm bootstraps here)
       ".tmux"
@@ -22,7 +30,7 @@
       # Credentials & security
       ".ssh"
       ".gnupg"
-      ".secrets"                      # tokens.zsh and other secrets
+      ".secrets" # tokens.zsh and other secrets
 
       # User data dirs (lowercase) — downloads intentionally excluded (wiped each boot)
       "documents"
@@ -31,8 +39,8 @@
       "videos"
 
       # Python / uv
-      ".cache/uv"                     # downloaded wheels & packages
-      ".local/share/uv"              # managed toolchains
+      ".cache/uv" # downloaded wheels & packages
+      ".local/share/uv" # managed toolchains
 
       # Node / pnpm
       ".local/share/pnpm"
@@ -61,13 +69,10 @@
       # Nix
       ".cache/nix"
 
-      # Zsh state (history, compdump)
-      ".local/state/zsh"
-
       # GTK bookmarks & settings
       ".config/gtk-3.0"
       ".config/gtk-4.0"
     ];
 
-};
+  };
 }
