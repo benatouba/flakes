@@ -97,6 +97,13 @@ in
     vivid
   ];
 
+  # direnv + nix-direnv: auto-activate per-project dev shells
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+    enableZshIntegration = true;
+  };
+
   # Starship config (palette selected at build time based on theme)
   xdg.configFile."starship.toml".text = starshipConfig;
 }

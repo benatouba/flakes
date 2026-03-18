@@ -114,6 +114,8 @@
       ".mypy_cache/"
       ".ruff_cache/"
       "**/.claude/settings.local.json"
+      ".direnv/"
+      ".envrc"
     ];
   };
 

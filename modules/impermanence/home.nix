@@ -69,6 +69,9 @@
       # Nix
       ".cache/nix"
 
+      # direnv (nix-direnv cached dev shells)
+      ".local/share/direnv"
+
       # GTK bookmarks & settings
       ".config/gtk-3.0"
       ".config/gtk-4.0"
