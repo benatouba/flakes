@@ -71,8 +71,8 @@ config.inactive_pane_hsb = {
   saturation = 1.0,
   brightness = 1.0,
 }
-config.window_background_opacity = 0.9
-config.text_background_opacity = 0.9
+config.window_background_opacity =0.95
+config.text_background_opacity = 1
 config.enable_tab_bar = false
 config.enable_scroll_bar = true
 config.scrollback_lines = 3500

@@ -107,17 +107,17 @@
   };
 
   security.polkit.enable = true;
+  security.polkit.extraConfig = ''
+    polkit.addRule(function(action, subject) {
+      if (action.id == "org.freedesktop.policykit.exec" &&
+          action.lookup("program") == "${pkgs.tlp}/bin/tlp" &&
+          subject.isInGroup("wheel")) {
+        return polkit.Result.AUTH_SELF;
+      }
+    });
+  '';
   security.sudo = {
     enable = true;
-    extraConfig = ''
-      ${user} ALL=(ALL) NOPASSWD:ALL
-    '';
-  };
-  security.doas = {
-    enable = false;
-    extraConfig = ''
-      permit nopass :wheel
-    '';
   };
 
 }
