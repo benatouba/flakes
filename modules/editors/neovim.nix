@@ -18,37 +18,25 @@ in
     withNodeJs = true;
     withPython3 = true;
     extraPackages = with pkgs; [
-      basedpyright # Python
       bash-language-server # Bash
-      vscode-langservers-extracted # CSS, HTML, JSON, ESLint LSPs
-      docker-language-server # Dockerfiles
       fortls # Fortran
       hyprls # Hyprland config
       lemminx # XML
       ltex-ls-plus # Grammar checking
       lua-language-server # Lua
-      marksman # Markdown
       matlab-language-server # MATLAB
       nil # Nix
       nginx-language-server # Nginx
       postgres-language-server # PostgreSQL
       sqls # SQL
-      taplo # TOML
       texlab # LaTeX
       tinymist # Typst
-      vtsls # TypeScript/JavaScript
       vim-language-server # Vim
-      vue-language-server # Vue
       yaml-language-server # YAML
 
       # -- Formatters --
-      python3Packages.docformatter # Python docstrings
-      jq # JSON
       texlivePackages.latexindent # LaTeX
       nixfmt # Nix
-      nodePackages.prettier # JS/TS/JSON/YAML/MD fallback
-      prettierd # Prettier daemon
-      ruff # Python (lint + format)
       stylua # Lua
       typstyle # Typst
       xmlformat # XML
@@ -59,8 +47,6 @@ in
       codespell # Spell checker
       commitlint # Git commit messages
       editorconfig-checker # EditorConfig
-      markdownlint-cli # Markdown
-      oxlint # JS/TS
       proselint # Prose
       selene # Lua
 
