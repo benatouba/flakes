@@ -13,7 +13,7 @@ launch-waybar &
 # swaync &
 
 # Wallpaper
-waypaper --random
+bash ~/.config/hypr/scripts/random-wallpaper.sh
 
 # XSettings daemon (for GTK/X11 apps)
 pkill -x xsettingsd || true

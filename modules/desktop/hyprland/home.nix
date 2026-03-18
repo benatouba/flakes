@@ -32,6 +32,10 @@ in
     source = ./scripts/refresh.sh;
     executable = true;
   };
+  xdg.configFile."hypr/scripts/random-wallpaper.sh" = {
+    source = ./scripts/random-wallpaper.sh;
+    executable = true;
+  };
   xdg.configFile."hypr/scripts/power.sh" = {
     source = ./scripts/power.sh;
     executable = true;
