@@ -32,6 +32,11 @@
     options = [ "bind" ];
   };
 
+  # Prevent readOnlyNixStore from remounting the entire ext4 device as ro,
+  # which would make /persist and all its bind mounts read-only too.
+  # /nix and /persist share the same partition (nvme0n1p3).
+  boot.readOnlyNixStore = false;
+
   fileSystems."/mnt" = {
     device = "/dev/disk/by-uuid/6f021149-57b1-4ae8-99eb-99b1e8430336";
     fsType = "btrfs";
