@@ -32,10 +32,10 @@
     options = [ "bind" ];
   };
 
-  # Prevent readOnlyNixStore from remounting the entire ext4 device as ro,
-  # which would make /persist and all its bind mounts read-only too.
-  # /nix and /persist share the same partition (nvme0n1p3).
-  boot.readOnlyNixStore = false;
+  # Don't mount /nix/store as read-only — it shares the same ext4 partition
+  # as /persist, and an ro remount propagates to the entire device, making
+  # all impermanence bind mounts (including ~/.claude) read-only.
+  boot.nixStoreMountOpts = [];
 
   fileSystems."/mnt" = {
     device = "/dev/disk/by-uuid/6f021149-57b1-4ae8-99eb-99b1e8430336";
