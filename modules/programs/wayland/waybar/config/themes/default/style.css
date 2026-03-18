@@ -288,3 +288,14 @@ label:focus {
 #scratchpad.empty {
 	background-color: transparent;
 }
+
+#bluetooth {
+    padding: 0 10px;
+    color: #3daee9;
+}
+
+#bluetooth.disabled,
+#bluetooth.off {
+    color: #666666;
+    text-decoration: line-through;
+}

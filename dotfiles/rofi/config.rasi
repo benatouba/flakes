@@ -27,20 +27,8 @@ configuration {
     
 }
 
-/* ---- Load font ---- */
-@import "~/.config/themes/settings/rofi-font.rasi"
-
 /* ---- Load colors ---- */
 @theme "~/.config/rofi/colors.rasi"
-
-/* ---- Load wallpaper ---- */
-@import "~/.cache/themes/hyprland-dotfiles/current_wallpaper.rasi"
-
-/* ---- Load border width ---- */
-@import "~/.config/themes/settings/rofi-border.rasi"
-
-/* ---- Load border radius ---- */
-@import "~/.config/themes/settings/rofi-border-radius.rasi"
 
 // Main //
 window {
@@ -52,9 +40,9 @@ window {
     cursor:                      "default";
     spacing:                     0em;
     padding:                     0em;
-    border:                      @border-width;
+    border:                      2px;
     border-color:                @primary;
-    border-radius:               @border-radius;
+    border-radius:               12px;
     background-color:            @background;
 }
 
@@ -65,7 +53,7 @@ mainbox {
     orientation:                 horizontal;
     children:                    [ "imagebox" , "listbox" ];
     background-color:            transparent;
-    background-image:            @current-image;
+    background-image:            none;
 }
 
 imagebox {

@@ -66,7 +66,7 @@
   },
   // Tools
   "custom/tools": {
-    "format": "",
+    "format": "ï½",
     "tooltip-format": "Tools",
     "on-scroll-up": "true",
     "on-scroll-down": "true"
@@ -75,7 +75,7 @@
   // Now Playing
   "custom/nowplaying": {
     "exec": "~/.config/ml4w/scripts/ml4w-now-playing",
-    "format": "  {text}",
+    "format": "ï  {text}",
     "return-type": "json",
     "interval": 1,
     "escape": true,
@@ -88,7 +88,7 @@
   
   // Cliphist
   "custom/cliphist": {
-    "format": "",
+    "format": "ïª",
     "on-click": "sleep 0.1 && ~/.config/ml4w/scripts/ml4w-cliphist",
     "on-click-right": "sleep 0.1 && ~/.config/ml4w/scripts/ml4w-cliphist d",
     "on-click-middle": "sleep 0.1 && ~/.config/ml4w/scripts/ml4w-cliphist w",
@@ -98,7 +98,7 @@
   },
   // Updates Count
   "custom/updates": {
-    "format": "  {}",
+    "format": "ï²  {}",
     "escape": true,
     "return-type": "json",
     "exec": "~/.config/ml4w/scripts/ml4w-check-system-updates",
@@ -109,32 +109,32 @@
   },
   // Wallpaper
   "custom/wallpaper": {
-    "format": "",
+    "format": "ï¾",
     "on-click": "bash -c waypaper &",
     "on-click-right": "~/.config/hypr/scripts/wallpaper-effects.sh",
     "tooltip-format": "Left: Select a wallpaper\nRight: Select wallpaper effect"
   },
   // Waybar Themes
   "custom/waybarthemes": {
-    "format": "",
+    "format": "ï",
     "on-click": "~/.config/waybar/themeswitcher.sh",
     "tooltip-format": "Select a waybar theme"
   },
   // Settings
   "custom/settings": {
-    "format": "",
+    "format": "ï",
     "on-click": "sleep 0.1 && com.ml4w.dotfilessettings",
     "tooltip-format": "ML4W Settings"
   },
   // Keybindings
   "custom/keybindings": {
-    "format": "",
+    "format": "ï",
     "on-click": "~/.config/hypr/scripts/keybindings.sh",
     "tooltip": false
   },
   // Calculator
   "custom/calculator": {
-    "format": "",
+    "format": "ï¬",
     "on-click": "qalculate-gtk",
     "tooltip-format": "Open calculator"
   },
@@ -149,14 +149,14 @@
   },
   // Rofi Application Launcher
   "custom/appmenuicon": {
-    "format": "",
+    "format": "ïµ",
     "on-click": "sleep 0.2;rofi -show drun -replace",
     "on-click-right": "~/.config/hypr/scripts/keybindings.sh",
     "tooltip-format": "Left: Open the application launcher\nRight: Show all keybindings"
   },
   // Power Menu
   "custom/exit": {
-    "format": "",
+    "format": "ï",
     "on-click": "~/.config/ml4w/scripts/ml4w-wlogout",
     "on-click-right": "hyprlock",
     "tooltip-format": "Left: Power menu\nRight: Lock screen"
@@ -184,7 +184,7 @@
   },
   // Hyprsunset
   "custom/hyprshade": {
-    "format": "",
+    "format": "î",
     "tooltip-format": "Toggle Screen Shader",
     "on-click": "sleep 0.5; ~/.config/ml4w/scripts/ml4w-toggle-hyprsunset",
     "on-scroll-up": "true",
@@ -192,7 +192,7 @@
   },
   // Hypridle inhibitor
   "custom/hypridle": {
-    "format": "",
+    "format": "ï£",
     "return-type": "json",
     "escape": true,
     "exec-on-event": true,
@@ -208,8 +208,8 @@
     "capslock": true,
     "format": "{name} {icon}",
     "format-icons": {
-      "locked": "",
-      "unlocked": ""
+      "locked": "ï£",
+      "unlocked": "ï"
     },
     "on-scroll-up": "true",
     "on-scroll-down": "true"
@@ -228,31 +228,28 @@
   },
   // System
   "custom/system": {
-    "format": "",
+    "format": "î³",
     "tooltip": false,
     "on-scroll-up": "true",
     "on-scroll-down": "true"
   },
   // CPU
   "cpu": {
-    "format": "/ C {usage}% ",
-    "on-click": "~/.config/ml4w/settings/system-monitor.sh",
+    "format": "/  {usage}%",
     "on-scroll-up": "true",
     "on-scroll-down": "true"
   },
   // Memory
   "memory": {
-    "format": "/ M {}% ",
-    "on-click": "~/.config/ml4w/settings/system-monitor.sh",
+    "format": "/  {}%",
     "on-scroll-up": "true",
     "on-scroll-down": "true"
   },
   // Harddisc space used
   "disk": {
     "interval": 30,
-    "format": "D {percentage_used}% ",
+    "format": "ó° {percentage_used}%",
     "path": "/",
-    "on-click": "~/.config/ml4w/settings/system-monitor.sh",
     "on-scroll-up": "true",
     "on-scroll-down": "true"
   },
@@ -318,12 +315,12 @@
   // Network
   "network": {
     "format": "{ifname}",
-    "format-wifi": " {signalStrength}%",
-    "format-ethernet": "  {ifname}",
-    "format-disconnected": "Disconnected ⚠",
-    "tooltip-format": " {ifname} via {gwaddri}",
-    "tooltip-format-wifi": "  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBits} Down: {bandwidthDownBits}",
-    "tooltip-format-ethernet": " {ifname}\nIP: {ipaddr}\n up: {bandwidthUpBits} down: {bandwidthDownBits}",
+    "format-wifi": "ï« {signalStrength}%",
+    "format-ethernet": "ï  {ifname}",
+    "format-disconnected": "Disconnected â ",
+    "tooltip-format": "ï {ifname} via {gwaddri}",
+    "tooltip-format-wifi": "ï«  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBits} Down: {bandwidthDownBits}",
+    "tooltip-format-ethernet": "ï {ifname}\nIP: {ipaddr}\n up: {bandwidthUpBits} down: {bandwidthDownBits}",
     "tooltip-format-disconnected": "Disconnected",
     "max-length": 50,
     "on-click": "~/.config/ml4w/settings/networkmanager.sh",
@@ -338,17 +335,17 @@
       "critical": 15
     },
     "format": "{icon} {capacity}%",
-    "format-charging": "  {capacity}%",
-    "format-plugged": "  {capacity}%",
+    "format-charging": "ï§  {capacity}%",
+    "format-plugged": "ï¦  {capacity}%",
     "format-alt": "{icon}  {time}",
     // "format-good": "", // An empty format will hide the module
     // "format-full": "",
     "format-icons": [
-      " ",
-      " ",
-      " ",
-      " ",
-      " "
+      "ï ",
+      "ï ",
+      "ï ",
+      "ï ",
+      "ï "
     ]
   },
   // Power Profiles Daemon
@@ -357,10 +354,10 @@
     "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
     "tooltip": true,
     "format-icons": {
-      "default": "",
-      "performance": "",
-      "balanced": "",
-      "power-saver": ""
+      "default": "ï",
+      "performance": "ï§",
+      "balanced": "ï¡£",
+      "power-saver": "ï¬"
     },
     "on-scroll-up": "true",
     "on-scroll-down": "true"
@@ -369,37 +366,39 @@
   "pulseaudio": {
     // "scroll-step": 1, // %, can be a float
     "format": "{icon}  {volume}%",
-    "format-bluetooth": "{volume}% {icon} {format_source}",
-    "format-bluetooth-muted": " {icon} {format_source}",
-    "format-muted": " {format_source}",
-    "format-source": "{volume}% ",
-    "format-source-muted": "",
+    "format-bluetooth": "{volume}% {icon}ï {format_source}",
+    "format-bluetooth-muted": "ï© {icon}ï {format_source}",
+    "format-muted": "ï© {format_source}",
+    "format-source": "{volume}% ï°",
+    "format-source-muted": "ï±",
     "format-icons": {
-      "headphone": " ",
-      "hands-free": " ",
-      "headset": " ",
-      "phone": " ",
-      "portable": " ",
-      "car": " ",
+      "headphone": "ï¥ ",
+      "hands-free": "ï ",
+      "headset": "ï ",
+      "phone": "ï ",
+      "portable": "ï ",
+      "car": "ï¹ ",
       "default": [
-        "",
-        "",
-        ""
+        "ï¦",
+        "ï¨",
+        "ï¨"
       ]
     },
     "on-click": "pavucontrol"
   },
   // Bluetooth
   "bluetooth": {
-  "format": " {status}",
-  "format-disabled": "",
-  "format-off": "",
-  "interval": 30,
-  "on-click": "sleep 0.1 && ~/.config/ml4w/settings/bluetooth.sh",
-  "tooltip-format-connected": "Connected devices: {num_connections} connected\n\n{device_enumerate}",
-  "tooltip-format-enumerate-connected": "{device_alias}",
-  "tooltip-format-enumerate-connected-battery": "{device_alias}\t| Battery life: {device_battery_percentage}%",
-  "format-no-controller": ""
+    "format": "",
+    "format-connected": " {num_connections}",
+    "format-disabled": "",
+    "format-off": "",
+    "interval": 30,
+    "on-click": "rfkill toggle bluetooth",
+    "tooltip-format": "Bluetooth: {status}",
+    "tooltip-format-connected": "{num_connections} connected\n\n{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}",
+    "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_battery_percentage}%",
+    "format-no-controller": ""
   },
   // Other
   "user": {
@@ -411,21 +410,21 @@
   "backlight": {
     "format": "{icon} {percent}%",
     "format-icons": [
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      ""
+      "î",
+      "î",
+      "î",
+      "î",
+      "î",
+      "î",
+      "î",
+      "î",
+      "î",
+      "î",
+      "î",
+      "î",
+      "î",
+      "î",
+      "î"
     ],
     "scroll-step": 1
   }

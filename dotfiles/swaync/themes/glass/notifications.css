@@ -78,7 +78,7 @@
   > *
   .notification-action {
   border-radius: 0.5rem;
-  background-color: alpha(@crust, 0.95);
+  background-color: alpha(@surface_container_lowest, 0.95);
   margin: 0.4rem;
   border: 1px solid transparent;
 }
@@ -90,7 +90,7 @@
   > *:last-child
   > *
   .notification-action:hover {
-  background-color: @hover;
+  background-color: @hovercolor;
   border: 1px solid @primary;
 }
 
