@@ -1,12 +1,16 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, theme ? "dark", ... }:
 
+let
+  themeConf = if theme == "light" then ./latte_theme.conf else ./mocha_theme.conf;
+  gtkColors = if theme == "light" then ../gtk/colors-latte.css else ../gtk/colors.css;
+in
 {
   imports = [ (import ../../environment/hypr-variables.nix) ];
   wayland.windowManager.hyprland = {
     enable = true;
     package = null;
     extraConfig = builtins.concatStringsSep "\n" (map builtins.readFile [
-      ./mocha_theme.conf
+      themeConf
       ./monitors.conf
       ./input.conf
       ./appearance.conf
@@ -34,10 +38,10 @@
   };
   xdg.configFile."hypr/assets/blank.png".source = ./assets/blank.png;
 
-  # GTK colors
-  xdg.configFile."gtk-3.0/colors.css".source = ../gtk/colors.css;
+  # GTK colors - selected based on theme
+  xdg.configFile."gtk-3.0/colors.css".source = gtkColors;
   xdg.configFile."gtk-3.0/gtk.css".text = "@import 'colors.css';";
-  xdg.configFile."gtk-4.0/colors.css".source = ../gtk/colors.css;
+  xdg.configFile."gtk-4.0/colors.css".source = gtkColors;
   xdg.configFile."gtk-4.0/gtk.css".text = "@import 'colors.css';";
 
   # Waypaper

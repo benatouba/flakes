@@ -1,9 +1,9 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 {
   programs = {
     btop = {
       settings = {
-        color_theme = lib.mkDefault "catppuccin_latte";
+        color_theme = "catppuccin_latte";
       };
     };
   };

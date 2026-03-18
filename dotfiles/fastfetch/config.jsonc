@@ -78,6 +78,10 @@
             "type": "memory"
         },
         {
+            "key": "│ {#31}󰁹 battery {#keys}│",
+            "type": "battery"
+        },
+        {
             "key": "├───────────┤",
             "type": "custom"
         },

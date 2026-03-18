@@ -42,7 +42,6 @@
     kernelParams = [
       "quiet"
       "splash"
-      "amd_pstate=active"
     ];
     consoleLogLevel = 0;
     initrd.verbose = false;
@@ -50,6 +49,7 @@
 
   programs = {
     dconf.enable = true;
+    hyprland.enable = true;
   };
 
   i18n = { supportedLocales = [ "de_DE.UTF-8/UTF-8" "en_US.UTF-8/UTF-8" ]; };
@@ -87,7 +87,15 @@
 
   services = {
     dbus.packages = [ pkgs.gcr ];
-    getty.autologinUser = "${user}";
+    greetd = {
+      enable = true;
+      settings = {
+        default_session = {
+          command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --asterisks --cmd start-hyprland";
+          user = "greeter";
+        };
+      };
+    };
     gvfs.enable = true;
     pipewire = {
       enable = true;

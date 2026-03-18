@@ -1,110 +1,98 @@
-# Get editor completions based on the config schema
 "$schema" = 'https://starship.rs/config-schema.json'
 
 add_newline = false
-# A minimal left prompt
-# format = """$directory$character"""
-right_format = """$git_branch$git_status$cmd_duration$directory"""
-palette = "catppuccin_mocha"
-# move the rest of the prompt to the right
-# format = "$all"
+palette = "@starshipPalette@"
+
 format = """
-[░▒▓](#a3aed2)\
-[  ](bg:#a3aed2 fg:#090c0c)\
-[](bg:#769ff0 fg:#a3aed2)\
 $directory\
-[](fg:#769ff0 bg:#394260)\
 $git_branch\
 $git_status\
-[](fg:#394260 bg:#212736)\
+$git_state\
+$python\
 $nodejs\
-$rust\
-$golang\
-$php\
-[](fg:#212736 bg:#1d2230)\
-$time\
-[ ](fg:#1d2230)\
-\n$character"""
+$nix_shell\
+$cmd_duration\
+$character"""
 
-[aws]
-format = 'on [$symbol($profile )(\($region\) )]($style)'
-style = 'bold blue'
-symbol = "  "
-
-[line_break]
-disabled = true
 [character]
-success_symbol = " [](#6791c9)"
-error_symbol = " [](#df5b61)"
-vimcmd_symbol = "[ ](#78b892)"
-[hostname]
-ssh_only = true
-format = "[$hostname](bold blue) "
-disabled = false
+success_symbol = "[❯](lavender)"
+error_symbol = "[❯](red)"
+vimcmd_symbol = "[❮](green)"
 
-[sudo]
-disabled = false
-
-[nodejs]
-format = 'via [🤖 $version](bold green) '
+[directory]
+style = "bold sapphire"
+truncation_length = 3
+truncate_to_repo = true
+read_only = " 󰌾"
 
 [git_branch]
-format = "[](fg:#1c252c bg:none)[$branch]($style)[](fg:#1c252c bg:#1c252c)[](fg:#78b892 bg:#1c252c)[](fg:#282c34 bg:#78b892)[](fg:#78b892 bg:none) "
-style = "fg:#d9d7d6 bg:#1c252c"
-symbol = '🌱 '
-truncation_length = 4
-truncation_symbol = ''
-ignore_branches = ['master', 'main']
+format = "[$symbol$branch(:$remote_branch)]($style) "
+style = "green"
+symbol = " "
+truncation_length = 24
 
 [git_status]
-format = "[](fg:#1c252c bg:none)[$all_status$ahead_behind]($style)[](fg:#1c252c bg:#1c252c)[](fg:#67afc1 bg:#1c252c)[](fg:#1c252c bg:#67afc1)[](fg:#67afc1 bg:none) "
-style = "fg:#d9d7d6 bg:#1c252c"
-conflicted = "="
-ahead = "🏎💨 ${count}"
-behind = "😰${count}"
-diverged = "😵${ahead_count}⇣${behind_count}"
-up_to_date = "✓"
-untracked = "🤷${count}"
-stashed = "📦"
-modified = "📝${count}"
-staged = '[++\($count\)](green)'
-renamed = "👅${count}"
-deleted = "🗑${count}"
-
-[git_commit]
-format = "[\\($hash\\)]($style) [\\($tag\\)]($style)"
-tag_symbol = '🔖 '
-commit_hash_length = 8
-style = "green"
+format = '([$all_status$ahead_behind]($style) )'
+style = "peach"
+conflicted = "= "
+ahead = "⇡${count} "
+behind = "⇣${count} "
+diverged = "⇡${ahead_count}⇣${behind_count} "
+up_to_date = ""
+untracked = "?${count} "
+stashed = "* "
+modified = "~${count} "
+staged = "+${count} "
+renamed = "» "
+deleted = "✘${count} "
 
 [git_state]
-rebase = "REBASING"
-merge = "MERGING"
-revert = "REVERTING"
-cherry_pick = '[🍒 PICKING](bold red)'
-bisect = "BISECTING"
-am = "AM"
-am_or_rebase = "AM/REBASE"
+format = '[\($state( $progress_current/$progress_total)\)]($style) '
 style = "yellow"
-format = '\([$state( $progress_current/$progress_total)]($style)\) '
+
+[git_commit]
+format = "[$hash$tag]($style) "
+tag_symbol = " "
+commit_hash_length = 7
+style = "overlay2"
 
 [python]
-symbol = '👾 '
-pyenv_version_name = true
+format = '[$symbol$version( \($virtualenv\))]($style) '
+symbol = " "
+style = "yellow"
 python_binary = ['python', 'python3']
+detect_extensions = ['py']
+detect_files = ['requirements.txt', 'pyproject.toml', 'setup.py', 'Pipfile', '.python-version']
 
-[golang]
-format = '[ ](bold cyan)'
+[nodejs]
+format = "[$symbol$version]($style) "
+symbol = " "
+style = "green"
+detect_files = ['package.json', '.nvmrc']
+detect_extensions = ['js', 'ts', 'vue']
 
-[kubernetes]
-symbol = '☸ '
-disabled = false
-detect_files = ['Dockerfile']
-format = '[$context(\[$namespace\])]($style) '
-[kubernetes.context_aliases]
-'arn:aws:eks:us-west-2:577926974532:cluster/gal-kub-demo-cluster' = 'gal'
+[nix_shell]
+format = "[$symbol$state]($style) "
+symbol = " "
+style = "blue"
+
+[cmd_duration]
+format = "[$duration]($style) "
+style = "overlay1"
+min_time = 2_000
+
+[hostname]
+ssh_only = true
+format = "[$hostname]($style) "
+style = "bold blue"
+
+[aws]
+disabled = true
 
 [docker_context]
+disabled = true
+
+[kubernetes]
 disabled = true
 
 [palettes.catppuccin_mocha]
@@ -135,8 +123,30 @@ base = "#1e1e2e"
 mantle = "#181825"
 crust = "#11111b"
 
-[directory.substitutions]
-documents = "󰈙 "
-downloads = " "
-music = " "
-pictures = " "
+[palettes.catppuccin_latte]
+rosewater = "#dc8a78"
+flamingo = "#dd7878"
+pink = "#ea76cb"
+mauve = "#8839ef"
+red = "#d20f39"
+maroon = "#e64553"
+peach = "#fe640b"
+yellow = "#df8e1d"
+green = "#40a02b"
+teal = "#179299"
+sky = "#04a5e5"
+sapphire = "#209fb5"
+blue = "#1e66f5"
+lavender = "#7287fd"
+text = "#4c4f69"
+subtext1 = "#5c5f77"
+subtext0 = "#6c6f85"
+overlay2 = "#7c7f93"
+overlay1 = "#8c8fa1"
+overlay0 = "#9ca0b0"
+surface2 = "#acb0be"
+surface1 = "#bcc0cc"
+surface0 = "#ccd0da"
+base = "#eff1f5"
+mantle = "#e6e9ef"
+crust = "#dce0e8"

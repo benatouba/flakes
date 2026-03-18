@@ -2,18 +2,18 @@
 # Restart DE components on hyprland reload
 
 # Waybar
-pkill -x waybar || true
+pkill -x .waybar-wrapped >/dev/null 2>&1 || true
+pkill -x waybar >/dev/null 2>&1 || true
+sleep 0.4
 launch-waybar &
 
 # Notification daemon (swaync)
-pkill -x swaync || true
-sleep 0.2
-swaync &
+# pkill -x swaync || true
+# while pgrep -x swaync >/dev/null; do sleep 0.1; done
+# swaync &
 
 # Wallpaper
-pkill -x hyprpaper || true
-sleep 0.2
-hyprpaper &
+waypaper --random
 
 # XSettings daemon (for GTK/X11 apps)
 pkill -x xsettingsd || true

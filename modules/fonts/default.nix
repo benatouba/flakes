@@ -12,6 +12,7 @@
       nerd-fonts.symbols-only
       nerd-fonts.jetbrains-mono
       nerd-fonts.hack
+      maple-mono.NF
       twemoji-color-font
     ];
     fontconfig = {

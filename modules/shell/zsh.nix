@@ -1,7 +1,12 @@
-{ pkgs, lib, user, ... }:
+{ pkgs, lib, user, theme ? "dark", ... }:
 
 let
   flakesPath = "/home/${user}/projects/flakes";
+  starshipPalette = if theme == "light" then "catppuccin_latte" else "catppuccin_mocha";
+  starshipConfig = builtins.replaceStrings
+    [ "@starshipPalette@" ]
+    [ starshipPalette ]
+    (builtins.readFile ../../dotfiles/starship.toml);
 in
 {
   programs.zsh = {
@@ -34,7 +39,6 @@ in
         "copypath"
         "web-search"
         "colored-man-pages"
-        "pnpm"
         "pip"
         "ssh-agent"
         "uv"
@@ -43,11 +47,6 @@ in
 
     initContent = lib.mkMerge [
       (lib.mkBefore ''
-        # Auto-start Hyprland on TTY1
-        if [[ "$(tty)" == "/dev/tty1" ]]; then
-          exec dbus-run-session Hyprland
-        fi
-
         fastfetch
       '')
       ''
@@ -63,8 +62,8 @@ in
         # Tokens (secrets — persisted in ~/.secrets/, not in flakes repo)
         [ -f ~/.secrets/tokens.zsh ] && source ~/.secrets/tokens.zsh
 
-        # Zoxide
-        export ZOXIDE_CMD_OVERRIDE=cd
+        # Zoxide — replace cd with zoxide's smart cd
+        eval "$(zoxide init zsh --cmd cd)"
 
         # Case-sensitive completion
         CASE_SENSITIVE="true"
@@ -98,6 +97,6 @@ in
     vivid
   ];
 
-  # Starship config
-  xdg.configFile."starship.toml".source = ../../dotfiles/starship.toml;
+  # Starship config (palette selected at build time based on theme)
+  xdg.configFile."starship.toml".text = starshipConfig;
 }

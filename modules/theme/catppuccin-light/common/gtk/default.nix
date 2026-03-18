@@ -2,43 +2,61 @@
 
 {
   home.sessionVariables = {
-    GTK_THEME = lib.mkDefault "Catppuccin-Latte-Green";
+    GTK_THEME = "Catppuccin-Latte-Green";
   };
   home.pointerCursor = {
-    package = lib.mkDefault pkgs.catppuccin-cursors;
-    name = lib.mkDefault "Catppuccin-Frappe-Dark";
-    size = lib.mkDefault 16;
+    package = pkgs.catppuccin-cursors;
+    name = "Catppuccin-Latte-Dark";
+    size = 16;
   };
-  home.pointerCursor.gtk.enable = lib.mkDefault true;
+  home.pointerCursor.gtk.enable = true;
+  dconf.settings = {
+    "org/gnome/desktop/interface" = {
+      color-scheme = "prefer-light";
+    };
+  };
   gtk = {
-    enable = lib.mkDefault true;
+    enable = true;
     theme = {
-      name = lib.mkDefault "Catppuccin-Latte-Green";
-      package = lib.mkDefault pkgs.catppuccin-latte-gtk;
+      name = "Catppuccin-Latte-Green";
+      package = pkgs.catppuccin-latte-gtk;
     };
     cursorTheme = {
-      name = lib.mkDefault "Catppuccin-Frappe-Dark";
+      name = "Catppuccin-Latte-Dark";
     };
     iconTheme = {
-      name = lib.mkDefault "Papirus-Light";
-      package = lib.mkDefault pkgs.papirus-icon-theme;
+      name = "Papirus-Light";
+      package = pkgs.papirus-icon-theme;
     };
 
     font = {
-      name = lib.mkDefault "JetBrainsMono Nerd Font";
-      size = lib.mkDefault 12;
+      name = "Noto Sans";
+      size = 11;
     };
     gtk3.extraConfig = {
-      gtk-xft-antialias = lib.mkDefault 1;
-      gtk-xft-hinting = lib.mkDefault 1;
-      gtk-xft-hintstyle = lib.mkDefault "hintslight";
-      gtk-xft-rgba = lib.mkDefault "rgb";
+      gtk-xft-antialias = 1;
+      gtk-xft-hinting = 1;
+      gtk-xft-hintstyle = "hintslight";
+      gtk-xft-rgba = "rgb";
     };
-    gtk2.extraConfig = lib.mkDefault ''
+    gtk2.extraConfig = ''
       gtk-xft-antialias=1
       gtk-xft-hinting=1
       gtk-xft-hintstyle="hintslight"
       gtk-xft-rgba="rgb"
     '';
   };
+
+  # Qt theming via Kvantum
+  qt = {
+    enable = true;
+    platformTheme.name = "kvantum";
+    style.name = "kvantum";
+  };
+  xdg.configFile."Kvantum/kvantum.kvconfig".text = ''
+    [General]
+    theme=catppuccin-latte-mauve
+  '';
+  xdg.configFile."Kvantum/catppuccin-latte-mauve".source =
+    "${pkgs.catppuccin-kvantum}/share/Kvantum/catppuccin-latte-mauve";
 }

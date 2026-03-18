@@ -1,4 +1,4 @@
-{ config, lib, pkgs, user, ... }:
+{ pkgs, user, ... }:
 
 {
   environment.systemPackages = with pkgs; [
@@ -14,8 +14,9 @@
   ];
 
   home-manager.users.${user} = {
-    xdg.configFile."waybar/modules.json".source = ./config/modules.json;
-    xdg.configFile."waybar/waybar-quicklinks.json".source = ./config/waybar-quicklinks.json;
-    xdg.configFile."waybar/themes".source = ./config/themes;
+    xdg.configFile."waybar" = {
+      source = ./config;
+      recursive = true;
+    };
   };
 }

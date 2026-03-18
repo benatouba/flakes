@@ -51,7 +51,7 @@ config.adjust_window_size_when_changing_font_size = false
 -- config.unix_domains = { { name = "unix" } }
 config.default_gui_startup_args = { "connect", "unix" }
 
-config.color_scheme = "Catppuccin Mocha"
+config.color_scheme = "@weztermColorScheme@"
 
 -- This is where you actually apply your config choices
 config.audible_bell = "Disabled"

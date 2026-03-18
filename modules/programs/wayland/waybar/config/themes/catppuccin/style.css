@@ -1,0 +1,135 @@
+* {
+  font-family: "Maple Mono NF";
+  font-size: 15px;
+}
+
+#waybar {
+  background-color: alpha(@text, 0.15);
+  color: @text;
+  padding: 0;
+  margin: 0;
+}
+
+#workspaces {
+  background-color: alpha(@surface0, 0.4);
+}
+
+#workspaces button {
+  color: @lavender;
+  font-size: 17px;
+}
+
+#workspaces button.active {
+  color: @sky;
+}
+
+#workspaces button:hover {
+  color: @sapphire;
+}
+
+#workspaces button.urgent {
+  color: @red;
+}
+
+button {
+  background: transparent;
+}
+
+#tray,
+#backlight,
+#clock,
+#battery,
+#pulseaudio,
+#cpu,
+#memory,
+#disk,
+#network,
+#bluetooth,
+#idle_inhibitor,
+#custom-notification,
+#language,
+#custom-power {
+  background-color: alpha(@surface0, 0.4);
+  padding: 0 0.75rem;
+}
+
+#clock {
+  color: @blue;
+}
+
+#cpu {
+  color: @teal;
+}
+
+#memory {
+  color: @peach;
+}
+
+#disk {
+  color: @mauve;
+}
+
+#network {
+  color: @sapphire;
+}
+
+#network.disconnected {
+  color: @overlay0;
+}
+
+#battery {
+  color: @green;
+}
+
+#battery.charging {
+  color: @green;
+}
+
+#battery.warning:not(.charging) {
+  color: @yellow;
+}
+
+#battery.critical:not(.charging) {
+  color: @red;
+}
+
+#bluetooth {
+  color: @blue;
+}
+
+#bluetooth.disabled,
+#bluetooth.off {
+  color: @overlay0;
+}
+
+#backlight {
+  color: @yellow;
+}
+
+#pulseaudio {
+  color: @maroon;
+}
+
+#pulseaudio.muted {
+  color: @overlay0;
+}
+
+#idle_inhibitor {
+  color: @lavender;
+}
+
+#idle_inhibitor.activated {
+  color: @peach;
+}
+
+#custom-notification {
+  color: @flamingo;
+}
+
+#language {
+  color: @lavender;
+}
+
+#custom-power {
+  color: @red;
+}

@@ -32,11 +32,11 @@
     options = [ "bind" ];
   };
 
-  # fileSystems."/garuda" =
-  #   { device = "/dev/nvme0n1p2";
-  #     fsType = "btrfs";
-  #     options = [ "subvol=log" "compress=zstd" "noatime" ];
-  #   };
+  fileSystems."/mnt" = {
+    device = "/dev/disk/by-uuid/6f021149-57b1-4ae8-99eb-99b1e8430336";
+    fsType = "btrfs";
+    options = [ "compress=zstd" "noatime" ];
+  };
 
   fileSystems."/boot/efi" =
     { device = "/dev/disk/by-uuid/5090-32C8";

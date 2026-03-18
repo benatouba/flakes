@@ -21,7 +21,7 @@
         default = [ "hyprland" "gtk" ];
       };
       common = {
-        default = [ "gtk" ];
+        default = [ "*" ];
       };
     };
   };

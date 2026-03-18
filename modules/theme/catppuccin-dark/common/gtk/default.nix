@@ -30,8 +30,8 @@
     };
 
     font = {
-      name = "JetBrainsMono Nerd Font";
-      size = 12;
+      name = "Noto Sans";
+      size = 11;
     };
     gtk3.extraConfig = {
       gtk-application-prefer-dark-theme = 1;
@@ -47,4 +47,17 @@
       gtk-xft-rgba="rgb"
     '';
   };
+
+  # Qt theming via Kvantum
+  qt = {
+    enable = true;
+    platformTheme.name = "kvantum";
+    style.name = "kvantum";
+  };
+  xdg.configFile."Kvantum/kvantum.kvconfig".text = ''
+    [General]
+    theme=catppuccin-mocha-mauve
+  '';
+  xdg.configFile."Kvantum/catppuccin-mocha-mauve".source =
+    "${pkgs.catppuccin-kvantum}/share/Kvantum/catppuccin-mocha-mauve";
 }

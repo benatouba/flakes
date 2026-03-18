@@ -19,12 +19,14 @@
         inputs.nixpkgs.follows = "nixpkgs";
       };
       impermanence.url = "github:nix-community/impermanence";
+      nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     };
 
   outputs = inputs @ { self, nixpkgs, ... }:
     let
       system = "x86_64-linux";
       user = "ben";
+      theme = "dark"; # "dark" (catppuccin mocha) or "light" (catppuccin latte)
       selfPkgs = import ./pkgs;
       pkgs = import nixpkgs {
         inherit system;
@@ -40,7 +42,7 @@
 
       nixosConfigurations = (
         import ./hosts {
-          inherit system nixpkgs self inputs user;
+          inherit system nixpkgs self inputs user theme;
         }
       );
     };

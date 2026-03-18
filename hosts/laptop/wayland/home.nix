@@ -1,5 +1,10 @@
-{ pkgs, user, ... }:
+{ pkgs, user, theme, ... }:
 
+let
+  themeModule = if theme == "light"
+    then ../../../modules/theme/catppuccin-light/wayland
+    else ../../../modules/theme/catppuccin-dark/wayland;
+in
 {
   imports = [
     (import ../../../modules/desktop/hyprland/home.nix)
@@ -8,8 +13,7 @@
   ++ [ (import ../../../modules/scripts) ]
   ++ (import ../../../modules/shell)
   ++ (import ../../../modules/programs/wayland)
-  ++ (import ../../../modules/theme/catppuccin-dark/wayland)
-  ++ (import ../../../modules/theme/catppuccin-light/wayland);
+  ++ (import themeModule);
 
   home = {
     username = "${user}";

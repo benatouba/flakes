@@ -83,11 +83,6 @@ neomuttbw() {
     BW_SESSION="$output" neomutt "$@"
 }
 
-# =============================================================================
-#
-# To initialize zoxide, add this to your configuration (usually ~/.zshrc):
-#
-# eval "$(zoxide init zsh)"
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
 	yazi "$@" --cwd-file="$tmp"

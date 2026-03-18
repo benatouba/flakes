@@ -79,6 +79,7 @@ in
       cmake
       gnumake
       gcc
+      cargo
     ];
   };
 

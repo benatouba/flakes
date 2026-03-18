@@ -1,4 +1,4 @@
-{ system, self, nixpkgs, inputs, user, ... }:
+{ system, self, nixpkgs, inputs, user, theme, ... }:
 
 let
   pkgs = import nixpkgs {
@@ -12,7 +12,7 @@ in
   laptop = lib.nixosSystem {
     # Laptop profile
     inherit system;
-    specialArgs = { inherit inputs user; };
+    specialArgs = { inherit inputs user theme; };
     modules = [
       ./laptop/wayland
     ] ++ [
@@ -20,6 +20,7 @@ in
     ] ++ [
       ../modules/impermanence
     ] ++ [
+      inputs.nixos-hardware.nixosModules.lenovo-thinkpad-p14s-amd-gen2
       inputs.impermanence.nixosModules.impermanence
       inputs.hyprland.nixosModules.default
       inputs.home-manager.nixosModules.home-manager
@@ -27,7 +28,7 @@ in
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;
-          extraSpecialArgs = { inherit inputs user; };
+          extraSpecialArgs = { inherit inputs user theme; };
           users.${user} = {
             imports = [
               (import ./laptop/wayland/home.nix)
