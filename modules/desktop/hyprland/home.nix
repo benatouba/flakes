@@ -9,6 +9,7 @@ in
   wayland.windowManager.hyprland = {
     enable = true;
     package = null;
+    portalPackage = null; # portal is managed at the NixOS level
     extraConfig = builtins.concatStringsSep "\n" (map builtins.readFile [
       themeConf
       ./monitors.conf
