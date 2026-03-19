@@ -1,7 +1,7 @@
 { system, self, nixpkgs, inputs, user, theme, ... }:
 
 let
-  lib = nixpkgs.lib;
+  inherit (nixpkgs) lib;
 
   mkHost = { hostModules, hmModules, hardwareModules ? [] }: lib.nixosSystem {
     inherit system;

@@ -10,7 +10,7 @@ in
   };
   home.pointerCursor = {
     package = pkgs.catppuccin-cursors;
-    name = theme.cursor.name;
+    inherit (theme.cursor) name;
     size = 16;
   };
   home.pointerCursor.gtk.enable = true;
@@ -26,16 +26,16 @@ in
       package = pkgs.${theme.gtk.package};
     };
     cursorTheme = {
-      name = theme.cursor.name;
+      inherit (theme.cursor) name;
     };
     iconTheme = {
-      name = theme.icons.name;
+      inherit (theme.icons) name;
       package = pkgs.papirus-icon-theme;
     };
 
     font = {
       name = theme.font.sans;
-      size = theme.font.size;
+      inherit (theme.font) size;
     };
     gtk3.extraConfig = {
       gtk-application-prefer-dark-theme = if theme.variant == "dark" then 1 else 0;

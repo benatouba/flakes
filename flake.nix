@@ -41,10 +41,8 @@
 
       overlays.default = selfPkgs.overlay;
 
-      nixosConfigurations = (
-        import ./hosts {
+      nixosConfigurations = import ./hosts {
           inherit system nixpkgs self inputs user theme;
-        }
-      );
+        };
     };
 }
