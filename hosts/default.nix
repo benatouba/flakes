@@ -1,43 +1,22 @@
 { system, self, nixpkgs, inputs, user, theme, ... }:
 
 let
-  pkgs = import nixpkgs {
-    inherit system;
-    config.allowUnfree = true; # Allow proprietary software
-  };
-
   lib = nixpkgs.lib;
-in
-{
-  laptop = lib.nixosSystem {
-    # Laptop profile
+
+  mkHost = { hostModules, hmModules, hardwareModules ? [] }: lib.nixosSystem {
     inherit system;
     specialArgs = { inherit inputs user theme; };
     modules = [
-      ./laptop/wayland
-    ] ++ [
-      ./system.nix
-    ] ++ [
-      ../modules/impermanence
-    ] ++ [
-      inputs.nixos-hardware.nixosModules.lenovo-thinkpad-p14s-amd-gen2
+      ./common/core.nix
+      ../modules/nixos/impermanence.nix
       inputs.impermanence.nixosModules.impermanence
-      inputs.hyprland.nixosModules.default
       inputs.home-manager.nixosModules.home-manager
       {
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;
           extraSpecialArgs = { inherit inputs user theme; };
-          users.${user} = {
-            imports = [
-              (import ./laptop/wayland/home.nix)
-            ] ++ [
-              (import ../modules/impermanence/home.nix)
-            ] ++ [
-              inputs.hyprland.homeManagerModules.default
-            ];
-          };
+          users.${user}.imports = hmModules;
         };
         nixpkgs = {
           overlays =
@@ -45,11 +24,21 @@ in
               ++ [
               self.overlays.default
               inputs.neovim-nightly.overlays.default
-              # inputs.gdal.overlays.default
             ];
         };
       }
+    ] ++ hostModules ++ hardwareModules;
+  };
+in
+{
+  laptop = mkHost {
+    hostModules = [ ./laptop ];
+    hmModules = [
+      ./laptop/home.nix
+      inputs.hyprland.homeManagerModules.default
+    ];
+    hardwareModules = [
+      inputs.nixos-hardware.nixosModules.lenovo-thinkpad-p14s-amd-gen2
     ];
   };
-
 }

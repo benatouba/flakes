@@ -26,7 +26,8 @@
     let
       system = "x86_64-linux";
       user = "ben";
-      theme = "dark"; # "dark" (catppuccin mocha) or "light" (catppuccin latte)
+      themeName = "catppuccin-mocha"; # or "catppuccin-latte"
+      theme = import ./lib/theme.nix { inherit themeName; };
       selfPkgs = import ./pkgs;
       pkgs = import nixpkgs {
         inherit system;
