@@ -1,5 +1,5 @@
 {
-  description = "The most basic configuration";
+  description = "My flakes configuration";
 
   inputs =
     {
