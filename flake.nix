@@ -33,6 +33,7 @@
         inherit system;
         overlays = [
           self.overlays.default
+          inputs.neovim-nightly.overlays.default
         ];
       };
     in
