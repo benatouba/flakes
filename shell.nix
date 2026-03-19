@@ -22,5 +22,9 @@ pkgs.mkShell {
     nix-diff        # diff two derivations
     nix-tree        # explore dependency tree
     nix-output-monitor # prettier build output (nom)
+
+    # Linters (used by nvim-lint)
+    editorconfig-checker
+    commitlint
   ];
 }
