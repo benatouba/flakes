@@ -33,7 +33,7 @@
       enable = true;
       settings = {
         default_session = {
-          command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --asterisks --cmd start-hyprland";
+          command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --asterisks --kb-layout 'de,us' --kb-option 'grp:alt_shift_toggle' --cmd start-hyprland";
           user = "greeter";
         };
       };
