@@ -600,6 +600,22 @@
         "type": "github"
       }
     },
+    "nix-secrets": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1773957495,
+        "narHash": "sha256-fPLWL8qb3YOJqDgUTCKFSU1f64IEBeMdji1SNT3bjeo=",
+        "ref": "refs/heads/main",
+        "rev": "e4ce76c05d18a1ddaf06529f7ac1f6029e521a7d",
+        "revCount": 2,
+        "type": "git",
+        "url": "file:///home/ben/.local/secrets"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/ben/.local/secrets"
+      }
+    },
     "nixos-hardware": {
       "locked": {
         "lastModified": 1773533765,
@@ -711,8 +727,30 @@
         "hyprpicker": "hyprpicker",
         "impermanence": "impermanence",
         "neovim-nightly": "neovim-nightly",
+        "nix-secrets": "nix-secrets",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs_4"
+        "nixpkgs": "nixpkgs_4",
+        "sops-nix": "sops-nix"
+      }
+    },
+    "sops-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1773889674,
+        "narHash": "sha256-+ycaiVAk3MEshJTg35cBTUa0MizGiS+bgpYw/f8ohkg=",
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "rev": "29b6519f3e0780452bca0ac0be4584f04ac16cc5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "type": "github"
       }
     },
     "systems": {

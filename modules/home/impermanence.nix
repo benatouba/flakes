@@ -31,6 +31,7 @@
       ".ssh"
       ".gnupg"
       ".secrets" # tokens.zsh and other secrets
+      ".local/secrets" # nix build-time secrets (mail accounts, etc.)
 
       # User data dirs (lowercase) — downloads intentionally excluded (wiped each boot)
       "documents"
@@ -74,6 +75,9 @@
 
       # devenv global state
       ".local/share/devenv"
+
+      # Mail (mbsync Maildir)
+      "mail"
 
       # GTK bookmarks & settings
       ".config/gtk-3.0"

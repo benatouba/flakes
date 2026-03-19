@@ -6,6 +6,7 @@
     ../../modules/nixos/desktop.nix
     ../../modules/nixos/fonts.nix
     ../../modules/nixos/hardware/bluetooth.nix
+    ../../modules/nixos/sops.nix
   ];
 
   users.users.root.hashedPasswordFile = "/persist/passwords/root";

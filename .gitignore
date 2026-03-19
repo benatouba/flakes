@@ -3,3 +3,7 @@
 .direnv/
 
 result
+
+# Private config — only example templates and encrypted files are committed
+secrets/mail-accounts.nix
+secrets/secrets.yaml

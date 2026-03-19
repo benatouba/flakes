@@ -1,0 +1,9 @@
+keys:
+  # Generate with: nix-shell -p age --run "age-keygen -o /persist/sops/age/keys.txt"
+  # Then paste the public key below
+  - &laptop age1s99pw3mfn7ra6grm8a2kffld3js2hkyu0lw3uqz45zqy3m2cwsksww6kgt
+creation_rules:
+  - path_regex: secrets/.*\.yaml$
+    key_groups:
+      - age:
+          - *laptop

@@ -31,6 +31,8 @@
     ../../modules/home/programs/yazi.nix
     ../../modules/home/programs/yt-dlp.nix
     ../../modules/home/programs/zathura.nix
+    ../../modules/home/programs/mail.nix
+    ../../modules/home/programs/rbw.nix
     ../../modules/home/programs/mpv.nix
     ../../modules/home/programs/imgview.nix
     ../../modules/home/scripts/wallpaper.nix

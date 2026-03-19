@@ -11,12 +11,15 @@ let
       ../modules/nixos/impermanence.nix
       inputs.impermanence.nixosModules.impermanence
       inputs.home-manager.nixosModules.home-manager
+      inputs.sops-nix.nixosModules.sops
       {
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;
           extraSpecialArgs = { inherit inputs user theme; };
-          users.${user}.imports = hmModules;
+          users.${user}.imports = hmModules ++ [
+            inputs.sops-nix.homeManagerModules.sops
+          ];
         };
         nixpkgs = {
           overlays =

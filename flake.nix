@@ -20,6 +20,14 @@
       };
       impermanence.url = "github:nix-community/impermanence";
       nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+      sops-nix = {
+        url = "github:Mic92/sops-nix";
+        inputs.nixpkgs.follows = "nixpkgs";
+      };
+      nix-secrets = {
+        url = "git+file:///home/ben/.local/secrets";
+        flake = false;
+      };
     };
 
   outputs = inputs @ { self, nixpkgs, ... }:

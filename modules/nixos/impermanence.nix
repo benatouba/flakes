@@ -25,5 +25,6 @@
     "d /persist/home 0755 root root -"
     "d /persist/home/${user} 0700 ${user} users -"
     "d /persist/passwords 0700 root root -"
+    "d /persist/sops/age 0700 root root -"
   ];
 }
