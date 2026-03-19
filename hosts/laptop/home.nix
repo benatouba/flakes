@@ -23,6 +23,7 @@
     ../../modules/home/programs/fastfetch.nix
     ../../modules/home/programs/gpg.nix
     ../../modules/home/programs/lazygit.nix
+    ../../modules/home/programs/commitlint.nix
     ../../modules/home/programs/matugen.nix
     ../../modules/home/programs/music.nix
     ../../modules/home/programs/obs-studio.nix
