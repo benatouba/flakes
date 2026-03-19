@@ -34,9 +34,16 @@ in
       vim-language-server # Vim
       yaml-language-server # YAML
 
+      # -- LSPs (universal) --
+      docker-language-server # Dockerfiles
+      marksman # Markdown
+      taplo # TOML
+
       # -- Formatters --
       texlivePackages.latexindent # LaTeX
       nixfmt # Nix
+      nodePackages.prettier # JS/TS/JSON/YAML/MD fallback
+      prettierd # Prettier daemon
       stylua # Lua
       typstyle # Typst
       xmlformat # XML
@@ -47,6 +54,7 @@ in
       codespell # Spell checker
       commitlint # Git commit messages
       editorconfig-checker # EditorConfig
+      markdownlint-cli # Markdown
       proselint # Prose
       selene # Lua
 

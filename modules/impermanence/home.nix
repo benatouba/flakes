@@ -72,6 +72,9 @@
       # direnv (nix-direnv cached dev shells)
       ".local/share/direnv"
 
+      # devenv global state
+      ".local/share/devenv"
+
       # GTK bookmarks & settings
       ".config/gtk-3.0"
       ".config/gtk-4.0"

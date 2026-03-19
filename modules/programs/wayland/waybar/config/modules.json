@@ -235,20 +235,20 @@
   },
   // CPU
   "cpu": {
-    "format": "/  {usage}%",
+    "format": " {usage}%",
     "on-scroll-up": "true",
     "on-scroll-down": "true"
   },
   // Memory
   "memory": {
-    "format": "/  {}%",
+    "format": " {}%",
     "on-scroll-up": "true",
     "on-scroll-down": "true"
   },
   // Harddisc space used
   "disk": {
     "interval": 30,
-    "format": "ó° {percentage_used}%",
+    "format": "󰋊 {percentage_used}%",
     "path": "/",
     "on-scroll-up": "true",
     "on-scroll-down": "true"
@@ -365,9 +365,9 @@
   // Pulseaudio
   "pulseaudio": {
     // "scroll-step": 1, // %, can be a float
-    "format": "{icon}  {volume}%",
-    "format-bluetooth": "{volume}% {icon}ï {format_source}",
-    "format-bluetooth-muted": "ï© {icon}ï {format_source}",
+    "format": "{icon} {volume}%",
+    "format-bluetooth": "{volume}% 󰦢 {format_source}",
+    "format-bluetooth-muted": "ï©  {format_source}",
     "format-muted": "ï© {format_source}",
     "format-source": "{volume}% ï°",
     "format-source-muted": "ï±",
@@ -388,10 +388,10 @@
   },
   // Bluetooth
   "bluetooth": {
-    "format": "",
-    "format-connected": " {num_connections}",
-    "format-disabled": "",
-    "format-off": "",
+    "format": "󰂯 ",
+    "format-connected": "󰂱 {num_connections}",
+    "format-disabled": "󰂲 ",
+    "format-off": "󰂲 ",
     "interval": 30,
     "on-click": "rfkill toggle bluetooth",
     "tooltip-format": "Bluetooth: {status}",
