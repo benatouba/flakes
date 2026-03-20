@@ -64,6 +64,9 @@
       # Claude Code
       ".claude"
 
+      # GitHub Copilot (neovim auth tokens)
+      ".config/github-copilot"
+
       # Zoom
       ".zoom"
 
