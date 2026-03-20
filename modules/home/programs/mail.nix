@@ -50,6 +50,7 @@ in
       mail_check_stats = "yes";
       mailcap_path = "${config.xdg.configHome}/neomutt/mailcap";
       color_directcolor = "yes";
+      attach_save_dir = "~/downloads";
     };
     extraConfig = ''
       # Theme: ${theme.slug}
@@ -156,51 +157,6 @@ in
   # --- aerc (alternative client, connects to IMAP directly) ---
   aerc = {
     enable = true;
-    stylesets.${theme.slug} = {
-      "*.default" = "true";
-      "*.normal" = "true";
-      "default.fg" = "#${c.text}";
-      "default.bg" = "#${c.base}";
-      "error.fg" = "#${c.red}";
-      "error.bold" = "true";
-      "warning.fg" = "#${c.peach}";
-      "success.fg" = "#${c.green}";
-      "title.fg" = "#${c.mauve}";
-      "title.bold" = "true";
-      "header.fg" = "#${c.blue}";
-      "header.bold" = "true";
-      "statusline_default.fg" = "#${c.text}";
-      "statusline_default.bg" = "#${c.mantle}";
-      "statusline_error.fg" = "#${c.red}";
-      "statusline_error.bg" = "#${c.mantle}";
-      "statusline_success.fg" = "#${c.green}";
-      "statusline_success.bg" = "#${c.mantle}";
-      "msglist_default.fg" = "#${c.subtext0}";
-      "msglist_unread.fg" = "#${c.text}";
-      "msglist_unread.bold" = "true";
-      "msglist_read.fg" = "#${c.subtext0}";
-      "msglist_flagged.fg" = "#${c.peach}";
-      "msglist_deleted.fg" = "#${c.overlay0}";
-      "msglist_marked.fg" = "#${c.mauve}";
-      "msglist_marked.reverse" = "true";
-      "dirlist_default.fg" = "#${c.subtext1}";
-      "dirlist_recent.fg" = "#${c.blue}";
-      "dirlist_recent.bold" = "true";
-      "completion_default.fg" = "#${c.text}";
-      "completion_default.bg" = "#${c.surface0}";
-      "completion_pill.fg" = "#${c.base}";
-      "completion_pill.bg" = "#${c.mauve}";
-      "tab.fg" = "#${c.subtext0}";
-      "tab.bg" = "#${c.mantle}";
-      "tab.selected.fg" = "#${c.text}";
-      "tab.selected.bg" = "#${c.surface0}";
-      "tab.selected.bold" = "true";
-      "selector_default.fg" = "#${c.text}";
-      "selector_focused.fg" = "#${c.mauve}";
-      "selector_focused.bold" = "true";
-      "selector_chooser.fg" = "#${c.blue}";
-      "border.fg" = "#${c.surface1}";
-    };
     extraConfig = {
       general = {
         unsafe-accounts-conf = true;
@@ -272,7 +228,6 @@ in
         s = ":sort<space>";
         t = ":toggle-threads<Enter>";
         O = ":check-mail<Enter>";
-        ":" = "::";
         v = ":mark -v<Enter>";
 
         # Account switching
@@ -306,7 +261,6 @@ in
         "|" = ":pipe<space>";
         S = ":save<space>";
         o = ":open<Enter>";
-        ":" = "::";
       };
       "view::passthrough" = {
         g = ":toggle-key-passthrough<Enter>";
@@ -320,7 +274,6 @@ in
         "<C-l>" = ":switch-account<space>";
         "<Tab>" = ":next-field<Enter>";
         "<S-Tab>" = ":prev-field<Enter>";
-        ":" = "::";
       };
       "compose::editor" = {
         "<C-q>" = ":abort<Enter>";
@@ -337,7 +290,6 @@ in
         k = ":prev-field<Enter>";
         l = ":open<Enter>";
         h = ":prev-tab<Enter>";
-        ":" = "::";
       };
       terminal = {
         "<C-q>" = ":close<Enter>";
@@ -352,10 +304,63 @@ in
     postExec = "${pkgs.maildir-rank-addr}/bin/maildir-rank-addr";
   };
 
-  # Mailcap for viewing HTML emails
+  # aerc styleset (flat key=value, not INI sections)
+  xdg.configFile."aerc/stylesets/${theme.slug}".text = ''
+    *.default=true
+    *.normal=true
+    default.fg=#${c.text}
+    default.bg=#${c.base}
+    error.fg=#${c.red}
+    error.bold=true
+    warning.fg=#${c.peach}
+    success.fg=#${c.green}
+    title.fg=#${c.mauve}
+    title.bold=true
+    header.fg=#${c.blue}
+    header.bold=true
+    statusline_default.fg=#${c.text}
+    statusline_default.bg=#${c.mantle}
+    statusline_error.fg=#${c.red}
+    statusline_error.bg=#${c.mantle}
+    statusline_success.fg=#${c.green}
+    statusline_success.bg=#${c.mantle}
+    msglist_default.fg=#${c.subtext0}
+    msglist_unread.fg=#${c.text}
+    msglist_unread.bold=true
+    msglist_read.fg=#${c.subtext0}
+    msglist_flagged.fg=#${c.peach}
+    msglist_deleted.fg=#${c.overlay0}
+    msglist_marked.fg=#${c.mauve}
+    msglist_marked.reverse=true
+    dirlist_default.fg=#${c.subtext1}
+    dirlist_recent.fg=#${c.blue}
+    dirlist_recent.bold=true
+    completion_default.fg=#${c.text}
+    completion_default.bg=#${c.surface0}
+    completion_pill.fg=#${c.base}
+    completion_pill.bg=#${c.mauve}
+    tab.fg=#${c.subtext0}
+    tab.bg=#${c.mantle}
+    tab.selected.fg=#${c.text}
+    tab.selected.bg=#${c.surface0}
+    tab.selected.bold=true
+    selector_default.fg=#${c.text}
+    selector_focused.fg=#${c.mauve}
+    selector_focused.bold=true
+    selector_chooser.fg=#${c.blue}
+    border.fg=#${c.surface1}
+  '';
+
+  # Mailcap for viewing attachments
   xdg.configFile."neomutt/mailcap".text = ''
     text/html; xdg-open %s ; nametemplate=%s.html
     text/html; lynx -assume_charset=%{charset} -display_charset=utf-8 -dump %s; nametemplate=%s.html; copiousoutput
+    application/pdf; xdg-open %s
+    image/*; xdg-open %s
+    application/msword; xdg-open %s
+    application/vnd.openxmlformats-officedocument.*; xdg-open %s
+    application/vnd.ms-excel; xdg-open %s
+    application/vnd.oasis.opendocument.*; xdg-open %s
   '';
 
   home.packages = with pkgs; [
