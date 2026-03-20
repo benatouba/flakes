@@ -1,5 +1,10 @@
 _:
 {
+  services.gnome-keyring = {
+    enable = true;
+    components = [ "secrets" ];
+  };
+
   programs.gh = {
     enable = true;
     settings = {
