@@ -143,10 +143,10 @@ in
     macros = [
       { map = [ "index" ]; key = "O"; action = "<shell-escape>mbsync -a<enter>"; }
       # Quick account switching
-      { map = [ "index" ]; key = "gi"; action = "<change-folder>=tu-berlin/INBOX<enter>"; }
-      { map = [ "index" ]; key = "gm"; action = "<change-folder>=gmail/INBOX<enter>"; }
-      # { map = [ "index" ]; key = "gk"; action = "<change-folder>=klima-it/INBOX<enter>"; }
-      { map = [ "index" ]; key = "ga"; action = "<change-folder>=alganize/INBOX<enter>"; }
+      { map = [ "index" ]; key = "gi"; action = "<change-folder>~/mail/tu-berlin/Inbox<enter>"; }
+      { map = [ "index" ]; key = "gm"; action = "<change-folder>~/mail/gmail/Inbox<enter>"; }
+      # { map = [ "index" ]; key = "gk"; action = "<change-folder>~/mail/klima-it/Inbox<enter>"; }
+      { map = [ "index" ]; key = "ga"; action = "<change-folder>~/mail/alganize/Inbox<enter>"; }
     ];
     };
 
