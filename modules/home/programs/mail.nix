@@ -12,7 +12,7 @@ let
 
   # sops secret path helper
   secret = name: config.sops.secrets."mail_${name}".path;
-  catSecret = name: "cat ${secret name}";
+  catSecret = name: "${pkgs.coreutils}/bin/cat ${secret name}";
 
   # Notification command for new mail
   notifyCmd = account: "${pkgs.libnotify}/bin/notify-send -a 'Mail' -i mail-unread '${account}' 'New mail received'";
