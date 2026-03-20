@@ -35,6 +35,7 @@
     ../../modules/home/programs/rbw.nix
     ../../modules/home/programs/mpv.nix
     ../../modules/home/programs/imgview.nix
+    ../../modules/home/programs/brave.nix
     ../../modules/home/scripts/wallpaper.nix
     ../../modules/home/scripts/screenshot.nix
     ../../modules/home/scripts/waybar.nix
@@ -45,17 +46,7 @@
     username = "${user}";
     homeDirectory = "/home/${user}";
   };
-  programs = {
-    home-manager.enable = true;
-    chromium = {
-      enable = true;
-      package = pkgs.brave;
-      extensions = [
-        { id = "nngceckbapebfimnlniiiahkandclblb"; } # Bitwarden
-        { id = "hfjbmagddngcpeloejdejnfgbamkjaeg"; } # Vimium C
-      ];
-    };
-  };
+  programs.home-manager.enable = true;
 
   home.stateVersion = "25.05";
 }
