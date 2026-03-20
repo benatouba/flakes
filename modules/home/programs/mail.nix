@@ -30,6 +30,14 @@ in
 
   programs.neomutt = {
     enable = true;
+    package = pkgs.symlinkJoin {
+      name = "neomutt-truecolor";
+      paths = [ pkgs.neomutt ];
+      nativeBuildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/neomutt --set TERM xterm-direct
+      '';
+    };
     vimKeys = true;
     sort = "reverse-date";
     sidebar = {
@@ -39,7 +47,61 @@ in
     settings = {
       mail_check_stats = "yes";
       mailcap_path = "${config.xdg.configHome}/neomutt/mailcap";
+      color_directcolor = "yes";
     };
+    extraConfig = ''
+      # Theme: ${theme.slug}
+      color normal        #${c.text}     #${c.base}
+      color error         #${c.red}      #${c.base}
+      color indicator     #${c.text}     #${c.surface0}
+      color status        #${c.text}     #${c.mantle}
+      color tree          #${c.blue}     #${c.base}
+      color signature     #${c.overlay0} #${c.base}
+      color message       #${c.text}     #${c.base}
+      color attachment    #${c.peach}    #${c.base}
+      color search        #${c.base}     #${c.mauve}
+      color tilde         #${c.overlay0} #${c.base}
+      color markers       #${c.overlay0} #${c.base}
+
+      # Index
+      color index         #${c.subtext0} #${c.base}  "~R"
+      color index         #${c.text}     #${c.base}  "~U"
+      color index         #${c.peach}    #${c.base}  "~F"
+      color index         #${c.red}      #${c.base}  "~D"
+      color index         #${c.mauve}    #${c.base}  "~T"
+
+      # Header
+      color hdrdefault    #${c.blue}     #${c.base}
+      color header        #${c.mauve}    #${c.base}  "^(From|To|Cc|Bcc):"
+      color header        #${c.blue}     #${c.base}  "^Subject:"
+      color header        #${c.overlay0} #${c.base}  "^Date:"
+
+      # Body
+      color quoted        #${c.blue}     #${c.base}
+      color quoted1       #${c.teal}     #${c.base}
+      color quoted2       #${c.green}    #${c.base}
+      color quoted3       #${c.peach}    #${c.base}
+      color bold          #${c.text}     #${c.base}
+      color underline     #${c.text}     #${c.base}
+
+      # URL and email
+      color body          #${c.blue}     #${c.base}  "(https?|ftp)://[^ ]+"
+      color body          #${c.mauve}    #${c.base}  "[-a-z_0-9.]+@[-a-z_0-9.]+"
+
+      # Sidebar
+      color sidebar_new       #${c.blue}     #${c.base}
+      color sidebar_highlight #${c.text}     #${c.surface0}
+      color sidebar_indicator #${c.mauve}    #${c.base}
+      color sidebar_ordinary  #${c.subtext0} #${c.base}
+      color sidebar_divider   #${c.surface1} #${c.base}
+
+      # Compose
+      color compose header            #${c.text}  #${c.base}
+      color compose security_encrypt  #${c.green} #${c.base}
+      color compose security_sign     #${c.blue}  #${c.base}
+      color compose security_both     #${c.green} #${c.base}
+      color compose security_none     #${c.red}   #${c.base}
+    '';
     binds = [
       # Sidebar navigation
       { map = [ "index" "pager" ]; key = "\\Ck"; action = "sidebar-prev"; }
@@ -47,50 +109,26 @@ in
       { map = [ "index" "pager" ]; key = "\\Co"; action = "sidebar-open"; }
       { map = [ "index" "pager" ]; key = "B";    action = "sidebar-toggle-visible"; }
 
-      # Index: vim motions
-      { map = [ "index" ]; key = "j";  action = "next-entry"; }
-      { map = [ "index" ]; key = "k";  action = "previous-entry"; }
-      { map = [ "index" ]; key = "gT"; action = "noop"; }
-      { map = [ "index" ]; key = "g";  action = "noop"; }
-      { map = [ "index" ]; key = "gg"; action = "first-entry"; }
-      { map = [ "index" ]; key = "G";  action = "last-entry"; }
-      { map = [ "index" ]; key = "\\Cd"; action = "half-down"; }
-      { map = [ "index" ]; key = "\\Cu"; action = "half-up"; }
+      # Index: additions beyond vim-keys.rc
       { map = [ "index" ]; key = "l";  action = "display-message"; }
-      { map = [ "index" ]; key = "dT"; action = "noop"; }
-      { map = [ "index" ]; key = "d";  action = "delete-message"; }
       { map = [ "index" ]; key = "u";  action = "undelete-message"; }
       { map = [ "index" ]; key = "r";  action = "reply"; }
       { map = [ "index" ]; key = "R";  action = "group-reply"; }
       { map = [ "index" ]; key = "f";  action = "forward-message"; }
       { map = [ "index" ]; key = "c";  action = "mail"; }
       { map = [ "index" ]; key = "/";  action = "search"; }
-      { map = [ "index" ]; key = "n";  action = "search-next"; }
-      { map = [ "index" ]; key = "N";  action = "search-opposite"; }
       { map = [ "index" ]; key = "x";  action = "sync-mailbox"; }
       { map = [ "index" ]; key = "s";  action = "save-message"; }
       { map = [ "index" ]; key = "t";  action = "tag-entry"; }
 
-      # Pager: vim motions
-      { map = [ "pager" ]; key = "j";  action = "next-line"; }
-      { map = [ "pager" ]; key = "k";  action = "previous-line"; }
-      { map = [ "pager" ]; key = "gT"; action = "noop"; }
-      { map = [ "pager" ]; key = "g";  action = "noop"; }
-      { map = [ "pager" ]; key = "gg"; action = "top"; }
-      { map = [ "pager" ]; key = "G";  action = "bottom"; }
-      { map = [ "pager" ]; key = "\\Cd"; action = "half-down"; }
-      { map = [ "pager" ]; key = "\\Cu"; action = "half-up"; }
+      # Pager: additions beyond vim-keys.rc
       { map = [ "pager" ]; key = "h";  action = "exit"; }
       { map = [ "pager" ]; key = "l";  action = "view-attachments"; }
       { map = [ "pager" ]; key = "r";  action = "reply"; }
       { map = [ "pager" ]; key = "R";  action = "group-reply"; }
       { map = [ "pager" ]; key = "f";  action = "forward-message"; }
-      { map = [ "pager" ]; key = "dT"; action = "noop"; }
-      { map = [ "pager" ]; key = "d";  action = "delete-message"; }
       { map = [ "pager" ]; key = "u";  action = "undelete-message"; }
       { map = [ "pager" ]; key = "/";  action = "search"; }
-      { map = [ "pager" ]; key = "n";  action = "search-next"; }
-      { map = [ "pager" ]; key = "N";  action = "search-opposite"; }
 
       # Attach: vim motions
       { map = [ "attach" ]; key = "l"; action = "view-mailcap"; }
@@ -352,6 +390,7 @@ in
         mbsync = {
           enable = true;
           create = "maildir";
+          extraConfig.account.AuthMechs = "LOGIN";
         };
         msmtp.enable = true;
         neomutt = {

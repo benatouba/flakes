@@ -99,11 +99,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1773898372,
-        "narHash": "sha256-PqeDgmyI/Df3/Mv0B81FP/ZC4KuO88YRQF5ZfeFyA4k=",
+        "lastModified": 1773962693,
+        "narHash": "sha256-nf9pgktDE4E2TCavUT1vh3Nd/tfKixL1BK6P32Zp3hI=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "ecf019baf47df009937b5f8c4604cee10f410a76",
+        "rev": "9d3c1d636e7b8ab10f357cd9bee653cd400437de",
         "type": "github"
       },
       "original": {
@@ -228,11 +228,11 @@
         "xdph": "xdph"
       },
       "locked": {
-        "lastModified": 1773865169,
-        "narHash": "sha256-3LpwmNjKfZttXsR/CIKTn+z7GiJPeF5ENJJSS6Yjizk=",
+        "lastModified": 1773954292,
+        "narHash": "sha256-zU8GQuqxDkBKmb0tPv8YgcSeUgD+qJOirQtIXZ6cryE=",
         "owner": "hyprwm",
         "repo": "Hyprland",
-        "rev": "d635b499e1b2b9cf54b780ca7aee2b97cadeee89",
+        "rev": "b940b0d2c197841b0f648598ee782dbaf9e0a89b",
         "type": "github"
       },
       "original": {
@@ -603,11 +603,11 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1773957495,
-        "narHash": "sha256-fPLWL8qb3YOJqDgUTCKFSU1f64IEBeMdji1SNT3bjeo=",
+        "lastModified": 1773960926,
+        "narHash": "sha256-ZUMVkF1MlbwSzFYm2LBfDaU9QZdyWsaD89Uct7SHpTA=",
         "ref": "refs/heads/main",
-        "rev": "e4ce76c05d18a1ddaf06529f7ac1f6029e521a7d",
-        "revCount": 2,
+        "rev": "4900c9a093cd4f24f85beacbeb7db9e1b3cfa29c",
+        "revCount": 3,
         "type": "git",
         "url": "file:///home/ben/.local/secrets"
       },
