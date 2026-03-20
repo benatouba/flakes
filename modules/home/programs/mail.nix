@@ -391,6 +391,7 @@ in
           enable = true;
           create = "maildir";
           extraConfig.account.AuthMechs = "LOGIN";
+          patterns = [ "INBOX" "Sent" "Drafts" "Trash" "Junk-E-Mail" "Archives" "Archives/*" ];
         };
         msmtp.enable = true;
         neomutt = {
