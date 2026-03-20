@@ -1,9 +1,6 @@
-_:
+{ pkgs, ... }:
 {
-  services.gnome-keyring = {
-    enable = true;
-    components = [ "secrets" ];
-  };
+  home.packages = [ pkgs.libsecret ];
 
   programs.gh = {
     enable = true;

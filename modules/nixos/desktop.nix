@@ -12,6 +12,7 @@
   ];
 
   security.pam.services.hyprlock = { };
+  security.pam.services.greetd.enableGnomeKeyring = true;
 
   xdg.portal = {
     enable = true;
@@ -28,6 +29,7 @@
   };
 
   services = {
+    gnome.gnome-keyring.enable = true;
     dbus.packages = [ pkgs.gcr ];
     greetd = {
       enable = true;
