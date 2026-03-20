@@ -44,10 +44,48 @@
         untracked = "red bold";
       };
       alias = {
+        # Log
         logo = "log --pretty=tformat:'%C(auto,red)%m %C(auto,yellow)%h%C(auto,magenta) %G? %C(auto,blue)%>(12,trunc)%ad %C(auto,green)%<(15,trunc)%aN%C(auto,reset)%s%C(auto,red) %gD %D' --date=short";
         adog = "log --all --decorate --oneline --graph";
         dog = "log --decorate --oneline --graph";
+        # Status
+        s = "status -sb";
+        # Commit
+        c = "commit";
+        cm = "commit -m";
         ac = "commit -am";
+        ca = "commit --amend";
+        can = "commit --amend --no-edit";
+        # Branch & checkout
+        co = "checkout";
+        cb = "checkout -b";
+        br = "branch";
+        bra = "branch -a";
+        brd = "branch -d";
+        sw = "switch";
+        swc = "switch -c";
+        # Diff
+        d = "diff";
+        ds = "diff --staged";
+        # Push & pull
+        p = "push";
+        pf = "push --force-with-lease";
+        pl = "pull";
+        # Stash
+        st = "stash";
+        stp = "stash pop";
+        stl = "stash list";
+        # Reset
+        unstage = "reset HEAD --";
+        undo = "reset --soft HEAD~1";
+        # Misc
+        cp = "cherry-pick";
+        rb = "rebase";
+        rbc = "rebase --continue";
+        rba = "rebase --abort";
+        cl = "clone";
+        f = "fetch --all --prune";
+        t = "tag";
       };
       diff = {
         tool = "nvim";
