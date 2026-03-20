@@ -12,6 +12,7 @@
     ../../modules/home/shell/starship.nix
     ../../modules/home/shell/bash.nix
     ../../modules/home/shell/git.nix
+    ../../modules/home/shell/gh.nix
     ../../modules/home/programs/wezterm.nix
     ../../modules/home/programs/btop.nix
     ../../modules/home/programs/cava.nix

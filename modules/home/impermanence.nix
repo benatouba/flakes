@@ -61,6 +61,9 @@ _:
       # GitHub Copilot (neovim auth tokens)
       ".config/github-copilot"
 
+      # GitHub CLI (gh auth tokens & config)
+      ".config/gh"
+
       # Zoom
       ".zoom"
 
