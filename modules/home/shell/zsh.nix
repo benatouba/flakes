@@ -1,8 +1,5 @@
-{ pkgs, lib, user, theme, ... }:
+{ pkgs, lib, ... }:
 
-let
-  flakesPath = "/home/${user}/projects/flakes";
-in
 {
   programs.zsh = {
     enable = true;

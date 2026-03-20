@@ -1,10 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  user,
-  ...
-}:
+_:
 {
   home.persistence."/persist" = {
     directories = [

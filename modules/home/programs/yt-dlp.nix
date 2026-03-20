@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+_:
 
 {
   programs.yt-dlp.enable = true;

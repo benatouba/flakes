@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+_:
 {
   xdg.configFile."bat" = {
     source = ../../../dotfiles/bat;

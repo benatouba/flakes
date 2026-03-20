@@ -1,5 +1,5 @@
 rec{
-  overlay = final: prev:
+  overlay = final: _prev:
     let
       dirContents = builtins.readDir ../pkgs;
       genPackage = name: {

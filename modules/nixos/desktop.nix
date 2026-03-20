@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, user, ... }:
+{ pkgs, inputs, ... }:
 
 {
   imports = [ ./waybar.nix ];

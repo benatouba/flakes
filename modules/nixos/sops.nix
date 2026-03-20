@@ -1,4 +1,4 @@
-{ config, inputs, user, ... }:
+{ inputs, ... }:
 
 {
   sops = {

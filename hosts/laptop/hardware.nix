@@ -8,46 +8,49 @@
     [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "usb_storage" "sd_mod" "sdhci_pci" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-amd" ];
-  boot.extraModulePackages = [ ];
-
-  fileSystems."/" = {
-    device = "none";
-    fsType = "tmpfs";
-    options = [ "defaults" "size=2G" "mode=755" ];
+  boot = {
+    initrd.availableKernelModules = [ "nvme" "xhci_pci" "usb_storage" "sd_mod" "sdhci_pci" ];
+    initrd.kernelModules = [ ];
+    kernelModules = [ "kvm-amd" ];
+    extraModulePackages = [ ];
+    # Don't mount /nix/store as read-only — it shares the same ext4 partition
+    # as /persist, and an ro remount propagates to the entire device, making
+    # all impermanence bind mounts (including ~/.claude) read-only.
+    nixStoreMountOpts = [];
   };
 
-  fileSystems."/persist" = {
-    device = "/dev/disk/by-uuid/4e9ef302-7d6f-48f8-a881-d0bd5c47ff02";
-    fsType = "ext4";
-    neededForBoot = true;
-    options = [ "defaults" ];
-  };
+  fileSystems = {
+    "/" = {
+      device = "none";
+      fsType = "tmpfs";
+      options = [ "defaults" "size=2G" "mode=755" ];
+    };
 
-  fileSystems."/nix" = {
-    device = "/persist/nix";
-    fsType = "none";
-    options = [ "bind" ];
-  };
+    "/persist" = {
+      device = "/dev/disk/by-uuid/4e9ef302-7d6f-48f8-a881-d0bd5c47ff02";
+      fsType = "ext4";
+      neededForBoot = true;
+      options = [ "defaults" ];
+    };
 
-  # Don't mount /nix/store as read-only — it shares the same ext4 partition
-  # as /persist, and an ro remount propagates to the entire device, making
-  # all impermanence bind mounts (including ~/.claude) read-only.
-  boot.nixStoreMountOpts = [];
+    "/nix" = {
+      device = "/persist/nix";
+      fsType = "none";
+      options = [ "bind" ];
+    };
 
-  fileSystems."/mnt" = {
-    device = "/dev/disk/by-uuid/6f021149-57b1-4ae8-99eb-99b1e8430336";
-    fsType = "btrfs";
-    options = [ "compress=zstd" "noatime" ];
-  };
+    "/mnt" = {
+      device = "/dev/disk/by-uuid/6f021149-57b1-4ae8-99eb-99b1e8430336";
+      fsType = "btrfs";
+      options = [ "compress=zstd" "noatime" ];
+    };
 
-  fileSystems."/boot/efi" =
-    { device = "/dev/disk/by-uuid/5090-32C8";
+    "/boot/efi" = {
+      device = "/dev/disk/by-uuid/5090-32C8";
       fsType = "vfat";
       options = [ "fmask=0077" "dmask=0077" ];
     };
+  };
 
   swapDevices =
     [ { device = "/dev/disk/by-uuid/d1ae50c9-4370-49e8-b70b-a904fbbc7722"; } ];
@@ -56,15 +59,17 @@
   # (the default) this is the recommended approach. When using systemd-networkd it's
   # still possible to use this option, but it's recommended to use it in conjunction
   # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
-  networking.useDHCP = false;
-  networking.networkmanager.enable = true;
-  networking.networkmanager.dns = "none";
-  networking.firewall.enable = true;
+  networking = {
+    useDHCP = false;
+    networkmanager.enable = true;
+    networkmanager.dns = "none";
+    firewall.enable = true;
+    nameservers = [
+      "1.1.1.1"
+      "1.0.0.1"
+    ];
+  };
   environment.systemPackages = [ pkgs.networkmanager pkgs.networkmanagerapplet ];
-  networking.nameservers = [
-    "1.1.1.1"
-    "1.0.0.1"
-  ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;

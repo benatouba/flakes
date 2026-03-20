@@ -1,4 +1,4 @@
-{ config, pkgs, lib, theme, ... }:
+{ lib, theme, ... }:
 
 let
   c = theme.colors;

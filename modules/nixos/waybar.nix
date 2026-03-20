@@ -6,7 +6,7 @@
   ];
 
   nixpkgs.overlays = [
-    (final: prev: {
+    (_final: prev: {
       waybar = prev.waybar.overrideAttrs (oldAttrs: {
         mesonFlags = oldAttrs.mesonFlags ++ [ "-Dexperimental=true" ];
       });

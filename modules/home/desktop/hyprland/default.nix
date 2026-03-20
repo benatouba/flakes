@@ -1,4 +1,4 @@
-{ config, lib, pkgs, theme, ... }:
+{ lib, theme, ... }:
 
 let
   # Generate Hyprland theme conf from theme colors

@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, theme, ... }:
+{ config, pkgs, inputs, theme, ... }:
 
 let
   accts = import "${inputs.nix-secrets}/mail-accounts.nix";
@@ -19,16 +19,18 @@ let
 in
 {
   services.imapnotify.enable = true;
-  sops.defaultSopsFile = "${inputs.nix-secrets}/secrets.yaml";
-  sops.age.keyFile = "/persist/sops/age/keys.txt";
-
-  sops.secrets = {
-    mail_tu_berlin = { };
-    mail_gmail = { };
-    mail_alganize = { };
+  sops = {
+    defaultSopsFile = "${inputs.nix-secrets}/secrets.yaml";
+    age.keyFile = "/persist/sops/age/keys.txt";
+    secrets = {
+      mail_tu_berlin = { };
+      mail_gmail = { };
+      mail_alganize = { };
+    };
   };
 
-  programs.neomutt = {
+  programs = {
+    neomutt = {
     enable = true;
     package = pkgs.symlinkJoin {
       name = "neomutt-truecolor";
@@ -146,31 +148,13 @@ in
       # { map = [ "index" ]; key = "gk"; action = "<change-folder>=klima-it/INBOX<enter>"; }
       { map = [ "index" ]; key = "ga"; action = "<change-folder>=alganize/INBOX<enter>"; }
     ];
-  };
+    };
 
-  programs.mbsync.enable = true;
-  programs.msmtp.enable = true;
-
-  services.mbsync = {
-    enable = true;
-    frequency = "*:0/5";
-    postExec = "${pkgs.maildir-rank-addr}/bin/maildir-rank-addr";
-  };
-
-  # Mailcap for viewing HTML emails
-  xdg.configFile."neomutt/mailcap".text = ''
-    text/html; xdg-open %s ; nametemplate=%s.html
-    text/html; lynx -assume_charset=%{charset} -display_charset=utf-8 -dump %s; nametemplate=%s.html; copiousoutput
-  '';
-
-  home.packages = with pkgs; [
-    isync              # provides mbsync (for neomutt)
-    lynx               # HTML email rendering
-    maildir-rank-addr  # address completion from maildir history
-  ];
+    mbsync.enable = true;
+    msmtp.enable = true;
 
   # --- aerc (alternative client, connects to IMAP directly) ---
-  programs.aerc = {
+  aerc = {
     enable = true;
     stylesets.${theme.slug} = {
       "*.default" = "true";
@@ -359,7 +343,26 @@ in
         "<C-q>" = ":close<Enter>";
       };
     };
+  }; # close aerc
+  }; # close programs
+
+  services.mbsync = {
+    enable = true;
+    frequency = "*:0/5";
+    postExec = "${pkgs.maildir-rank-addr}/bin/maildir-rank-addr";
   };
+
+  # Mailcap for viewing HTML emails
+  xdg.configFile."neomutt/mailcap".text = ''
+    text/html; xdg-open %s ; nametemplate=%s.html
+    text/html; lynx -assume_charset=%{charset} -display_charset=utf-8 -dump %s; nametemplate=%s.html; copiousoutput
+  '';
+
+  home.packages = with pkgs; [
+    isync              # provides mbsync (for neomutt)
+    lynx               # HTML email rendering
+    maildir-rank-addr  # address completion from maildir history
+  ];
 
   # --- neomutt account definitions (via home-manager email module) ---
   accounts.email = {
@@ -368,10 +371,10 @@ in
     accounts = {
       tu-berlin = {
         primary = true;
-        address = a.tu-berlin.address;
-        aliases = a.tu-berlin.aliases;
-        realName = a.tu-berlin.realName;
-        userName = a.tu-berlin.userName;
+        inherit (a.tu-berlin) address;
+        inherit (a.tu-berlin) aliases;
+        inherit (a.tu-berlin) realName;
+        inherit (a.tu-berlin) userName;
         passwordCommand = catSecret "tu_berlin";
         signature = {
           text = a.tu-berlin.signature;
@@ -418,9 +421,9 @@ in
       };
 
       gmail = {
-        address = a.gmail.address;
-        realName = a.gmail.realName;
-        userName = a.gmail.userName;
+        inherit (a.gmail) address;
+        inherit (a.gmail) realName;
+        inherit (a.gmail) userName;
         passwordCommand = catSecret "gmail";
         imap = {
           host = a.gmail.imapHost;
@@ -505,9 +508,9 @@ in
       # };
 
       alganize = {
-        address = a.alganize.address;
-        realName = a.alganize.realName;
-        userName = a.alganize.userName;
+        inherit (a.alganize) address;
+        inherit (a.alganize) realName;
+        inherit (a.alganize) userName;
         passwordCommand = catSecret "alganize";
         imap = {
           host = a.alganize.imapHost;

@@ -1,11 +1,11 @@
-{ config, lib, pkgs, user, ... }:
+{ user, ... }:
 {
   environment.persistence."/persist" = {
     hideMounts = true;
 
     directories = [
       "/etc/nixos"
-      "/etc/ssh"                                  # host keys
+      "/etc/ssh"                                   # host keys
       "/etc/NetworkManager/system-connections"     # NM connection files
       "/var/lib/nixos"                             # uid/gid map (CRITICAL)
       "/var/lib/NetworkManager"                    # wifi passwords

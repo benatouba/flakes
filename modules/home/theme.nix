@@ -1,19 +1,21 @@
-{ config, pkgs, lib, theme, ... }:
+{ pkgs, theme, ... }:
 
 let
   c = theme.colors;
   accentHex = c.${theme.accent};
 in
 {
-  home.sessionVariables = {
-    GTK_THEME = theme.gtk.theme;
+  home = {
+    sessionVariables = {
+      GTK_THEME = theme.gtk.theme;
+    };
+    pointerCursor = {
+      package = pkgs.catppuccin-cursors;
+      inherit (theme.cursor) name;
+      size = 16;
+      gtk.enable = true;
+    };
   };
-  home.pointerCursor = {
-    package = pkgs.catppuccin-cursors;
-    inherit (theme.cursor) name;
-    size = 16;
-  };
-  home.pointerCursor.gtk.enable = true;
   dconf.settings = {
     "org/gnome/desktop/interface" = {
       color-scheme = theme.colorScheme;

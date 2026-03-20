@@ -1,4 +1,4 @@
-{ config, pkgs, theme, ... }:
+{ theme, ... }:
 
 let
   cavaGradient = theme.cava;

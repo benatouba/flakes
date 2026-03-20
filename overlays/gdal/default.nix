@@ -1,6 +1,6 @@
 self: super:
 {
-  gdal = super.gdal.overrideAttrs (old: {
+  gdal = super.gdal.overrideAttrs (_old: {
     name = "gdal-3.4.0";
     pname = "gdal";
     src = self.fetchFromGitHub {

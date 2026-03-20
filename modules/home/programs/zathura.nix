@@ -1,4 +1,4 @@
-{ lib, pkgs, user, ... }:
+_:
 
 {
   programs.zathura = {

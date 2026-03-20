@@ -1,4 +1,4 @@
-{ pkgs, theme, ... }:
+{ theme, ... }:
 
 let
   starshipConfig = builtins.replaceStrings
