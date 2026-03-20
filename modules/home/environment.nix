@@ -26,4 +26,9 @@ _:
       "$HOME/.local/bin"
     ];
   };
+
+  # Create ~/downloads on boot (tmpfs root wipes it each reboot)
+  systemd.user.tmpfiles.rules = [
+    "d %h/downloads 0755 - - -"
+  ];
 }

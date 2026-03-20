@@ -27,7 +27,7 @@ _:
       ".secrets" # tokens.zsh and other secrets
       ".local/secrets" # nix build-time secrets (mail accounts, etc.)
 
-      # User data dirs (lowercase) — downloads intentionally excluded (wiped each boot)
+      # User data dirs (lowercase)
       "documents"
       "music"
       "pictures"
