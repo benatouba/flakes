@@ -51,6 +51,7 @@ in
       mailcap_path = "${config.xdg.configHome}/neomutt/mailcap";
       color_directcolor = "yes";
       attach_save_dir = "~/downloads";
+      query_command = "'${pkgs.maildir-rank-addr}/bin/maildir-rank-addr \"%s\"'";
     };
     extraConfig = ''
       # Theme: ${theme.slug}
