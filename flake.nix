@@ -9,6 +9,8 @@
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
 
+    import-tree.url = "github:vic/import-tree";
+
     hyprpicker.url = "github:hyprwm/hyprpicker";
     hypr-contrib.url = "github:hyprwm/contrib";
     neovim-nightly = {
@@ -45,34 +47,6 @@
   };
 
   outputs = inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" ];
-
-      flake = let
-        user = "ben";
-        themeName = "catppuccin-mocha"; # or "catppuccin-latte"
-        theme = import ./lib/theme.nix { inherit themeName; };
-      in {
-        overlays.default = (import ./pkgs).overlay;
-
-        nixosConfigurations = import ./hosts {
-          inherit user theme;
-          inherit (inputs) self nixpkgs;
-          inherit inputs;
-          system = "x86_64-linux";
-        };
-      };
-
-      perSystem = { pkgs, system, ... }: {
-        _module.args.pkgs = import inputs.nixpkgs {
-          inherit system;
-          overlays = [
-            inputs.self.overlays.default
-            inputs.neovim-nightly.overlays.default
-          ];
-        };
-
-        devShells.default = import ./shell.nix { inherit pkgs; };
-      };
-    };
+    inputs.flake-parts.lib.mkFlake { inherit inputs; }
+    (inputs.import-tree ./cells);
 }
