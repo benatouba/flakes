@@ -27,6 +27,7 @@
         ".config/obsidian"
         ".config/obs-studio"
         ".claude"
+        ".config/opencode"
         ".config/github-copilot"
         ".config/gh"
         ".zoom"
