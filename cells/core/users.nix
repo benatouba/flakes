@@ -13,34 +13,5 @@ in
       packages = with pkgs; [ gdal hugo gimp nodejs pnpm ];
     };
 
-    environment = {
-      systemPackages = with pkgs; [
-        libnotify
-        wl-clipboard
-        wireplumber
-        nemo
-        networkmanagerapplet
-        wev
-        wf-recorder
-        alsa-lib
-        alsa-utils
-        flac
-        pulsemixer
-        imagemagick
-        pkgs.sway-contrib.grimshot
-        grim
-        brightnessctl
-        playerctl
-        cliphist
-        rofi-rbw
-        hyprshot
-        hyprpaper
-        hypridle
-        wlsunset
-        waypaper
-        jq
-        wlogout
-      ];
-    };
   })];
 }

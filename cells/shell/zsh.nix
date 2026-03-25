@@ -1,5 +1,13 @@
 { ... }:
 {
+  config.my.nixosModules = [({ pkgs, ... }: {
+    programs.zsh.enable = true;
+    environment = {
+      binsh = "${pkgs.dash}/bin/dash";
+      shells = with pkgs; [ zsh ];
+    };
+  })];
+
   config.my.hmModules = [({ pkgs, lib, ... }: {
     programs.zsh = {
       enable = true;

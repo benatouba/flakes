@@ -19,8 +19,6 @@ in
     ];
 
     security.pam.services.hyprlock = { };
-    security.pam.services.greetd.enableGnomeKeyring = true;
-
     xdg.portal = {
       enable = true;
       extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
@@ -32,28 +30,6 @@ in
         common = {
           default = [ "*" ];
         };
-      };
-    };
-
-    services = {
-      gnome.gnome-keyring.enable = true;
-      dbus.packages = [ pkgs.gcr ];
-      greetd = {
-        enable = true;
-        settings = {
-          default_session = {
-            command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --asterisks --kb-layout 'de,us' --kb-option 'grp:alt_shift_toggle' --cmd start-hyprland";
-            user = "greeter";
-          };
-        };
-      };
-      gvfs.enable = true;
-      pipewire = {
-        enable = true;
-        alsa.enable = true;
-        alsa.support32Bit = true;
-        pulse.enable = true;
-        jack.enable = true;
       };
     };
 

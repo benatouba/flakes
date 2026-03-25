@@ -27,6 +27,7 @@
         neovim
 
         nil
+        nixd
         nixfmt
         statix
         deadnix

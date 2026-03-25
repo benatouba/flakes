@@ -9,7 +9,6 @@ export NVIM_DIR="$XDG_CONFIG_HOME/nvim"
 export EDITOR='nvim'
 export EXPLORER='yazi'
 export DEFAULT_USER="$USER"
-export RIPGREP_CONFIG_PATH="$HOME/projects/flakes/dotfiles/rgrc"
 
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_CACHE_HOME="$HOME/.cache"

@@ -4,7 +4,7 @@ let
   c = theme.colors;
 in
 {
-  config.my.hmModules = [({ config, pkgs, ... }:
+  config.my.hmModules = [({ config, pkgs, lib, ... }:
   let
     accts = import "${inputs.nix-secrets}/mail-accounts.nix";
     a = accts;
@@ -14,6 +14,49 @@ in
     secret = name: config.sops.secrets."mail_${name}".path;
     catSecret = name: "${pkgs.coreutils}/bin/cat ${secret name}";
     notifyCmd = account: "${pkgs.libnotify}/bin/notify-send -a 'Mail' -i mail-unread '${account}' 'New mail received'";
+    queryAddresses = pkgs.writeShellScript "query-addresses" ''
+      query="$1"
+      [ -z "$query" ] && exit 1
+
+      tsv="''${XDG_CACHE_HOME:-$HOME/.cache}/maildir-rank-addr/addressbook.tsv"
+      password=$(cat ${secret "tu_berlin"})
+
+      # Search local history (TSV is pre-sorted by rank)
+      local_results=""
+      if [ -f "$tsv" ]; then
+        local_results=$(${pkgs.gawk}/bin/awk -F'\t' -v q="''${query}" '
+          tolower($1) ~ tolower(q) || tolower($2) ~ tolower(q) { print $1 "\t" $2 }
+        ' "$tsv")
+      fi
+
+      # Search TU Berlin LDAP (silent failure if unreachable / off VPN)
+      ldap_results=$(
+        ${pkgs.openldap}/bin/ldapsearch \
+          -H ldaps://ldap.tu-berlin.de \
+          -D "${a.tu-berlin.userName}" \
+          -w "$password" \
+          -b "ou=people,dc=tu-berlin,dc=de" \
+          -x \
+          "(|(cn=*''${query}*)(mail=*''${query}*))" \
+          cn mail 2>/dev/null \
+        | ${pkgs.gawk}/bin/awk '
+            /^cn:/   { name  = substr($0, 5) }
+            /^mail:/ { email = substr($0, 7) }
+            /^$/     { if (email != "" && name != "") print email "\t" name; email=""; name="" }
+            END      { if (email != "" && name != "") print email "\t" name }
+          '
+      )
+
+      # Merge: local first (ranked), then LDAP; deduplicate by email
+      all=$(
+        { echo "$local_results"; echo "$ldap_results"; } \
+        | ${pkgs.gawk}/bin/awk -F'\t' 'NF>=2 && !seen[$1]++ { print }'
+      )
+
+      count=$(echo "$all" | ${pkgs.gawk}/bin/awk 'NF' | wc -l)
+      echo "$count addresses found for ''${query}"
+      echo "$all" | ${pkgs.gawk}/bin/awk 'NF'
+    '';
   in {
     services.imapnotify.enable = true;
     sops = {
@@ -46,7 +89,7 @@ in
           mailcap_path = "${config.xdg.configHome}/neomutt/mailcap";
           color_directcolor = "yes";
           attach_save_dir = "~/downloads";
-          query_command = "'${pkgs.maildir-rank-addr}/bin/maildir-rank-addr \"%s\"'";
+          query_command = "\"${queryAddresses} '%s'\"";
         };
         extraConfig = ''
           # Theme: ${theme.slug}
@@ -127,12 +170,15 @@ in
           { map = [ "attach" ]; key = "h"; action = "exit"; }
           { map = [ "compose" ]; key = "l"; action = "view-attach"; }
           { map = [ "compose" ]; key = "h"; action = "exit"; }
+          { map = [ "editor" ]; key = "\\t"; action = "complete-query"; }
         ];
         macros = [
           { map = [ "index" ]; key = "O"; action = "<shell-escape>mbsync -a<enter>"; }
           { map = [ "index" ]; key = "gi"; action = "<change-folder>~/mail/tu-berlin/Inbox<enter>"; }
           { map = [ "index" ]; key = "gm"; action = "<change-folder>~/mail/gmail/Inbox<enter>"; }
           { map = [ "index" ]; key = "ga"; action = "<change-folder>~/mail/alganize/Inbox<enter>"; }
+          { map = [ "pager" "index" ]; key = "U"; action = "<pipe-message>${pkgs.urlscan}/bin/urlscan<enter>"; }
+          { map = [ "index" ]; key = "M"; action = "<tag-pattern>~U<enter><tag-prefix-cond><clear-flag>N<untag-pattern>.<enter>"; }
         ];
       };
 
@@ -166,7 +212,7 @@ in
             editor = "nvim";
             header-layout = "To|From,Subject";
             reply-to-self = false;
-            address-book-cmd = "${pkgs.maildir-rank-addr}/bin/maildir-rank-addr '%s'";
+            address-book-cmd = "${queryAddresses} '%s'";
           };
           filters = {
             "text/plain" = "colorize";
@@ -285,6 +331,16 @@ in
       postExec = "${pkgs.maildir-rank-addr}/bin/maildir-rank-addr";
     };
 
+    xdg.configFile."maildir-rank-addr/config.toml".text =
+      let
+        home = config.home.homeDirectory;
+        toTomlList = xs: "[${lib.concatMapStringsSep ", " (x: ''"${x}"'') xs}]";
+        addresses = [ a.tu-berlin.address ] ++ a.tu-berlin.aliases ++ [ a.gmail.address a.alganize.address ];
+      in ''
+        maildir = ["${home}/mail/tu-berlin", "${home}/mail/gmail", "${home}/mail/alganize"]
+        addresses = ${toTomlList addresses}
+      '';
+
     xdg.configFile."aerc/stylesets/${theme.slug}".text = ''
       *.default=true
       *.normal=true
@@ -346,6 +402,8 @@ in
       isync
       lynx
       maildir-rank-addr
+      openldap
+      urlscan
     ];
 
     accounts.email = {

@@ -20,10 +20,10 @@ in
         fortls
         hyprls
         lemminx
-        ltex-ls-plus
         lua-language-server
         matlab-language-server
         nil
+        nixd
         nginx-language-server
         postgres-language-server
         sqls
