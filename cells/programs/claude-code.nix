@@ -4,7 +4,7 @@
     (
       { pkgs, ... }:
       {
-        home.packages = [ inputs.claude-code.packages.${pkgs.system}.default ];
+        home.packages = [ inputs.claude-code.packages.${pkgs.stdenv.hostPlatform.system}.default ];
       }
     )
   ];
