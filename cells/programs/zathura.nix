@@ -45,7 +45,7 @@ in
         inputbar-fg = "#${c.lavender}";
         inputbar-bg = "#${c.base}";
 
-        recolor = true;
+        recolor = false;
         recolor-lightcolor = "#${c.base}";
         recolor-darkcolor = "#${c.text}";
 
