@@ -73,7 +73,7 @@
           # ssh-agent
           zstyle ':omz:plugins:ssh-agent' 'quiet' yes
           zstyle ':omz:plugins:ssh-agent' 'lazy' yes
-          zstyle ':omz:plugins:ssh-agent' agent-forwarding yes
+          zstyle ':omz:plugins:ssh-agent' agent-forwarding no
           zstyle ':omz:plugins:eza' 'dirs-first' yes
           zstyle ':omz:plugins:eza' 'git-status' yes
 

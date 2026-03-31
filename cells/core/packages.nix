@@ -10,8 +10,10 @@
       libglvnd
       lshw
       pciutils
+      unzip
       socat
       wget
+      zip
     ];
   })];
 }

@@ -1,4 +1,9 @@
-{ config, inputs, lib, ... }:
+{
+  config,
+  inputs,
+  lib,
+  ...
+}:
 let
   cfg = config.my;
   hostCfg = cfg.hosts.thinkpad;
@@ -26,20 +31,29 @@ in
           useGlobalPkgs = true;
           useUserPackages = true;
           extraSpecialArgs = { inherit inputs; };
-          users.${user}.imports = cfg.hmModules ++ hostCfg.hmModules ++ [
-            inputs.sops-nix.homeManagerModules.sops
-            inputs.hyprland.homeManagerModules.default
-            ({ lib, ... }: {
-              home = {
-                username = user;
-                homeDirectory = lib.mkForce "/home/${user}";
-                stateVersion = cfg.stateVersion;
-              };
-              programs.home-manager.enable = true;
-            })
-          ];
+          users.${user}.imports =
+            cfg.hmModules
+            ++ hostCfg.hmModules
+            ++ [
+              inputs.sops-nix.homeManagerModules.sops
+              inputs.hyprland.homeManagerModules.default
+              (
+                { lib, ... }:
+                {
+                  home = {
+                    username = user;
+                    homeDirectory = lib.mkForce "/home/${user}";
+                    stateVersion = cfg.stateVersion;
+                  };
+                  programs.home-manager.enable = true;
+                }
+              )
+            ];
         };
       }
-    ] ++ cfg.nixosModules ++ hostCfg.nixosModules ++ hostCfg.hardwareModules;
+    ]
+    ++ cfg.nixosModules
+    ++ hostCfg.nixosModules
+    ++ hostCfg.hardwareModules;
   };
 }
