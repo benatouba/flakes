@@ -62,11 +62,21 @@
   networking = {
     useDHCP = false;
     networkmanager.enable = true;
-    networkmanager.dns = "none";
+    networkmanager.dns = "systemd-resolved";
     firewall.enable = true;
     nameservers = [
-      "1.1.1.1"
-      "1.0.0.1"
+      "1.1.1.1#cloudflare-dns.com"
+      "1.0.0.1#cloudflare-dns.com"
+    ];
+  };
+
+  services.resolved = {
+    enable = true;
+    dnsovertls = "true";
+    dnssec = "true";
+    fallbackDns = [
+      "9.9.9.9#dns.quad9.net"
+      "149.112.112.112#dns.quad9.net"
     ];
   };
   environment.systemPackages = [ pkgs.networkmanager pkgs.networkmanagerapplet ];

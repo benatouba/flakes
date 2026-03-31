@@ -1,8 +1,17 @@
 { ... }:
 {
-  config.my.nixosModules = [({ ... }: {
-    services = {
-      dbus.enable = true;
-    };
-  })];
+  config.my.nixosModules = [
+    (
+      { pkgs, ... }:
+      {
+        services = {
+          dbus.enable = true;
+        };
+
+        networking.networkmanager.plugins = [ pkgs.networkmanager-openconnect ];
+
+        environment.systemPackages = [ pkgs.openconnect ];
+      }
+    )
+  ];
 }

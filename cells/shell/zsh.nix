@@ -59,8 +59,8 @@
           [ -f ~/.zsh/bindings.zsh ] && source ~/.zsh/bindings.zsh
           [ -f ~/.zsh/alias.zsh ] && source ~/.zsh/alias.zsh
 
-          # Tokens (secrets — persisted in ~/.secrets/, not in flakes repo)
-          [ -f ~/.secrets/tokens.zsh ] && source ~/.secrets/tokens.zsh
+          # Tokens (in nix-secrets repo, not in flakes)
+          [ -f ~/.local/secrets/tokens.zsh ] && source ~/.local/secrets/tokens.zsh
 
           # Zoxide — replace cd with zoxide's smart cd
           eval "$(zoxide init zsh --cmd cd)"

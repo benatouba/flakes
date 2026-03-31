@@ -41,6 +41,12 @@ in
           path = "/home/${user}/.ssh/tubklima_laptop";
           mode = "0600";
         };
+        # To manage the EC2 key via sops, add ssh_ec2_demo to secrets.yaml
+        # then uncomment:
+        # ssh_ec2_demo = {
+        #   path = "/home/${user}/.ssh/ec2-demo.pem";
+        #   mode = "0600";
+        # };
       };
     };
 
