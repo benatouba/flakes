@@ -45,11 +45,15 @@
 			"activated": "󰅶",
 			"deactivated": "󰾪"
 		},
+		"on-click-right": "hyprlock",
 		"tooltip-format-activated": "Idle inhibitor: active (screen stays awake)",
 		"tooltip-format-deactivated": "Idle inhibitor: inactive (will sleep on idle)"
 	},
 	"clock": {
 		"tooltip-format": "<tt><small>{calendar}</small></tt>",
+		"actions": {
+			"on-click-right": "mode"
+		},
 		"calendar": {
 			"mode": "year",
 			"mode-mon-col": 3,
@@ -69,11 +73,13 @@
 	},
 	"cpu": {
 		"format": " {usage}%",
+		"on-click": "wezterm start -- btop",
 		"tooltip": true,
 		"interval": 5
 	},
 	"memory": {
 		"format": " {}%",
+		"on-click": "wezterm start -- btop",
 		"tooltip-format": "{used:0.1f}G / {total:0.1f}G used",
 		"interval": 5
 	},
@@ -81,12 +87,15 @@
 		"interval": 30,
 		"format": "󰋊 {percentage_used}%",
 		"path": "/",
+		"on-click": "wezterm start -- btop",
 		"tooltip-format": "{used} / {total} used on {path}"
 	},
 	"network": {
 		"format-wifi": "  {essid} ({signalStrength}%)",
 		"format-ethernet": "󰈀 {ifname}",
 		"format-disconnected": "󰖪 Disconnected",
+		"on-click": "nm-connection-editor",
+		"on-click-right": "bash -c 'if [ \"$(nmcli -t -f WIFI g)\" = enabled ]; then nmcli radio wifi off; else nmcli radio wifi on; fi'",
 		"tooltip-format-wifi": "  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBits} Down: {bandwidthDownBits}",
 		"tooltip-format-ethernet": "󰈀 {ifname}\nIP: {ipaddr}\nUp: {bandwidthUpBits} Down: {bandwidthDownBits}",
 		"tooltip-format-disconnected": "Disconnected",
@@ -98,6 +107,8 @@
 		"format-connected-battery": "󰂱 {device_alias} {device_battery_percentage}%",
 		"format-disabled": "󰂲",
 		"format-off": "󰂲",
+		"on-click": "blueman-manager",
+		"on-click-right": "rfkill toggle bluetooth",
 		"format-no-controller": "",
 		"tooltip-format": "{controller_alias}\n{num_connections} connected",
 		"tooltip-format-connected": "{controller_alias}\n\n{device_enumerate}",
@@ -113,6 +124,8 @@
 		"format-charging": "󰂄 {capacity}%",
 		"format-plugged": "󰚥 {capacity}%",
 		"format-alt": "{icon} {time}",
+		"on-click": "wezterm start -- btop",
+		"on-click-right": "~/.config/hypr/scripts/toggle-charge.sh",
 		"format-icons": [
 			"󰁺",
 			"󰁻",
@@ -133,10 +146,14 @@
 				"󰕾"
 			]
 		},
-		"on-click": "pavucontrol"
+		"on-click": "pavucontrol",
+		"on-click-right": "pamixer -t"
 	},
 	"backlight": {
 		"format": "{icon} {percent}%",
+		"on-click": "brightnessctl set +5%",
+		"on-click-right": "brightnessctl set 5%-",
+		"on-click-middle": "brightnessctl set 50%",
 		"format-icons": [
 			"",
 			"",
@@ -178,8 +195,9 @@
 		"spacing": 10
 	},
 	"custom/power": {
-		"tooltip": false,
+		"tooltip-format": "Left: power menu\nRight: lock screen",
 		"on-click": "wlogout &",
+		"on-click-right": "hyprlock",
 		"format": "⏻"
 	}
 }

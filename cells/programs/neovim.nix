@@ -38,7 +38,7 @@ in
 
         texlivePackages.latexindent
         nixfmt
-        nodePackages.prettier
+        prettier
         prettierd
         stylua
         typstyle

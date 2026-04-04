@@ -7,7 +7,7 @@
     // Choose the order of the modules
     "modules-left": ["hyprland/workspaces","custom/waybarthemes"],
     "modules-center": ["hyprland/window"],
-    "modules-right": ["custom/ml4w-welcome","mpd", "idle_inhibitor", "pulseaudio", "network", "cpu", "memory", "temperature", "backlight", "keyboard-state", "sway/language", "battery", "battery#bat2", "clock", "tray"],
+    "modules-right": ["custom/ml4w-welcome","mpd", "idle_inhibitor", "pulseaudio", "network", "bluetooth", "cpu", "memory", "temperature", "backlight", "keyboard-state", "sway/language", "battery", "battery#bat2", "clock", "tray"],
     // Modules configuration
     "keyboard-state": {
         "numlock": true,
@@ -72,7 +72,8 @@
         "format-icons": {
             "activated": "",
             "deactivated": ""
-        }
+        },
+        "on-click-right": "hyprlock"
     },
     "tray": {
         "spacing": 10
@@ -80,25 +81,35 @@
     "clock": {
         // "timezone": "America/New_York",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-        "format-alt": "{:%Y-%m-%d}"
+        "format-alt": "{:%Y-%m-%d}",
+        "on-click": "flatpak run com.ml4w.calendar",
+        "actions": {
+            "on-click-right": "mode"
+        }
     },
     "cpu": {
         "format": "{usage}% ",
-        "tooltip": false
+        "tooltip": false,
+        "on-click": "wezterm start -- btop"
     },
     "memory": {
-        "format": "{}% "
+        "format": "{}% ",
+        "on-click": "wezterm start -- btop"
     },
     "temperature": {
         "critical-threshold": 80,
         // "format-critical": "{temperatureC}°C {icon}",
         "format": "{temperatureC}°C {icon}",
-        "format-icons": ["", "", ""]
+        "format-icons": ["", "", ""],
+        "on-click": "wezterm start -- btop"
     },
     "backlight": {
         // "device": "acpi_video1",
         "format": "{percent}% {icon}",
-        "format-icons": ["", "", "", "", "", "", "", "", ""]
+        "format-icons": ["", "", "", "", "", "", "", "", ""],
+        "on-click": "brightnessctl set +5%",
+        "on-click-right": "brightnessctl set 5%-",
+        "on-click-middle": "brightnessctl set 50%"
     },
     "battery": {
         "states": {
@@ -110,12 +121,16 @@
         "format-charging": "{capacity}% ",
         "format-plugged": "{capacity}% ",
         "format-alt": "{time} {icon}",
+        "on-click": "wezterm start -- btop",
+        "on-click-right": "~/.config/hypr/scripts/toggle-charge.sh",
         // "format-good": "", // An empty format will hide the module
         // "format-full": "",
         "format-icons": ["", "", "", "", ""]
     },
     "battery#bat2": {
-        "bat": "BAT2"
+        "bat": "BAT2",
+        "on-click": "wezterm start -- btop",
+        "on-click-right": "~/.config/hypr/scripts/toggle-charge.sh"
     },
     "network": {
         // "interface": "wlp2*", // (Optional) To force the use of this interface
@@ -124,7 +139,9 @@
         "tooltip-format": "{ifname} via {gwaddr} ",
         "format-linked": "{ifname} (No IP) ",
         "format-disconnected": "Disconnected ⚠",
-        "format-alt": "{ifname}: {ipaddr}/{cidr}"
+        "format-alt": "{ifname}: {ipaddr}/{cidr}",
+        "on-click": "nm-connection-editor",
+        "on-click-right": "bash -c 'if [ \"$(nmcli -t -f WIFI g)\" = enabled ]; then nmcli radio wifi off; else nmcli radio wifi on; fi'"
     },
     "pulseaudio": {
         // "scroll-step": 1, // %, can be a float
@@ -143,7 +160,8 @@
             "car": "",
             "default": ["", "", ""]
         },
-        "on-click": "pavucontrol"
+        "on-click": "pavucontrol",
+        "on-click-right": "pamixer -t"
     },
     "custom/media": {
         "format": "{icon} {}",
@@ -156,6 +174,19 @@
         "escape": true,
         "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
         // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
+    },
+    "bluetooth": {
+        "format": "󰂯 {status}",
+        "format-connected": "󰂱 {num_connections}",
+        "format-disabled": "󰂲",
+        "format-off": "󰂲",
+        "interval": 30,
+        "on-click": "blueman-manager",
+        "on-click-right": "rfkill toggle bluetooth",
+        "tooltip-format": "Bluetooth: {status}",
+        "tooltip-format-connected": "{num_connections} connected\n\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "{device_alias}",
+        "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_battery_percentage}%",
+        "format-no-controller": ""
     }
 }
-

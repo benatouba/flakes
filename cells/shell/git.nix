@@ -16,6 +16,15 @@ in
           editor = "nvim";
           whitespace = "fix,-indent-with-non-tab,trailing-space,cr-at-eol";
           preloadIndex = true;
+          pager = "delta";
+        };
+        interactive.diffFilter = "delta --color-only";
+        delta = {
+          navigate = true;
+          side-by-side = true;
+          line-numbers = true;
+          syntax-theme = "Catppuccin Mocha";
+          paging = "auto";
         };
         url = {
           "git@github.com:${u.githubUser}/" = { insteadOf = "gh:me:"; };
@@ -101,7 +110,7 @@ in
           keepBackup = false;
         };
         "mergetool \"diffview\"".cmd = "nvim -n -c \"DiffviewOpen\" \"$MERGE\"";
-        credential.helper = "cache 20";
+        credential.helper = "cache --timeout=3600";
         "filter \"lfs\"" = {
           clean = "git-lfs clean -- %f";
           smudge = "git-lfs smudge -- %f";
@@ -154,6 +163,7 @@ in
 
     home.packages = with pkgs; [
       git-lfs
+      delta
     ];
   })];
 }

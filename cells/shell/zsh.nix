@@ -36,6 +36,7 @@
           "eza"
           "encode64"
           "sudo"
+          "pay-respects"
           "copypath"
           "web-search"
           "colored-man-pages"
@@ -95,6 +96,8 @@
       fzf
       bat
       vivid
+      tldr
+      pay-respects
     ];
 
     # direnv + nix-direnv: auto-activate per-project dev shells

@@ -13,7 +13,7 @@ in
       pointerCursor = {
         package = pkgs.catppuccin-cursors;
         inherit (theme.cursor) name;
-        size = 24;
+        size = 32;
         gtk.enable = true;
       };
     };

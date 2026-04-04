@@ -38,11 +38,15 @@ in
   })];
 
   # HM side
-  config.my.hmModules = [{
+  config.my.hmModules = [({ pkgs, ... }: {
     wayland.windowManager.hyprland = {
       enable = true;
       package = null;
       portalPackage = null;
+      plugins = [
+        # TODO: re-enable when hyprexpo is compatible with Hyprland 0.54.0
+        # inputs.hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprexpo
+      ];
       extraConfig = builtins.concatStringsSep "\n" ([
         themeConf
       ] ++ (map builtins.readFile [
@@ -90,5 +94,5 @@ in
       executable = true;
     };
     xdg.configFile."sidepad/pads/wezterm".source = ./sidepad/pads/wezterm;
-  }];
+  })];
 }
