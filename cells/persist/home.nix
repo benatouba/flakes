@@ -37,6 +37,8 @@
         "mail"
         ".config/gtk-3.0"
         ".config/gtk-4.0"
+        ".local/share/atuin"
+        ".local/share/nix-index"
       ];
     };
   }];

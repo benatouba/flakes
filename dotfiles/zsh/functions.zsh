@@ -16,10 +16,6 @@ function printColors() {
   for i in {0..255}; do print -Pn "%K{$i}  %k%F{$i}${(l:3::0:)i}%f " ${${(M)$((i%6)):#3}:+$'\n'}; done
 }
 
-function updatePnpm() {
-    wget -qO- https://get.pnpm.io/install.sh | sh -
- }
-
 function tarPackUnpack() {
   case "$1" in
     pack)
@@ -36,51 +32,8 @@ function tarPackUnpack() {
   esac
 }
 
-function brc () {
-    $EDITOR ~/.bashrc && source $_
-}
-
 function zrc () {
     $EDITOR ~/.zshrc && source $_
-}
-
-# Function to source files if they exist
-function zsh_add_file() {
-    [ -f "$ZDOTDIR/$1" ] && source "$ZDOTDIR/$1"
-}
-function zsh_add_plugin() {
-    PLUGIN_NAME=$(echo $1 | cut -d "/" -f 2)
-    if [ -d "$ZDOTDIR/plugins/$PLUGIN_NAME" ]; then
-        # For plugins
-        zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.plugin.zsh" || \
-        zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.zsh"
-    else
-        git clone "https://github.com/$1.git" "$ZDOTDIR/plugins/$PLUGIN_NAME"
-    fi
-}
-function zsh_add_completion() {
-    PLUGIN_NAME=$(echo $1 | cut -d "/" -f 2)
-    if [ -d "$ZDOTDIR/plugins/$PLUGIN_NAME" ]; then
-        # For completions
-		completion_file_path=$(ls $ZDOTDIR/plugins/$PLUGIN_NAME/_*)
-		fpath+="$(dirname "${completion_file_path}")"
-        zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.plugin.zsh"
-    else
-        git clone "https://github.com/$1.git" "$ZDOTDIR/plugins/$PLUGIN_NAME"
-		fpath+=$(ls $ZDOTDIR/plugins/$PLUGIN_NAME/_*)
-		rm $ZDOTDIR/.zccompdump
-        [ -f $ZDOTDIR/.zccompdump ] && $ZDOTDIR/.zccompdump
-    fi
-	completion_file="$(basename "${completion_file_path}")"
-	if [ "$2" = true ] && compinit "${completion_file:1}"
-}
-
-neomuttbw() {
-    output=$( bw login benjaminschmidt88@gmail.com --raw || bw unlock --raw )
-    if [ -z "$output" ]; then
-        return
-    fi
-    BW_SESSION="$output" neomutt "$@"
 }
 
 function y() {

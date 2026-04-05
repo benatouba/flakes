@@ -85,6 +85,7 @@
     networkmanager.enable = true;
     networkmanager.dns = "systemd-resolved";
     firewall.enable = true;
+    firewall.logRefusedConnections = true;
     nameservers = [
       "1.1.1.1#cloudflare-dns.com"
       "1.0.0.1#cloudflare-dns.com"

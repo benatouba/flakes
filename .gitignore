@@ -1,6 +1,8 @@
 *test.txt
 .claude/
 .direnv/
+.devenv/
+devenv.lock
 
 result
 

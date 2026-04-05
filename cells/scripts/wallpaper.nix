@@ -6,72 +6,47 @@ in
 {
   config.my.hmModules = [({ pkgs, ... }:
   let
-    wallpaper_random = pkgs.writeShellScriptBin "wallpaper_random" ''
-      if command -v swww >/dev/null 2>&1; then
-          killall dynamic_wallpaper
-          swww img $(find ~/pictures/wallpaper/. -name "*.png" | shuf -n1) --transition-type random
-      else
-          killall swaybg
-          killall dynamic_wallpaper
-          swaybg -i $(find ~/pictures/wallpaper/. -name "*.png" | shuf -n1) -m fill &
+    pick_random = ''find ~/pictures/wallpaper -maxdepth 1 -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) | shuf -n1'';
+
+    set_wallpaper = pkgs.writeShellScriptBin "set_wallpaper" ''
+      IMG="$1"
+      if [ -z "$IMG" ]; then
+          echo "Usage: set_wallpaper <path>" >&2
+          exit 1
       fi
+      if command -v swww >/dev/null 2>&1; then
+          swww img "$IMG" --transition-type grow --transition-duration 2
+      else
+          hyprctl hyprpaper unload all
+          hyprctl hyprpaper preload "$IMG"
+          for monitor in $(hyprctl monitors -j | jq -r '.[].name'); do
+              hyprctl hyprpaper wallpaper "$monitor,$IMG"
+          done
+      fi
+    '';
+
+    wallpaper_random = pkgs.writeShellScriptBin "wallpaper_random" ''
+      killall dynamic_wallpaper 2>/dev/null
+      IMG=$(${pick_random})
+      [ -z "$IMG" ] && { echo "No wallpapers found" >&2; exit 1; }
+      set_wallpaper "$IMG"
     '';
 
     dynamic_wallpaper = pkgs.writeShellScriptBin "dynamic_wallpaper" ''
-      if command -v swww >/dev/null 2>&1; then
-          swww img $(find ~/pictures/wallpaper/. -name "*.png" | shuf -n1) --transition-type random
-          OLD_PID=$!
-          while true; do
-              sleep 120
-          swww img $(find ~/pictures/wallpaper/. -name "*.png" | shuf -n1) --transition-type random
-              NEXT_PID=$!
-              sleep 5
-              kill $OLD_PID
-              OLD_PID=$NEXT_PID
-          done
-      elif command -v swaybg >/dev/null 2>&1; then
-          killall swaybg
-          swaybg -i $(find ~/pictures/wallpaper/. -name "*.png" | shuf -n1) -m fill &
-          OLD_PID=$!
-          while true; do
-              sleep 120
-              swaybg -i $(find ~/pictures/wallpaper/. -name "*.png" | shuf -n1) -m fill &
-              NEXT_PID=$!
-              sleep 5
-              kill $OLD_PID
-              OLD_PID=$NEXT_PID
-          done
-      else
-          killall feh
-          feh --randomize --bg-fill $(find ~/pictures/wallpaper/. -name "*.png" | shuf -n1) &
-          OLD_PID=$!
-          while true; do
-              sleep 120
-              feh --randomize --bg-fill $(find ~/pictures/wallpaper/. -name "*.png" | shuf -n1) &
-              NEXT_PID=$!
-              sleep 5
-              kill $OLD_PID
-              OLD_PID=$NEXT_PID
-          done
-      fi
+      while true; do
+          IMG=$(${pick_random})
+          [ -n "$IMG" ] && set_wallpaper "$IMG"
+          sleep 120
+      done
     '';
 
     default_wall = pkgs.writeShellScriptBin "default_wall" ''
-      if command -v swww >/dev/null 2>&1; then
-          killall dynamic_wallpaper
-          swww img "${wallpaperPath}" --transition-type random
-      elif command -v swaybg >/dev/null 2>&1; then
-          killall swaybg
-          killall dynamic_wallpaper
-          swaybg -i "${wallpaperPath}" -m fill &
-      else
-          killall feh
-          killall dynamic_wallpaper
-          feh --randomize --bg-fill "${wallpaperPath}" &
-      fi
+      killall dynamic_wallpaper 2>/dev/null
+      set_wallpaper "${wallpaperPath}"
     '';
   in {
     home.packages = [
+      set_wallpaper
       wallpaper_random
       dynamic_wallpaper
       default_wall

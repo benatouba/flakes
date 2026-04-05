@@ -11,6 +11,7 @@
       hyprpaper
       hypridle
       hyprshot
+      hyprsunset
       imagemagick
       jq
       libnotify
@@ -23,7 +24,6 @@
       wf-recorder
       wl-clipboard
       wlogout
-      wlsunset
     ];
   })];
 }

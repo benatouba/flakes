@@ -36,7 +36,6 @@
           "eza"
           "encode64"
           "sudo"
-          "pay-respects"
           "copypath"
           "web-search"
           "colored-man-pages"
@@ -48,7 +47,7 @@
 
       initContent = lib.mkMerge [
         (lib.mkBefore ''
-          fastfetch
+          [[ -o login ]] && fastfetch
         '')
         ''
           # Custom zsh modules
@@ -78,6 +77,9 @@
           zstyle ':omz:plugins:eza' 'dirs-first' yes
           zstyle ':omz:plugins:eza' 'git-status' yes
 
+          # pay-respects — correct previous command with F
+          eval "$(pay-respects zsh --alias f)"
+
           # Starship prompt
           eval "$(starship init zsh)"
         ''
@@ -98,6 +100,8 @@
       vivid
       tldr
       pay-respects
+      nh
+      comma
     ];
 
     # direnv + nix-direnv: auto-activate per-project dev shells

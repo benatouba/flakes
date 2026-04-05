@@ -4,6 +4,8 @@
     nix = {
       settings = {
         auto-optimise-store = true;
+        sandbox = true;
+        allowed-users = [ "@wheel" ];
         max-jobs = "auto";
         cores = 0;
         substituters = [
