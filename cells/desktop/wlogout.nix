@@ -1,11 +1,15 @@
-{ ... }:
-{
-  config.my.hmModules = [({ pkgs, ... }: {
-    home.packages = with pkgs; [ wlogout ];
+_: {
+  config.my.branches.desktop.hmModules = [
+    (
+      { pkgs, ... }:
+      {
+        home.packages = with pkgs; [ wlogout ];
 
-    xdg.configFile."wlogout" = {
-      source = ../../dotfiles/wlogout;
-      recursive = true;
-    };
-  })];
+        xdg.configFile."wlogout" = {
+          source = ../../dotfiles/wlogout;
+          recursive = true;
+        };
+      }
+    )
+  ];
 }

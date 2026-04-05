@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  nix:
+    name: Flake Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+
+      - name: Prepare local nix-secrets input
+        run: |
+          sudo mkdir -p /home/ben/.local/secrets
+          sudo cp secrets/secrets.example.yaml /home/ben/.local/secrets/secrets.yaml
+          sudo cp secrets/ssh-hosts.example.nix /home/ben/.local/secrets/ssh-hosts.nix
+          sudo cp secrets/rbw.example.nix /home/ben/.local/secrets/rbw.nix
+          sudo cp secrets/mail-accounts.example.nix /home/ben/.local/secrets/mail-accounts.nix
+          sudo chown -R "$(id -u)":"$(id -g)" /home/ben/.local/secrets
+
+      - name: Run flake checks
+        run: nix flake check --print-build-logs
+
+      - name: Evaluate host toplevel derivation
+        run: nix eval --raw .#nixosConfigurations.thinkpad.config.system.build.toplevel.drvPath

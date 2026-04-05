@@ -1,13 +1,14 @@
-{ ... }:
-{
-  config.my.hmModules = [{
-    programs.atuin = {
-      enable = true;
-      enableZshIntegration = true;
-      settings = {
-        style = "compact";
-        inline_height = 20;
+_: {
+  config.my.branches.desktop.hmModules = [
+    {
+      programs.atuin = {
+        enable = true;
+        enableZshIntegration = true;
+        settings = {
+          style = "compact";
+          inline_height = 20;
+        };
       };
-    };
-  }];
+    }
+  ];
 }

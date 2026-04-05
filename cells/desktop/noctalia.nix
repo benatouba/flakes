@@ -1,8 +1,11 @@
 { config, lib, ... }:
 {
-  config.my.hmModules = lib.optionals config.my.enableNoctalia [
-    ({ pkgs, ... }: {
-      home.packages = [ pkgs.noctalia-shell ];
-    })
+  config.my.branches.desktop.hmModules = lib.optionals config.my.enableNoctalia [
+    (
+      { pkgs, ... }:
+      {
+        home.packages = [ pkgs.noctalia-shell ];
+      }
+    )
   ];
 }

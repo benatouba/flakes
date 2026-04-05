@@ -1,11 +1,15 @@
-{ ... }:
-{
-  config.my.hmModules = [({ pkgs, ... }: {
-    home.packages = with pkgs; [ swaynotificationcenter ];
+_: {
+  config.my.branches.desktop.hmModules = [
+    (
+      { pkgs, ... }:
+      {
+        home.packages = with pkgs; [ swaynotificationcenter ];
 
-    xdg.configFile."swaync" = {
-      source = ../../dotfiles/swaync;
-      recursive = true;
-    };
-  })];
+        xdg.configFile."swaync" = {
+          source = ../../dotfiles/swaync;
+          recursive = true;
+        };
+      }
+    )
+  ];
 }

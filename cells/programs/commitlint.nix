@@ -1,6 +1,7 @@
-{ ... }:
-{
-  config.my.hmModules = [{
-    home.file.".commitlintrc.yaml".source = ./commitlint/commitlintrc.yaml;
-  }];
+_: {
+  config.my.branches.desktop.hmModules = [
+    {
+      home.file.".commitlintrc.yaml".source = ./commitlint/commitlintrc.yaml;
+    }
+  ];
 }

@@ -8,4 +8,6 @@ result
 
 # Private config — only example templates and encrypted files are committed
 secrets/mail-accounts.nix
+secrets/rbw.nix
+secrets/ssh-hosts.nix
 secrets/secrets.yaml

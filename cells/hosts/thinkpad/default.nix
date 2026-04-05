@@ -8,10 +8,19 @@ let
   cfg = config.my;
   hostCfg = cfg.hosts.thinkpad;
   user = cfg.user.name;
+
+  selectedBranchNames = lib.unique (cfg.profile.branches ++ hostCfg.branches);
+  selectedBranches = map (
+    name: cfg.branches.${name} or (throw "Unknown branch: ${name}")
+  ) selectedBranchNames;
+
+  branchNixosModules = lib.concatMap (branchCfg: branchCfg.nixosModules) selectedBranches;
+  branchHmModules = lib.concatMap (branchCfg: branchCfg.hmModules) selectedBranches;
 in
 {
   config.my.hosts.thinkpad = {
     system = "x86_64-linux";
+    branches = [ ];
     hardwareModules = [
       inputs.nixos-hardware.nixosModules.lenovo-thinkpad-p14s-amd-gen2
     ];
@@ -32,7 +41,7 @@ in
           useUserPackages = true;
           extraSpecialArgs = { inherit inputs; };
           users.${user}.imports =
-            cfg.hmModules
+            branchHmModules
             ++ hostCfg.hmModules
             ++ [
               inputs.sops-nix.homeManagerModules.sops
@@ -52,7 +61,7 @@ in
         };
       }
     ]
-    ++ cfg.nixosModules
+    ++ branchNixosModules
     ++ hostCfg.nixosModules
     ++ hostCfg.hardwareModules;
   };

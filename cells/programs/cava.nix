@@ -17,38 +17,40 @@ let
   '';
 in
 {
-  config.my.hmModules = [{
-    home.file.".config/cava/config".text = ''
-      [general]
+  config.my.branches.desktop.hmModules = [
+    {
+      home.file.".config/cava/config".text = ''
+        [general]
 
-      [input]
+        [input]
 
-      [output]
+        [output]
 
-      ${colorSection}
+        ${colorSection}
 
-      [smoothing]
+        [smoothing]
 
-      [eq]
-    '';
+        [eq]
+      '';
 
-    home.file.".config/cava/config1".text = ''
-      [general]
-      bars = 12
-      sleep_timer = 10
+      home.file.".config/cava/config1".text = ''
+        [general]
+        bars = 12
+        sleep_timer = 10
 
-      [input]
+        [input]
 
-      [output]
-      method = raw
-      data_format = ascii
-      ascii_max_range = 7
+        [output]
+        method = raw
+        data_format = ascii
+        ascii_max_range = 7
 
-      [color]
+        [color]
 
-      [smoothing]
+        [smoothing]
 
-      [eq]
-    '';
-  }];
+        [eq]
+      '';
+    }
+  ];
 }

@@ -4,7 +4,6 @@
 {
   config,
   lib,
-  pkgs,
   modulesPath,
   ...
 }:
@@ -75,38 +74,6 @@
   };
 
   swapDevices = [ { device = "/dev/disk/by-uuid/d1ae50c9-4370-49e8-b70b-a904fbbc7722"; } ];
-
-  # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
-  # (the default) this is the recommended approach. When using systemd-networkd it's
-  # still possible to use this option, but it's recommended to use it in conjunction
-  # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
-  networking = {
-    useDHCP = false;
-    networkmanager.enable = true;
-    networkmanager.dns = "systemd-resolved";
-    firewall.enable = true;
-    firewall.logRefusedConnections = true;
-    nameservers = [
-      "1.1.1.1#cloudflare-dns.com"
-      "1.0.0.1#cloudflare-dns.com"
-    ];
-  };
-
-  services.resolved = {
-    enable = true;
-    settings.Resolve = {
-      DNSOverTLS = true;
-      DNSSEC = true;
-      FallbackDNS = [
-        "9.9.9.9#dns.quad9.net"
-        "149.112.112.112#dns.quad9.net"
-      ];
-    };
-  };
-  environment.systemPackages = [
-    pkgs.networkmanager
-    pkgs.networkmanagerapplet
-  ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;

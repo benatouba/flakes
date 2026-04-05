@@ -2,10 +2,7 @@
 let
   theme = config.my.theme;
   c = theme.colors;
-  upper = s: builtins.replaceStrings
-    ["a" "b" "c" "d" "e" "f"]
-    ["A" "B" "C" "D" "E" "F"]
-    s;
+  upper = s: builtins.replaceStrings [ "a" "b" "c" "d" "e" "f" ] [ "A" "B" "C" "D" "E" "F" ] s;
   btopTheme = ''
     theme[main_bg]="#${upper c.base}"
     theme[main_fg]="#${upper c.text}"
@@ -52,13 +49,15 @@ let
   '';
 in
 {
-  config.my.hmModules = [{
-    programs.btop = {
-      enable = true;
-      settings = {
-        color_theme = theme.slug;
+  config.my.branches.desktop.hmModules = [
+    {
+      programs.btop = {
+        enable = true;
+        settings = {
+          color_theme = theme.slug;
+        };
       };
-    };
-    home.file.".config/btop/themes/${theme.slug}.theme".text = btopTheme;
-  }];
+      home.file.".config/btop/themes/${theme.slug}.theme".text = btopTheme;
+    }
+  ];
 }

@@ -1,6 +1,5 @@
-{ ... }:
-{
-  config.my.hmModules = [
+_: {
+  config.my.branches.desktop.hmModules = [
     (
       { pkgs, ... }:
       {

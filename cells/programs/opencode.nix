@@ -1,6 +1,10 @@
-{ ... }:
-{
-  config.my.hmModules = [({ pkgs, ... }: {
-    home.packages = [ pkgs.opencode ];
-  })];
+_: {
+  config.my.branches.desktop.hmModules = [
+    (
+      { pkgs, ... }:
+      {
+        home.packages = [ pkgs.opencode ];
+      }
+    )
+  ];
 }

@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  config.my.hmModules = [
+  config.my.branches.desktop.hmModules = [
     (
       { pkgs, ... }:
       {

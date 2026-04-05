@@ -1,9 +1,10 @@
-{ ... }:
-{
-  config.my.hmModules = [{
-    xdg.configFile."bat" = {
-      source = ../../dotfiles/bat;
-      recursive = true;
-    };
-  }];
+_: {
+  config.my.branches.desktop.hmModules = [
+    {
+      xdg.configFile."bat" = {
+        source = ../../dotfiles/bat;
+        recursive = true;
+      };
+    }
+  ];
 }

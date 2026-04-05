@@ -1,13 +1,16 @@
-{ ... }:
-{
-  config.my.nixosModules = [{
-    programs.command-not-found.enable = false;
-  }];
+_: {
+  config.my.branches.base.nixosModules = [
+    {
+      programs.command-not-found.enable = false;
+    }
+  ];
 
-  config.my.hmModules = [{
-    programs.nix-index = {
-      enable = true;
-      enableZshIntegration = true;
-    };
-  }];
+  config.my.branches.base.hmModules = [
+    {
+      programs.nix-index = {
+        enable = true;
+        enableZshIntegration = true;
+      };
+    }
+  ];
 }
