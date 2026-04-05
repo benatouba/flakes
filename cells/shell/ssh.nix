@@ -8,11 +8,7 @@ let
   user = config.my.user.name;
   isHardened = config.my.profile.security.level == "hardened";
   secretsRoot = toString inputs.nix-secrets;
-  sshHostsPath =
-    if builtins.pathExists "${secretsRoot}/ssh-hosts.nix" then
-      "${secretsRoot}/ssh-hosts.nix"
-    else
-      ../../secrets/ssh-hosts.example.nix;
+  sshHostsPath = "${secretsRoot}/ssh-hosts.nix";
   sshHosts = import sshHostsPath;
   inherit (sshHosts) tuKey;
 
@@ -62,7 +58,9 @@ let
     };
   };
 in
+assert builtins.pathExists sshHostsPath;
 {
+
   config.my.branches.security.hmModules = [
     (_: {
       sops = {

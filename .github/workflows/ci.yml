@@ -21,17 +21,16 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v14
 
-      - name: Prepare local nix-secrets input
+      - name: Prepare CI secrets input
         run: |
-          sudo mkdir -p /home/ben/.local/secrets
-          sudo cp secrets/secrets.example.yaml /home/ben/.local/secrets/secrets.yaml
-          sudo cp secrets/ssh-hosts.example.nix /home/ben/.local/secrets/ssh-hosts.nix
-          sudo cp secrets/rbw.example.nix /home/ben/.local/secrets/rbw.nix
-          sudo cp secrets/mail-accounts.example.nix /home/ben/.local/secrets/mail-accounts.nix
-          sudo chown -R "$(id -u)":"$(id -g)" /home/ben/.local/secrets
+          mkdir -p .ci-secrets
+          cp secrets/secrets.example.yaml .ci-secrets/secrets.yaml
+          cp secrets/ssh-hosts.example.nix .ci-secrets/ssh-hosts.nix
+          cp secrets/rbw.example.nix .ci-secrets/rbw.nix
+          cp secrets/mail-accounts.example.nix .ci-secrets/mail-accounts.nix
 
       - name: Run flake checks
-        run: nix flake check --print-build-logs
+        run: nix flake check --print-build-logs --override-input nix-secrets path:./.ci-secrets
 
       - name: Evaluate host toplevel derivation
-        run: nix eval --raw .#nixosConfigurations.thinkpad.config.system.build.toplevel.drvPath
+        run: nix eval --raw --override-input nix-secrets path:./.ci-secrets .#nixosConfigurations.thinkpad.config.system.build.toplevel.drvPath

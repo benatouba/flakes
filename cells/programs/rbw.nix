@@ -1,15 +1,15 @@
 { inputs, ... }:
+let
+  secretsRoot = toString inputs.nix-secrets;
+  rbwPath = "${secretsRoot}/rbw.nix";
+in
+assert builtins.pathExists rbwPath;
 {
+
   config.my.branches.security.hmModules = [
     (
       { pkgs, ... }:
       let
-        secretsRoot = toString inputs.nix-secrets;
-        rbwPath =
-          if builtins.pathExists "${secretsRoot}/rbw.nix" then
-            "${secretsRoot}/rbw.nix"
-          else
-            ../../secrets/rbw.example.nix;
         secrets = import rbwPath;
       in
       {

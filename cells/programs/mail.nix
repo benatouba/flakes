@@ -3,13 +3,11 @@ let
   theme = config.my.theme;
   c = theme.colors;
   secretsRoot = toString inputs.nix-secrets;
-  mailAccountsPath =
-    if builtins.pathExists "${secretsRoot}/mail-accounts.nix" then
-      "${secretsRoot}/mail-accounts.nix"
-    else
-      ../../secrets/mail-accounts.example.nix;
+  mailAccountsPath = "${secretsRoot}/mail-accounts.nix";
 in
+assert builtins.pathExists mailAccountsPath;
 {
+
   config.my.branches.security.hmModules = [
     (
       {

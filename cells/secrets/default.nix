@@ -1,14 +1,11 @@
 { inputs, ... }:
 let
   secretsRoot = toString inputs.nix-secrets;
-  fallbackSopsFile = ../../secrets/secrets.example.yaml;
-  defaultSopsFile =
-    if builtins.pathExists "${secretsRoot}/secrets.yaml" then
-      "${secretsRoot}/secrets.yaml"
-    else
-      fallbackSopsFile;
+  defaultSopsFile = "${secretsRoot}/secrets.yaml";
 in
+assert builtins.pathExists defaultSopsFile;
 {
+
   config.my.branches.security.nixosModules = [
     {
       sops = {

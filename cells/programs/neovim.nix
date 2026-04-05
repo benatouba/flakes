@@ -65,8 +65,6 @@ in
             ripgrep
 
             cmake
-            gnumake
-            gcc
             cargo
           ];
         };

@@ -39,14 +39,11 @@ _: {
               "git"
               "tmux"
               "history"
-              "emoji"
               "eza"
-              "encode64"
               "sudo"
               "copypath"
               "web-search"
               "colored-man-pages"
-              "pip"
               "ssh-agent"
               "uv"
             ];
@@ -101,6 +98,11 @@ _: {
 
               # Starship prompt
               eval "$(starship init zsh)"
+
+              # Keep Up Arrow compact: prefix history search in shell line editor.
+              # Atuin stays on Ctrl-R for fuzzy/interactive history.
+              bindkey '^[[A' up-line-or-beginning-search
+              bindkey '^[[B' down-line-or-beginning-search
             ''
           ];
         };
@@ -125,6 +127,12 @@ _: {
 
         home.shellAliases = {
           dreload = "direnv reload";
+          ncheck = "nh os test ~/projects/flakes";
+          nswitch = "nh os switch ~/projects/flakes";
+          ndiff = "nvd diff /run/current-system result";
+
+          sops-edit = "sops ~/projects/flakes/secrets/secrets.example.yaml";
+          sops-update = "just update-secrets";
         };
 
         home.sessionVariables = {

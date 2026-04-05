@@ -45,6 +45,11 @@ in
             };
             pull.rebase = false;
             color.ui = true;
+            fetch = {
+              prune = true;
+              pruneTags = true;
+            };
+            rebase.autoStash = true;
             "color \"branch\"" = {
               current = "yellow bold";
               local = "green bold";
@@ -96,6 +101,8 @@ in
               rba = "rebase --abort";
               cl = "clone";
               f = "fetch --all --prune";
+              fp = "fetch --all --prune --prune-tags";
+              up = "!git remote update --prune && git status -sb";
               t = "tag";
             };
             diff = {

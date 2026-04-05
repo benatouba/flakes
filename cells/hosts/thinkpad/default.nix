@@ -10,9 +10,18 @@ let
   user = cfg.user.name;
 
   selectedBranchNames = lib.unique (cfg.profile.branches ++ hostCfg.branches);
-  selectedBranches = map (
-    name: cfg.branches.${name} or (throw "Unknown branch: ${name}")
+  knownBranchNames = builtins.attrNames cfg.branches;
+  unknownBranches = builtins.filter (
+    name: !(builtins.elem name knownBranchNames)
   ) selectedBranchNames;
+  selectedBranches =
+    if unknownBranches != [ ] then
+      throw (
+        "Unknown branch names for thinkpad in my.profile.branches/my.hosts.thinkpad.branches: "
+        + lib.concatStringsSep ", " unknownBranches
+      )
+    else
+      map (name: cfg.branches.${name}) selectedBranchNames;
 
   branchNixosModules = lib.concatMap (branchCfg: branchCfg.nixosModules) selectedBranches;
   branchHmModules = lib.concatMap (branchCfg: branchCfg.hmModules) selectedBranches;

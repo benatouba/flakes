@@ -36,6 +36,8 @@ in
           };
         };
 
+        services.openssh.enable = false;
+
         boot.kernel.sysctl = {
           "kernel.kptr_restrict" = 2;
           "kernel.yama.ptrace_scope" = 1;
