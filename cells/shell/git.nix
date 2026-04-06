@@ -106,24 +106,24 @@ in
               t = "tag";
             };
             diff = {
-              tool = "nvim";
+              tool = "nvim_difftool";
               context = 3;
               renames = "copies";
               algorithm = "histogram";
               submodule = "log";
             };
             submodule.recurse = true;
-            difftool.prompt = false;
-            "difftool \"nvim\"".cmd = "nvim -c \"DiffviewOpen\"";
+            # difftool.prompt = false;
+            "difftool \"nvim_difftool\"".cmd = "nvim -c \"packadd nvim.difftool\" -c \"DiffTool $LOCAL $REMOTE\"";
             merge = {
-              tool = "diffview";
+              tool = "nvim_mergetool";
               conflictstyle = "diff3";
             };
             mergetool = {
               prompt = false;
               keepBackup = false;
             };
-            "mergetool \"diffview\"".cmd = "nvim -n -c \"DiffviewOpen\" \"$MERGE\"";
+            "mergetool \"nvim_mergetool\"".cmd = "nvim -c \"packadd nvim.difftool\" -c \"DiffTool $LOCAL $REMOTE\"";
             credential.helper = "cache --timeout=3600";
             "filter \"lfs\"" = {
               clean = "git-lfs clean -- %f";

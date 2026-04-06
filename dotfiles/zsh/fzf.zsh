@@ -22,3 +22,40 @@ export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -200'"
 # 6. fzf-tab (Modern replacements)
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons $realpath'
 zstyle ':fzf-tab:*' switch-group ',' '.'
+
+# 7. Atuin + fzf history (snappy Ctrl-R)
+if [[ -o interactive ]]; then
+  _atuin_fzf_history_widget() {
+    emulate -L zsh
+    setopt localoptions pipefail no_aliases
+
+    if ! (( $+commands[atuin] )); then
+      zle history-incremental-search-backward
+      return
+    fi
+
+    local query selected
+    local -a atuin_cmd
+
+    query=$LBUFFER
+    atuin_cmd=(atuin search --cmd-only --limit 20000 --search-mode prefix)
+    [[ -n $query ]] && atuin_cmd+=("$query")
+
+    selected="$(${atuin_cmd[@]} 2>/dev/null | fzf \
+      --height 45% \
+      --layout=reverse \
+      --border \
+      --prompt='atuin> ' \
+      --query="$query" \
+      --bind='ctrl-r:toggle-sort' \
+      --bind='tab:down,btab:up')"
+
+    [[ -z $selected ]] && return
+
+    LBUFFER=$selected
+    zle redisplay
+  }
+
+  zle -N atuin-fzf-history-widget _atuin_fzf_history_widget
+  bindkey '^R' atuin-fzf-history-widget
+fi

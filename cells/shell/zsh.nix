@@ -99,9 +99,7 @@ _: {
               # Starship prompt
               eval "$(starship init zsh)"
 
-              # Keep Up Arrow compact: prefix history search in shell line editor.
-              # Atuin stays on Ctrl-R for fuzzy/interactive history.
-              bindkey '^[[A' up-line-or-beginning-search
+              # Keep Down Arrow native, let Atuin own Up Arrow.
               bindkey '^[[B' down-line-or-beginning-search
             ''
           ];
