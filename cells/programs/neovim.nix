@@ -18,6 +18,12 @@ in
           vimAlias = true;
           withNodeJs = true;
           withPython3 = true;
+          withRuby = false;
+          extraWrapperArgs = [
+            "--set"
+            "DIRENV_LOG_FORMAT"
+            ""
+          ];
           extraPackages = with pkgs; [
             bash-language-server
             fortls
