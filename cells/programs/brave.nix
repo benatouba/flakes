@@ -25,6 +25,7 @@ _: {
             { id = "nngceckbapebfimnlniiiahkandclblb"; } # Bitwarden
             { id = "hfjbmagddngcpeloejdejnfgbamkjaeg"; } # Vimium C
             { id = "eimadpbcbfnmbkopoojfekhnkhdbieeh"; } # Dark Reader
+            { id = "ekhagklcjbdpajgpjgmbionohlpdbjgc"; } # Zotero Connector
           ];
         };
       }
