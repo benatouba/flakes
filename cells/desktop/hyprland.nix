@@ -11,6 +11,7 @@ let
       name: hex: "$" + name + " = rgb(" + hex + ")\n" + "$" + name + "Alpha = " + hex
     ) theme.colors
   );
+  cursorEnvConf = "env = XCURSOR_SIZE, ${toString theme.cursor.size}";
 in
 {
   # NixOS side
@@ -66,6 +67,7 @@ in
           extraConfig = builtins.concatStringsSep "\n" (
             [
               themeConf
+              cursorEnvConf
             ]
             ++ (map builtins.readFile [
               ./hyprland/monitors.conf

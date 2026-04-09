@@ -12,11 +12,12 @@ in
         home = {
           sessionVariables = {
             GTK_THEME = theme.gtk.theme;
+            XCURSOR_SIZE = toString theme.cursor.size;
           };
           pointerCursor = {
             package = pkgs.catppuccin-cursors;
             inherit (theme.cursor) name;
-            size = 32;
+            inherit (theme.cursor) size;
             gtk.enable = true;
           };
         };
@@ -34,6 +35,7 @@ in
           };
           cursorTheme = {
             inherit (theme.cursor) name;
+            inherit (theme.cursor) size;
           };
           iconTheme = {
             inherit (theme.icons) name;
@@ -131,6 +133,7 @@ in
           Net/ThemeName "${theme.gtk.theme}"
           Net/IconThemeName "${theme.icons.name}"
           Gtk/CursorThemeName "${theme.cursor.name}"
+          Gtk/CursorThemeSize ${toString theme.cursor.size}
           Net/EnableEventSounds 1
           EnableInputFeedbackSounds 0
           Xft/Antialias 1

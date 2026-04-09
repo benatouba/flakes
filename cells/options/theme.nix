@@ -69,7 +69,10 @@ in
         };
         cursor = mkOption {
           type = types.submodule {
-            options.name = mkOption { type = types.str; };
+            options = {
+              name = mkOption { type = types.str; };
+              size = mkOption { type = types.int; };
+            };
           };
         };
         colorScheme = mkOption { type = types.str; };

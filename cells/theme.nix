@@ -43,6 +43,7 @@ let
       };
       cursor = {
         name = "Catppuccin-Frappe-Dark";
+        size = 24;
       };
       colorScheme = "prefer-dark";
       kvantum = "catppuccin-mocha-mauve";
@@ -109,6 +110,7 @@ let
       };
       cursor = {
         name = "Catppuccin-Latte-Dark";
+        size = 24;
       };
       colorScheme = "prefer-light";
       kvantum = "catppuccin-latte-mauve";
