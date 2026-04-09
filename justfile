@@ -15,14 +15,23 @@ switch:
 switch-host host="thinkpad":
   nh os switch ~/projects/flakes#{{host}}
 
+update-switch:
+  just update && just switch
+
 test:
   nh os test ~/projects/flakes
+
+update-test:
+  just update && just test
 
 test-host host="thinkpad":
   nh os test ~/projects/flakes#{{host}}
 
 build host="thinkpad":
   nix build .#nixosConfigurations.{{host}}.config.system.build.toplevel
+
+update-build host="thinkpad":
+  just update && just build {{host}}
 
 diff:
   nvd diff /run/current-system ./result
