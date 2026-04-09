@@ -56,3 +56,5 @@ function nvimvenv {
 }
 
 alias nvim=nvimvenv
+
+# sshd() { TERM=xterm-256color command ssh "$@"; }

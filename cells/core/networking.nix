@@ -12,31 +12,33 @@ in
           resolved = {
             enable = true;
             settings.Resolve = {
-              DNS = [
-                "1.1.1.1#cloudflare-dns.com"
-                "1.0.0.1#cloudflare-dns.com"
-              ];
-              DNSOverTLS = "opportunistic";
-              DNSSEC = "allow-downgrade";
+              # DNSOverTLS = "opportunistic";
+              # Captive portals often forge DNS answers until login succeeds.
+              DNSSEC = false;
               FallbackDNS = [
-                "9.9.9.9#dns.quad9.net"
-                "149.112.112.112#dns.quad9.net"
+                "1.1.1.1"
+                "1.0.0.1"
+                "9.9.9.9"
+                "149.112.112.112"
               ];
-              Domains = [ "~." ];
             };
           };
         };
 
         networking = {
           useDHCP = lib.mkDefault false;
-          nameservers = [
-            "1.1.1.1#cloudflare-dns.com"
-            "1.0.0.1#cloudflare-dns.com"
-          ];
           networkmanager = {
             enable = lib.mkDefault true;
             dns = "systemd-resolved";
             plugins = [ pkgs.networkmanager-openconnect ];
+            settings = {
+              connectivity = {
+                enabled = true;
+                uri = "http://nmcheck.gnome.org/check_network_status.txt";
+                interval = 300;
+                response = "NetworkManager is online";
+              };
+            };
           };
           firewall = {
             enable = true;
