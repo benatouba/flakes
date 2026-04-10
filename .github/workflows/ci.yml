@@ -16,10 +16,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
+        uses: DeterminateSystems/nix-installer-action@v22
 
       - name: Prepare CI secrets input
         run: |
@@ -29,8 +29,13 @@ jobs:
           cp secrets/rbw.example.nix .ci-secrets/rbw.nix
           cp secrets/mail-accounts.example.nix .ci-secrets/mail-accounts.nix
 
-      - name: Run flake checks
-        run: nix flake check --print-build-logs --override-input nix-secrets path:./.ci-secrets
+      - name: Build checks output
+        run: |
+          nix build --print-build-logs \
+            --override-input nix-secrets path:./.ci-secrets \
+            .#checks.x86_64-linux.deadnix \
+            .#checks.x86_64-linux.nixfmt \
+            .#checks.x86_64-linux.statix
 
       - name: Evaluate host toplevel derivation
         run: nix eval --raw --override-input nix-secrets path:./.ci-secrets .#nixosConfigurations.thinkpad.config.system.build.toplevel.drvPath
