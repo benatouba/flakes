@@ -3,9 +3,9 @@ _: {
     (
       { pkgs, ... }:
       {
-        home.packages = [
-          pkgs.element-desktop
-          pkgs.iamb
+        home.packages = with pkgs; [
+          element-desktop
+          iamb
         ];
       }
     )
