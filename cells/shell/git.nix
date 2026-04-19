@@ -113,7 +113,7 @@ in
               submodule = "log";
             };
             submodule.recurse = true;
-            # difftool.prompt = false;
+            difftool.prompt = false;
             "difftool \"nvim_difftool\"".cmd = "nvim -c \"packadd nvim.difftool\" -c \"DiffTool $LOCAL $REMOTE\"";
             merge = {
               tool = "nvim_mergetool";
