@@ -58,6 +58,7 @@ in
           extraOptions = ''
             keep-outputs     = true
             keep-derivations = true
+            warn-dirty       = false
           '';
         };
         nixpkgs.config.allowUnfree = true;
