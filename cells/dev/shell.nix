@@ -4,6 +4,7 @@
 
   config.perSystem =
     {
+      config,
       pkgs,
       system,
       ...
@@ -45,10 +46,23 @@
               nixfmt --check flake.nix $(find cells secrets -type f -name '*.nix')
               touch "$out"
             '';
+
+        pre-commit-check = inputs.git-hooks-nix.lib.${system}.run {
+          src = ../../.;
+          hooks = {
+            nixfmt.enable = true;
+            statix.enable = true;
+            deadnix.enable = true;
+            end-of-file-fixer.enable = true;
+            trim-trailing-whitespace.enable = true;
+          };
+        };
       };
 
       devShells.default = pkgs.mkShell {
         shellHook = ''
+          ${config.checks.pre-commit-check.shellHook}
+
                 echo "
            ______   _           _
           |  ____| | |         | |

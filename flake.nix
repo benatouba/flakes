@@ -9,6 +9,11 @@
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
 
+    git-hooks-nix = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     import-tree.url = "github:vic/import-tree";
 
     hyprpicker.url = "github:hyprwm/hyprpicker";
