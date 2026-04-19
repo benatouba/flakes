@@ -6,7 +6,6 @@ _: {
         enableZshIntegration = true;
         flags = [
           "--disable-ctrl-r"
-          "--disable-up-arrow"
         ];
         settings = {
           search_mode = "daemon-fuzzy";
