@@ -85,7 +85,7 @@
     "on-click-middle": "playerctl previous",
     "tooltip-format": "Left: Play/Pause\nRight: Next\nMiddle: Previous"
   },
-  
+
   // Cliphist
   "custom/cliphist": {
     "format": "ïª",

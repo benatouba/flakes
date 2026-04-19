@@ -56,7 +56,7 @@
         "hyprland/window",
         "custom/empty"
     ],
-    // Modules Right    
+    // Modules Right
     "modules-right": [
         "custom/updates",
         "pulseaudio",

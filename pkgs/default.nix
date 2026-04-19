@@ -1,5 +1,6 @@
-rec{
-  overlay = final: _prev:
+rec {
+  overlay =
+    final: _prev:
     let
       dirContents = builtins.readDir ../pkgs;
       genPackage = name: {
@@ -10,4 +11,3 @@ rec{
     in
     builtins.listToAttrs (map genPackage names);
 }
-  

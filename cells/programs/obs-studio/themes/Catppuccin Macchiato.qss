@@ -36,7 +36,7 @@ OBSTheme {
     alternateBase: rgb(24, 25, 38);
 
     text: rgb(202, 211, 245);
-    
+
     button: rgb(54, 58, 79);
     buttonText: rgb(165, 173, 203);
 
@@ -62,14 +62,14 @@ OBSTheme::disabled {
     windowText: rgb(128, 135, 162);
     text: rgb(128, 135, 162);
     button: rgb(36, 39, 58);
-    
+
     buttonText: rgb(30, 32, 48);
     brightText: rgb(30, 32, 48);
 }
 
 OBSTheme::inactive {
     text: rgb(165, 173, 203);
-    
+
     highlight: rgb(24, 25, 38);
     highlightText: rgb(202, 211, 245);
 }
@@ -416,7 +416,7 @@ QScrollBar::handle:pressed {
 }
 
 QScrollBar::handle:vertical {
-    min-height: 20px;   
+    min-height: 20px;
 }
 
 QScrollBar::handle:horizontal {
@@ -875,7 +875,7 @@ QSlider::handle:vertical:pressed {
 }
 
 QSlider::add-page:vertical {
-    background-color: palette(highlight); 
+    background-color: palette(highlight);
     border-radius: 2px;
 }
 
@@ -1484,7 +1484,7 @@ QCalendarWidget QToolButton:pressed {
 
 /* Month Dropdown Menu */
 QCalendarWidget QMenu {
-    
+
 }
 /* Year spinbox */
 QCalendarWidget QSpinBox {

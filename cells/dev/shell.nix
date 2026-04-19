@@ -72,25 +72,28 @@
           |_|      |_|  \__,_| |_|\_\  \___| |___/
                 "
         '';
-        nativeBuildInputs = with pkgs; [
-          git
-          neovim
+        nativeBuildInputs =
+          with pkgs;
+          [
+            git
+            neovim
 
-          nil
-          nixd
-          nixfmt
-          statix
-          deadnix
-          nix-diff
-          nix-tree
-          nix-output-monitor
-          nvd
-          nh
+            nil
+            nixd
+            nixfmt
+            statix
+            deadnix
+            nix-diff
+            nix-tree
+            nix-output-monitor
+            nvd
+            nh
 
-          editorconfig-checker
-          commitlint
-          just
-        ];
+            editorconfig-checker
+            commitlint
+            just
+          ]
+          ++ (config.checks.pre-commit-check.enabledPackages or [ ]);
       };
     };
 }

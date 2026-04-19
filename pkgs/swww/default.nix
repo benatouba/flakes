@@ -1,9 +1,9 @@
-{ lib
-, fetchFromGitHub
-, rustPlatform
-, pkg-config
-, libxkbcommon
-,
+{
+  lib,
+  fetchFromGitHub,
+  rustPlatform,
+  pkg-config,
+  libxkbcommon,
 }:
 rustPlatform.buildRustPackage rec {
   pname = "swww";

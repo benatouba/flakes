@@ -17,7 +17,7 @@
         "hyprland/workspaces",
         "wlr/taskbar",
         "group/quicklinks",
-        //"custom/nowplaying",        
+        //"custom/nowplaying",
         "custom/empty"
     ],
     // Modules Center
@@ -25,7 +25,7 @@
         "clock",
         "custom/empty"
     ],
-    // Modules Right    
+    // Modules Right
     "modules-right": [
         "custom/updates",
         "pulseaudio",

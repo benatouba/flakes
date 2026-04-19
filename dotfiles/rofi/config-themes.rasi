@@ -1,12 +1,12 @@
 /*
-#  ____        __ _  
-# |  _ \ ___  / _(_) 
-# | |_) / _ \| |_| | 
-# |  _ < (_) |  _| | 
-# |_| \_\___/|_| |_| 
-#                    
-# by Stephan Raabe (2023) 
-# ----------------------------------------------------- 
+#  ____        __ _
+# |  _ \ ___  / _(_)
+# | |_) / _ \| |_| |
+# |  _ < (_) |  _| |
+# |_| \_\___/|_| |_|
+#
+# by Stephan Raabe (2023)
+# -----------------------------------------------------
 */
 
 /* ---- Configuration ---- */
@@ -25,7 +25,7 @@ configuration {
     me-select-entry:            "";
     me-accept-entry:            "MousePrimary";
     window-format:              "{w} · {c} · {t}";
-    
+
 }
 
 /* ---- Load colors ---- */
@@ -38,7 +38,7 @@ window {
     y-offset:                     2em;
     spacing:                      0em;
     padding:                      0em;
-    margin:                       0px; 
+    margin:                       0px;
     color:                        #FFFFFF;
     border:                       2px;
     border-color:                 @primary;

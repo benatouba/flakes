@@ -38,7 +38,7 @@
     border-radius: 12px;
     background: radial-gradient(circle at 50% 250%, @surface, @surface_dim) padding-box,
         linear-gradient(#FFFFFF,@on_primary) border-box;
-    border: 1px solid transparent;	
+    border: 1px solid transparent;
     opacity:0.9;
     margin:10px;
     margin-right:18px;
@@ -302,7 +302,7 @@ trough highlight {
     border-radius: 12px;
     background: radial-gradient(circle at 50% 250%, @primary, @surface) padding-box,
         linear-gradient(#FFFFFF,@on_primary) border-box;
-    border: 1px solid transparent;	
+    border: 1px solid transparent;
     opacity:1.0;
     padding:10px;
     margin:10px 0px 0px 0px;

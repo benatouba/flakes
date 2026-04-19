@@ -242,7 +242,7 @@ window#waybar.empty #window {
     font-weight: bold;
     opacity: 1.0;
     color: @icon_color;
-    transition: all 0.3s ease-out;    
+    transition: all 0.3s ease-out;
 }
 
 #idle_inhibitor.activated {
@@ -265,7 +265,7 @@ window#waybar.empty #window {
     padding: 3px 10px 3px 10px;
     margin: 3px 10px 3px 0px;
     border: 2px solid @border_color;
-    transition: all 0.3s ease-out;    
+    transition: all 0.3s ease-out;
 }
 
 #custom-appmenu:hover {
@@ -333,7 +333,7 @@ window#waybar.empty #window {
     padding: 2px 10px 0px 10px;
     margin: 3px 10px 3px 0px;
     border: 2px solid @border_color;
-    transition: all 0.3s ease-out;    
+    transition: all 0.3s ease-out;
 }
 
 #custom-updates.green:hover {
@@ -394,7 +394,7 @@ window#waybar.empty #window {
     padding: 1px 10px 0px 10px;
     margin: 3px 0px 3px 0px;
     border: 2px solid @border_color;
-    transition: all 0.3s ease-out;    
+    transition: all 0.3s ease-out;
 }
 
 #clock:hover {
@@ -416,7 +416,7 @@ window#waybar.empty #window {
     padding: 2px 10px 0px 10px;
     margin: 3px 10px 3px 0px;
     border: 2px solid @border_color;
-    transition: all 0.3s ease-out;    
+    transition: all 0.3s ease-out;
 }
 
 #backlight:hover {
@@ -438,7 +438,7 @@ window#waybar.empty #window {
     margin: 3px 10px 3px 0px;
     opacity: 1.0;
     border: 2px solid @border_color;
-    transition: all 0.3s ease-out;    
+    transition: all 0.3s ease-out;
 }
 
 #pulseaudio:hover {
@@ -464,7 +464,7 @@ window#waybar.empty #window {
     padding: 2px 10px 0px 10px;
     margin: 3px 10px 3px 0px;
     border: 2px solid @border_color;
-    transition: all 0.3s ease-out;    
+    transition: all 0.3s ease-out;
 }
 
 #network.ethernet:hover {
@@ -501,7 +501,7 @@ window#waybar.empty #window {
     padding: 2px 10px 0px 10px;
     margin: 3px 10px 3px 0px;
     border: 2px solid @border_color;
-    transition: all 0.3s ease-out;    
+    transition: all 0.3s ease-out;
 }
 
 #bluetooth:hover {

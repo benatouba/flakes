@@ -1,5 +1,4 @@
-self: super:
-{
+self: super: {
   gdal = super.gdal.overrideAttrs (_old: {
     name = "gdal-3.4.0";
     pname = "gdal";

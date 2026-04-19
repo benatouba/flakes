@@ -24,7 +24,7 @@
         "on-click-right": "sleep 0.1 && com.ml4w.welcome",
         "format": " ",
         "tooltip": false
-    },    
+    },
     // Waybar Themes
     "custom/waybarthemes": {
         "format": "Themes",

@@ -1,7 +1,7 @@
 [
   (import ./cinnamon.nemo)
   (import ./iamb)
-  (final: prev: {
+  (_: prev: {
     sonic-pi =
       (prev.sonic-pi.override {
         # Ruby 3.4 moved mutex_m out of the default gems set, and vendored

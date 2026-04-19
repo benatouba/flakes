@@ -114,7 +114,8 @@ in
             };
             submodule.recurse = true;
             difftool.prompt = false;
-            "difftool \"nvim_difftool\"".cmd = "nvim -c \"packadd nvim.difftool\" -c \"DiffTool $LOCAL $REMOTE\"";
+            "difftool \"nvim_difftool\"".cmd =
+              "nvim -c \"packadd nvim.difftool\" -c \"DiffTool $LOCAL $REMOTE\"";
             merge = {
               tool = "nvim_mergetool";
               conflictstyle = "diff3";
@@ -123,7 +124,8 @@ in
               prompt = false;
               keepBackup = false;
             };
-            "mergetool \"nvim_mergetool\"".cmd = "nvim -c \"packadd nvim.difftool\" -c \"DiffTool $LOCAL $REMOTE\"";
+            "mergetool \"nvim_mergetool\"".cmd =
+              "nvim -c \"packadd nvim.difftool\" -c \"DiffTool $LOCAL $REMOTE\"";
             credential.helper = "cache --timeout=3600";
             "filter \"lfs\"" = {
               clean = "git-lfs clean -- %f";
