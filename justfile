@@ -27,11 +27,11 @@ update-test:
 test-host host="thinkpad":
   nh os test ~/projects/flakes#{{host}}
 
-build host="thinkpad":
-  nix build .#nixosConfigurations.{{host}}.config.system.build.toplevel
+build:
+  nh os build ~/projects/flakes
 
-update-build host="thinkpad":
-  just update && just build {{host}}
+update-build:
+  just update && just build
 
 diff:
   nvd diff /run/current-system ./result
