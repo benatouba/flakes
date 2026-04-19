@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   user = config.my.user.name;
 in
@@ -13,7 +13,8 @@ in
         programs.neovim = {
           enable = true;
           defaultEditor = true;
-          package = pkgs.neovim;
+          package = pkgs.neovim-unwrapped;
+          initLua = lib.mkForce "";
           viAlias = true;
           vimAlias = true;
           withNodeJs = true;
