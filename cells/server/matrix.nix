@@ -5,7 +5,7 @@ in
 {
   config.my.branches.matrix.nixosModules = [
     (
-      { pkgs, ... }:
+      _:
       lib.mkIf cfg.enable {
         services.matrix-synapse = {
           enable = true;
