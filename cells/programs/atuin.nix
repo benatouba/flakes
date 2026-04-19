@@ -8,6 +8,7 @@ _: {
           "--disable-ctrl-r"
         ];
         settings = {
+          enter_accept = true;
           search_mode = "daemon-fuzzy";
           filter_mode = "host";
           search_mode_shell_up_key_binding = "prefix";
@@ -18,6 +19,7 @@ _: {
           show_preview = false;
           show_help = false;
           show_tabs = false;
+          accept_past_line_start = true;
 
           daemon = {
             enabled = true;
