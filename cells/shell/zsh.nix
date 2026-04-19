@@ -99,8 +99,7 @@ _: {
               # Starship prompt
               eval "$(starship init zsh)"
 
-              # Keep arrow keys on native zsh history search.
-              bindkey '^[[A' up-line-or-beginning-search
+              # Keep Down Arrow native, let Atuin own Up Arrow.
               bindkey '^[[B' down-line-or-beginning-search
             ''
           ];
