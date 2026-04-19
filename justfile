@@ -4,7 +4,7 @@ default:
   @just --list
 
 check:
-  nix flake check
+  nix flake check --checks pre-commit-check
 
 fmt:
   nix fmt
