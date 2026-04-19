@@ -11,6 +11,3 @@ secrets/mail-accounts.nix
 secrets/rbw.nix
 secrets/ssh-hosts.nix
 secrets/secrets.yaml
-
-# flake.lock since I don't need 100% identical builds across all machinee
-flake.lock
