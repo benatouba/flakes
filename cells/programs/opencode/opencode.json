@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    "@simonwjackson/opencode-direnv",
+    "envsitter-guard@latest",
+    "@tarquinen/opencode-dcp@latest",
+    "@ramtinj95/opencode-tokenscope",
+    "opencode-plugin-openspec",
+    "opentmux"
+  ],
+  "mcp": {
+    "vuetify-mcp": {
+      "type": "remote",
+      "url": "https://mcp.vuetifyjs.com/mcp",
+      "enabled": true,
+      "timeout": 5000
+    }
+  }
+}
