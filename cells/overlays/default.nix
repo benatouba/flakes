@@ -1,6 +1,12 @@
 { inputs, ... }:
+let
+  defaultOverlay = inputs.nixpkgs.lib.composeManyExtensions [
+    (import ../../pkgs).overlay
+    inputs.neovim-nightly.overlays.default
+  ];
+in
 {
-  config.flake.overlays.default = (import ../../pkgs).overlay;
+  config.flake.overlays.default = defaultOverlay;
 
   config.my.branches.base.nixosModules = [
     (
@@ -8,8 +14,7 @@
       {
         nixpkgs = {
           overlays = (import ../../overlays) ++ [
-            (import ../../pkgs).overlay
-            inputs.neovim-nightly.overlays.default
+            inputs.self.overlays.default
           ];
         };
       }
