@@ -34,6 +34,11 @@ _: {
           consoleLogLevel = 0;
           initrd.verbose = false;
         };
+
+        services.journald.extraConfig = ''
+          SystemMaxUse=200M
+          RuntimeMaxUse=200M
+        '';
       }
     )
   ];

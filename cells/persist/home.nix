@@ -32,6 +32,11 @@ _: {
           ".config/gh"
           ".zoom"
           ".cache/nix"
+          ".cache/Cypress"
+          ".cache/ms-playwright"
+          ".cache/opencode"
+          ".cache/BraveSoftware"
+          ".npm"
           ".local/share/direnv"
           ".local/share/devenv"
           "mail"
@@ -39,6 +44,7 @@ _: {
           ".config/gtk-4.0"
           ".local/share/atuin"
           ".local/share/nix-index"
+          ".local/share/opencode"
         ];
       };
     }
