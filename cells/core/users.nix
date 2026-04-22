@@ -22,7 +22,7 @@ in
             gdal
             hugo
             gimp
-            nodejs
+            nodejs_latest
             pnpm
           ];
         };

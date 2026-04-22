@@ -7,14 +7,24 @@ _: {
         pkgs,
         ...
       }:
+      let
+        wrappedOpencode = pkgs.symlinkJoin {
+          name = "opencode-wrapped";
+          paths = [ pkgs.opencode ];
+          nativeBuildInputs = [ pkgs.makeWrapper ];
+          postBuild = ''
+            wrapProgram $out/bin/opencode \
+              --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ]}" \
+              --prefix PATH : "${lib.makeBinPath [ pkgs.bun ]}"
+          '';
+        };
+      in
       {
         home.packages = with pkgs; [
-          opencode
+          wrappedOpencode
+          bun # runtime for opencode plugin dependency installs
           nil # Nix LSP server
-          eslint # JavaScript linter
-          prettier # Code formatter
-          djlint # Django template linter
-          nodejs # needed for JavaScript tools
+          nodejs_latest # needed for JavaScript tools
           # Python with RAG dependencies
           (python3.withPackages (
             ps: with ps; [
