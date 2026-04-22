@@ -26,44 +26,13 @@ in
             ""
           ];
           extraPackages = with pkgs; [
-            bash-language-server
-            fortls
-            hyprls
-            lemminx
-            lua-language-server
-            matlab-language-server
             nil
             nixd
-            nginx-language-server
-            postgres-language-server
-            sqls
-            texlab
-            tinymist
-            vim-language-server
-            yaml-language-server
-
-            docker-language-server
-            marksman
-            taplo
-
-            texlivePackages.latexindent
             nixfmt
-            prettier
-            prettierd
-            stylua
-            typstyle
-            xmlformat
-            yamlfmt
+            statix
 
-            actionlint
-            codespell
             commitlint
             editorconfig-checker
-            markdownlint-cli
-            proselint
-            selene
-
-            vscode-js-debug
 
             tree-sitter
             gcc
