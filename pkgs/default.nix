@@ -1,4 +1,4 @@
-rec {
+{
   overlay =
     final: _prev:
     let
