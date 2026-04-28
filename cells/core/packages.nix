@@ -11,6 +11,7 @@ _: {
           killall
           libglvnd
           lshw
+          lsof
           pciutils
           unzip
           socat
