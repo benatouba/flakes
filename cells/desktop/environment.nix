@@ -5,7 +5,7 @@ _: {
         sessionVariables = {
           EDITOR = "nvim";
           BROWSER = "brave";
-          TERMINAL = "wezterm";
+          # TERMINAL = "wezterm";
           QT_SCALE_FACTOR = "1";
           MOZ_ENABLE_WAYLAND = "1";
           SDL_VIDEODRIVER = "wayland";
