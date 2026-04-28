@@ -34,6 +34,12 @@ build mode="":
 update-build:
   just update && just build
 
+boot mode="":
+  if [ "{{mode}}" = "" ]; then nh os boot ~/projects/flakes; elif [ "{{mode}}" = "up" ]; then nh os boot --update ~/projects/flakes; else echo "Invalid mode '{{mode}}'. Use 'up' or omit it." >&2; exit 1; fi
+
+update-boot:
+  just update && just boot
+
 diff:
   nvd diff /run/current-system ./result
 
