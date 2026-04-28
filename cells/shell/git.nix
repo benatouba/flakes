@@ -143,7 +143,6 @@ in
             "**/tags"
             "**/*.orig"
             "**/*.coverage*"
-            "**/*cache*"
             ".vscode"
             "**/htmlcov*"
             ".vimspector.*"
