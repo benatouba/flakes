@@ -100,7 +100,14 @@ _: {
               eval "$(starship init zsh)"
 
               # Keep Down Arrow native, let Atuin own Up Arrow.
-              bindkey '^[[B' down-line-or-beginning-search
+              # bindkey '^[[B' down-line-or-beginning-search
+              fpath=(~/.zsh/completions $fpath)
+              autoload -U compinit
+              compinit
+
+              if (( $+commands[just] )); then
+                source <(just --completions zsh)
+              fi
             ''
           ];
         };
@@ -121,6 +128,7 @@ _: {
           pay-respects
           nh
           comma
+          just
         ];
 
         home.shellAliases = {
