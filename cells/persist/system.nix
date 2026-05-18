@@ -3,7 +3,7 @@ let
   user = config.my.user.name;
 in
 {
-  config.my.branches.security.nixosModules = [
+  config.my.branches.persist.nixosModules = [
     {
       environment.persistence."/persist" = {
         hideMounts = true;

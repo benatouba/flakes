@@ -3,16 +3,24 @@ let
   secretsRoot = toString inputs.nix-secrets;
   rbwPath = "${secretsRoot}/rbw.nix";
 in
-assert builtins.pathExists rbwPath;
 {
 
-  config.my.branches.security.hmModules = [
+  config.my.branches.personal.hmModules = [
     (
-      { pkgs, ... }:
+      { lib, pkgs, ... }:
       let
-        secrets = import rbwPath;
+        hasRbwConfig = builtins.pathExists rbwPath;
+        secrets = if hasRbwConfig then import rbwPath else { };
       in
       {
+        assertions = [
+          {
+            assertion = hasRbwConfig;
+            message = "The personal branch requires ${rbwPath} to exist.";
+          }
+        ];
+      }
+      // lib.optionalAttrs hasRbwConfig {
         programs.rbw = {
           enable = true;
           settings = {

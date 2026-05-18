@@ -15,5 +15,19 @@
       "enabled": true,
       "timeout": 5000
     }
+  },
+  "permission": {
+    "read": {
+      "*": "allow"
+    },
+    "edit": {
+      "*": "ask",
+      "/nix/store/**": "deny"
+    },
+    "external_directory": {
+      "/nix/store/**": "allow",
+      "~/.config/nix/**": "allow",
+      "~/.cache/nix/**": "allow"
+    }
   }
 }

@@ -1,5 +1,5 @@
 _: {
-  config.my.branches.security.hmModules = [
+  config.my.branches.persist.hmModules = [
     {
       home.persistence."/persist" = {
         directories = [

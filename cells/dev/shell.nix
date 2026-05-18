@@ -20,6 +20,12 @@
       formatter = pkgs.nixfmt;
 
       checks = {
+        actionlint = pkgs.runCommand "actionlint-check" { nativeBuildInputs = [ pkgs.actionlint ]; } ''
+          cd ${inputs.self}
+          actionlint .github/workflows/*.yml
+          touch "$out"
+        '';
+
         deadnix = pkgs.runCommand "deadnix-check" { nativeBuildInputs = [ pkgs.deadnix ]; } ''
           cd ${inputs.self}
           deadnix --fail cells flake.nix
@@ -52,6 +58,7 @@
             nixfmt.enable = true;
             statix.enable = true;
             deadnix.enable = true;
+            actionlint.enable = true;
             end-of-file-fixer.enable = true;
             trim-trailing-whitespace.enable = true;
           };
@@ -82,11 +89,19 @@
             nixfmt
             statix
             deadnix
+            actionlint
+            shellcheck
+            shfmt
+            nix-fast-build
             nix-diff
             nix-tree
             nix-output-monitor
             nvd
             nh
+            nixos-generators
+            attic-client
+            nix-update
+            nurl
 
             editorconfig-checker
             commitlint

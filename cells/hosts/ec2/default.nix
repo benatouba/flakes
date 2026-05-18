@@ -1,35 +1,35 @@
-{ config, lib, ... }:
+{
+  config,
+  inputs,
+  lib,
+  myHostLib,
+  ...
+}:
 let
   cfg = config.my;
   hostCfg = cfg.hosts.ec2;
-
-  selectedBranchNames = lib.unique hostCfg.branches;
-  knownBranchNames = builtins.attrNames cfg.branches;
-  unknownBranches = builtins.filter (
-    name: !(builtins.elem name knownBranchNames)
-  ) selectedBranchNames;
-  selectedBranches =
-    if unknownBranches != [ ] then
-      throw (
-        "Unknown branch names for ec2 in my.hosts.ec2.branches: "
-        + lib.concatStringsSep ", " unknownBranches
-      )
-    else
-      map (name: cfg.branches.${name}) selectedBranchNames;
-
-  branchNixosModules = lib.concatMap (branchCfg: branchCfg.nixosModules) selectedBranches;
+  branches = myHostLib.resolveBranches {
+    inherit cfg hostCfg;
+    hostName = "ec2";
+  };
+  ec2Modules = branches.nixosModules ++ hostCfg.nixosModules ++ hostCfg.hardwareModules;
 in
 {
   config.my.hosts.ec2 = {
     system = "x86_64-linux";
+    includeProfileBranches = false;
     branches = [
       "server"
       "matrix"
     ];
     nixosModules = [
       (
-        { ... }:
+        { modulesPath, ... }:
         {
+          imports = [
+            (modulesPath + "/virtualisation/amazon-image.nix")
+          ];
+
           networking.hostName = "ec2";
 
           users.users.root.hashedPasswordFile = lib.mkForce null;
@@ -57,6 +57,12 @@ in
 
   config.flake.nixosConfigurations.ec2 = lib.nixosSystem {
     system = hostCfg.system;
-    modules = branchNixosModules ++ hostCfg.nixosModules ++ hostCfg.hardwareModules;
+    modules = ec2Modules;
+  };
+
+  config.flake.packages.${hostCfg.system}.ec2-amazon = inputs.nixos-generators.nixosGenerate {
+    system = hostCfg.system;
+    format = "amazon";
+    modules = ec2Modules;
   };
 }

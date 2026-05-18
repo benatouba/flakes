@@ -33,15 +33,5 @@ in
       type = types.bool;
       default = false;
     };
-
-    nixosModules = mkOption {
-      type = types.listOf types.deferredModule;
-      default = [ ];
-    };
-
-    hmModules = mkOption {
-      type = types.listOf types.deferredModule;
-      default = [ ];
-    };
   };
 }

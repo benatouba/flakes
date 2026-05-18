@@ -2,12 +2,17 @@
 let
   secretsRoot = toString inputs.nix-secrets;
   defaultSopsFile = "${secretsRoot}/secrets.yaml";
+  assertSecretsFile = {
+    assertion = builtins.pathExists defaultSopsFile;
+    message = "The secrets branch requires ${defaultSopsFile} to exist.";
+  };
 in
-assert builtins.pathExists defaultSopsFile;
 {
 
-  config.my.branches.security.nixosModules = [
+  config.my.branches.secrets.nixosModules = [
     {
+      assertions = [ assertSecretsFile ];
+
       sops = {
         inherit defaultSopsFile;
         age.keyFile = "/persist/sops/age/keys.txt";
@@ -15,8 +20,10 @@ assert builtins.pathExists defaultSopsFile;
     }
   ];
 
-  config.my.branches.security.hmModules = [
+  config.my.branches.secrets.hmModules = [
     {
+      assertions = [ assertSecretsFile ];
+
       sops = {
         inherit defaultSopsFile;
         age.keyFile = "/persist/sops/age/keys.txt";

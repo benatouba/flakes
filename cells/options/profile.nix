@@ -11,10 +11,12 @@ in
           "base"
           "desktop"
           "security"
-          "legacy"
+          "persist"
+          "secrets"
+          "personal"
           "addons"
         ];
-        description = "Global branch set shared by all hosts.";
+        description = "Global branch set used by hosts with includeProfileBranches enabled.";
       };
 
       theme = mkOption {

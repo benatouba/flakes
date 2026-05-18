@@ -19,7 +19,10 @@ _: {
 
   config.my.branches.desktop.hmModules = [
     (
-      { pkgs, ... }:
+      { lib, pkgs, ... }:
+      let
+        useLuaConfig = lib.versionAtLeast (lib.getVersion pkgs.hyprland) "0.55.0";
+      in
       {
         # OBS Studio with streaming plugins
         programs.obs-studio = {
@@ -41,36 +44,62 @@ _: {
           chatterino2
         ];
 
-        # Hyprland window rules for streaming
-        wayland.windowManager.hyprland.extraConfig = ''
-          # Streaming rules
-          windowrule {
-              name = obs-opaque
-              match:class = ^(com\.obsproject\.Studio)$
-              opaque = true
-          }
+        # Keep streaming tweaks aligned with the active Hyprland config format.
+        wayland.windowManager.hyprland.extraConfig =
+          if useLuaConfig then
+            ''
+              hl.window_rule({
+                name = "obs-opaque",
+                match = { class = "^(com\\.obsproject\\.Studio)$" },
+                opaque = true,
+              })
+              hl.window_rule({
+                name = "obs-idle-inhibit",
+                match = { class = "^(com\\.obsproject\\.Studio)$" },
+                idle_inhibit = "always",
+              })
+              hl.window_rule({
+                name = "chatterino-float",
+                match = { class = "^(com\\.chatterino\\.)$" },
+                float = true,
+                size = "400 700",
+                move = "100%-w-10 60",
+              })
 
-          windowrule {
-              name = obs-idle-inhibit
-              match:class = ^(com\.obsproject\.Studio)$
-              idle_inhibit = always
-          }
+              hl.workspace_rule({
+                workspace = "name:stream",
+                monitor = "eDP-1",
+                on_created_empty = "obs",
+              })
 
-          windowrule {
-              name = chatterino-float
-              match:class = ^(com\.chatterino\.)$
-              float = true
-              size = 400 700
-              move = 100%-w-10 60
-          }
+              hl.bind("SUPER_L + s", hl.dsp.focus({ workspace = "name:stream" }))
+              hl.bind("SUPER_L + SHIFT + s", hl.dsp.window.move({ workspace = "name:stream" }))
+            ''
+          else
+            ''
+              windowrule {
+                  name = obs-opaque
+                  match:class = ^(com\.obsproject\.Studio)$
+                  opaque = true
+              }
+              windowrule {
+                  name = obs-idle-inhibit
+                  match:class = ^(com\.obsproject\.Studio)$
+                  idle_inhibit = always
+              }
+              windowrule {
+                  name = chatterino-float
+                  match:class = ^(com\.chatterino\.)$
+                  float = true
+                  size = 400 700
+                  move = 100%-w-10 60
+              }
 
-          # Streaming workspace
-          workspace = name:stream, monitor:eDP-1, on-created-empty:obs
+              workspace = name:stream, monitor:eDP-1, on-created-empty:obs
 
-          # Streaming workspace keybinds
-          bind = SUPER_L, s, workspace, name:stream
-          bind = SUPER_L SHIFT, s, movetoworkspace, name:stream
-        '';
+              bind = SUPER_L, s, workspace, name:stream
+              bind = SUPER_L SHIFT, s, movetoworkspace, name:stream
+            '';
       }
     )
   ];

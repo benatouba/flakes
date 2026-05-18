@@ -3,8 +3,12 @@
 .direnv/
 .devenv/
 devenv.lock
+node_modules/
+cells/programs/opencode/node_modules/
 
 result
+result-*
+.ci-secrets/
 
 # Private config — only example templates and encrypted files are committed
 secrets/mail-accounts.nix

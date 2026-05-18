@@ -2,29 +2,17 @@
   config,
   inputs,
   lib,
+  myHostLib,
   ...
 }:
 let
   cfg = config.my;
   hostCfg = cfg.hosts.thinkpad;
   user = cfg.user.name;
-
-  selectedBranchNames = lib.unique (cfg.profile.branches ++ hostCfg.branches);
-  knownBranchNames = builtins.attrNames cfg.branches;
-  unknownBranches = builtins.filter (
-    name: !(builtins.elem name knownBranchNames)
-  ) selectedBranchNames;
-  selectedBranches =
-    if unknownBranches != [ ] then
-      throw (
-        "Unknown branch names for thinkpad in my.profile.branches/my.hosts.thinkpad.branches: "
-        + lib.concatStringsSep ", " unknownBranches
-      )
-    else
-      map (name: cfg.branches.${name}) selectedBranchNames;
-
-  branchNixosModules = lib.concatMap (branchCfg: branchCfg.nixosModules) selectedBranches;
-  branchHmModules = lib.concatMap (branchCfg: branchCfg.hmModules) selectedBranches;
+  branches = myHostLib.resolveBranches {
+    inherit cfg hostCfg;
+    hostName = "thinkpad";
+  };
 in
 {
   config.my.hosts.thinkpad = {
@@ -50,7 +38,7 @@ in
           useUserPackages = true;
           extraSpecialArgs = { inherit inputs; };
           users.${user}.imports =
-            branchHmModules
+            branches.hmModules
             ++ hostCfg.hmModules
             ++ [
               inputs.sops-nix.homeManagerModules.sops
@@ -70,7 +58,7 @@ in
         };
       }
     ]
-    ++ branchNixosModules
+    ++ branches.nixosModules
     ++ hostCfg.nixosModules
     ++ hostCfg.hardwareModules;
   };

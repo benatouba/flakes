@@ -5,10 +5,9 @@ let
   secretsRoot = toString inputs.nix-secrets;
   mailAccountsPath = "${secretsRoot}/mail-accounts.nix";
 in
-assert builtins.pathExists mailAccountsPath;
 {
 
-  config.my.branches.security.hmModules = [
+  config.my.branches.personal.hmModules = [
     (
       {
         config,
@@ -17,7 +16,8 @@ assert builtins.pathExists mailAccountsPath;
         ...
       }:
       let
-        accts = import mailAccountsPath;
+        hasMailAccounts = builtins.pathExists mailAccountsPath;
+        accts = if hasMailAccounts then import mailAccountsPath else { };
         a = accts;
         urlEncode = builtins.replaceStrings [ "@" "\\" ] [ "%40" "%5C" ];
         secret = name: config.sops.secrets."mail_${name}".path;
@@ -70,6 +70,14 @@ assert builtins.pathExists mailAccountsPath;
         '';
       in
       {
+        assertions = [
+          {
+            assertion = hasMailAccounts;
+            message = "The personal branch requires ${mailAccountsPath} to exist.";
+          }
+        ];
+      }
+      // lib.optionalAttrs hasMailAccounts {
         services.imapnotify.enable = true;
         sops = {
           secrets = {

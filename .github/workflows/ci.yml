@@ -31,11 +31,16 @@ jobs:
 
       - name: Build checks output
         run: |
-          nix build --print-build-logs \
+          nix run nixpkgs#nix-fast-build -- \
+            --flake .#checks.x86_64-linux \
             --override-input nix-secrets path:./.ci-secrets \
-            .#checks.x86_64-linux.deadnix \
-            .#checks.x86_64-linux.nixfmt \
-            .#checks.x86_64-linux.statix
+            --no-link \
+            --no-nom
 
-      - name: Evaluate host toplevel derivation
+      - name: Build EC2 image output
+        run: nix build --print-build-logs --override-input nix-secrets path:./.ci-secrets .#ec2-amazon
+
+      - name: Evaluate host toplevel derivations
         run: nix eval --raw --override-input nix-secrets path:./.ci-secrets .#nixosConfigurations.thinkpad.config.system.build.toplevel.drvPath
+      - name: Evaluate server host toplevel derivation
+        run: nix eval --raw --override-input nix-secrets path:./.ci-secrets .#nixosConfigurations.ec2.config.system.build.toplevel.drvPath
