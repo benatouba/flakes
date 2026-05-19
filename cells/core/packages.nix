@@ -5,6 +5,7 @@ _: {
       {
         environment.systemPackages = with pkgs; [
           curl
+          dnsutils
           eza
           fzf
           git

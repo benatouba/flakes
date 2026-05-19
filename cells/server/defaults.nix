@@ -46,14 +46,15 @@ in
             "nix-command"
             "flakes"
           ];
-          trusted-users = [
+          trusted-users = lib.mkForce [
             "root"
-            "@wheel"
+            user
           ];
         };
 
         environment.systemPackages = with pkgs; [
           curl
+          dnsutils
           git
           htop
           tmux

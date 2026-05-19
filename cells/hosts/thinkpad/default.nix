@@ -29,34 +29,35 @@ in
       ./_hardware.nix
       inputs.impermanence.nixosModules.impermanence
       inputs.home-manager.nixosModules.home-manager
-      inputs.sops-nix.nixosModules.sops
-      {
-        networking.hostName = "thinkpad";
+      (
+        { ... }:
+        {
+          networking.hostName = "thinkpad";
 
-        home-manager = {
-          useGlobalPkgs = true;
-          useUserPackages = true;
-          extraSpecialArgs = { inherit inputs; };
-          users.${user}.imports =
-            branches.hmModules
-            ++ hostCfg.hmModules
-            ++ [
-              inputs.sops-nix.homeManagerModules.sops
-              inputs.hyprland.homeManagerModules.default
-              (
-                { lib, ... }:
-                {
-                  home = {
-                    username = user;
-                    homeDirectory = lib.mkForce "/home/${user}";
-                    stateVersion = cfg.stateVersion;
-                  };
-                  programs.home-manager.enable = true;
-                }
-              )
-            ];
-        };
-      }
+          home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            extraSpecialArgs = { inherit inputs; };
+            users.${user}.imports =
+              branches.hmModules
+              ++ hostCfg.hmModules
+              ++ [
+                inputs.hyprland.homeManagerModules.default
+                (
+                  { lib, ... }:
+                  {
+                    home = {
+                      username = user;
+                      homeDirectory = lib.mkForce "/home/${user}";
+                      stateVersion = cfg.stateVersion;
+                    };
+                    programs.home-manager.enable = true;
+                  }
+                )
+              ];
+          };
+        }
+      )
     ]
     ++ branches.nixosModules
     ++ hostCfg.nixosModules

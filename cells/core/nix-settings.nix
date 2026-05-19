@@ -6,6 +6,7 @@
 }:
 let
   isHardened = config.my.profile.security.level == "hardened";
+  user = config.my.user.name;
 in
 {
   config.my.branches.base.nixosModules = [
@@ -17,9 +18,9 @@ in
             auto-optimise-store = true;
             sandbox = true;
             allowed-users = [ "@wheel" ];
-            trusted-users = [
+            trusted-users = lib.mkForce [
               "root"
-              "@wheel"
+              user
             ];
             max-jobs = "auto";
             cores = 0;
