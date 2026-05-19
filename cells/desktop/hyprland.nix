@@ -114,6 +114,8 @@ let
       "true"
     else if value == "false" then
       "false"
+    else if builtins.match "-?[0-9]+(\\.[0-9]+)?" value != null then
+      value
     else
       luaString value;
 
@@ -326,7 +328,7 @@ let
 
     ${monitorLua}
 
-    local mainMod = "SUPER_L"
+    local mainMod = "SUPER"
     local browser = "brave"
     local terminal = "wezterm connect unix"
     local scriptsDir = os.getenv("HOME") .. "/.config/hypr/scripts"
@@ -379,7 +381,6 @@ let
         },
       },
       dwindle = {
-        pseudotile = true,
         preserve_split = true,
       },
       master = {
@@ -406,7 +407,7 @@ let
         repeat_rate = 40,
         touchpad = {
           natural_scroll = true,
-          ["tap-to-click"] = true,
+          tap_to_click = true,
           disable_while_typing = true,
         },
         sensitivity = 0,
@@ -551,8 +552,8 @@ let
     hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd("hyprctl --batch \"keyword general:gaps_out 5;keyword general:gaps_in 3\""))
     hl.bind(mainMod .. " + G", hl.dsp.exec_cmd("hyprctl --batch \"keyword general:gaps_out 0;keyword general:gaps_in 0\""))
     hl.bind(mainMod .. " + backslash", hl.dsp.exec_cmd("hyprctl switchxkblayout all next"))
-    hl.bind("ALT_L + W", hl.dsp.exec_cmd("bash " .. scriptsDir .. "/random-wallpaper.sh"))
-    hl.bind("ALT_L + SHIFT + C", hl.dsp.exec_cmd("bash " .. scriptsDir .. "/toggle-charge.sh"))
+    hl.bind("ALT + W", hl.dsp.exec_cmd("bash " .. scriptsDir .. "/random-wallpaper.sh"))
+    hl.bind("ALT + SHIFT + C", hl.dsp.exec_cmd("bash " .. scriptsDir .. "/toggle-charge.sh"))
     hl.bind(mainMod .. " + ALT + L", hl.dsp.exec_cmd("hyprlock"))
     hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("waybar-toggle"))
     hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | rofi -dmenu -theme cliphist_theme.rasi | cliphist decode | wl-copy"))

@@ -72,8 +72,8 @@ _: {
                 on_created_empty = "obs",
               })
 
-              hl.bind("SUPER_L + s", hl.dsp.focus({ workspace = "name:stream" }))
-              hl.bind("SUPER_L + SHIFT + s", hl.dsp.window.move({ workspace = "name:stream" }))
+              hl.bind("SUPER + s", hl.dsp.focus({ workspace = "name:stream" }))
+              hl.bind("SUPER + SHIFT + s", hl.dsp.window.move({ workspace = "name:stream" }))
             ''
           else
             ''
