@@ -1,6 +1,9 @@
 set shell := ["bash", "-cu"]
 set quiet
 
+root := justfile_directory()
+secrets := env_var_or_default("NIX_SECRETS_DIR", "/home/ben/.local/secrets")
+
 default:
   @just --list
 
@@ -17,45 +20,44 @@ lint-actions:
 fmt:
   nix fmt
 
-switch mode="":
-  if [ "{{mode}}" = "" ]; then nh os switch ~/projects/flakes; elif [ "{{mode}}" = "up" ]; then nh os switch --update ~/projects/flakes; else echo "Invalid mode '{{mode}}'. Use 'up' or omit it." >&2; exit 1; fi
+[arg("update", long="update", short="u", value="true", help="Update flakes before running the command")]
+switch update="false" host="thinkpad":
+  nh os switch {{ if update == "true" { "--update" } else { "" } }} {{root}}#{{host}}
 
-switch-host host="thinkpad":
-  nh os switch ~/projects/flakes#{{host}}
+[arg("update", long="update", short="u", value="true", help="Update flakes before running the command")]
+test update="false" host="thinkpad":
+  nh os test {{ if update == "true" { "--update" } else { "" } }} {{root}}#{{host}}
 
-update-switch:
-  just update && just switch
+[arg("update", long="update", short="u", value="true", help="Update flakes before running the command")]
+build update="false" host="thinkpad":
+  nh os build {{ if update == "true" { "-u" } else { "" } }} {{root}}#{{host}}
 
-test mode="":
-  if [ "{{mode}}" = "" ]; then nh os test ~/projects/flakes; elif [ "{{mode}}" = "up" ]; then nh os test --update ~/projects/flakes; else echo "Invalid mode '{{mode}}'. Use 'up' or omit it." >&2; exit 1; fi
+[arg("update", long="update", short="u", value="true", help="Update flakes before running the command")]
+boot update="false" host="thinkpad":
+  nh os boot {{ if update == "true" { "--update" } else { "" } }} {{root}}#{{host}}
 
-update-test:
-  just update && just test
+esprimo-test:
+  nixos-rebuild test --flake {{root}}#esprimo --target-host ben@esprimo --sudo
 
-test-host host="thinkpad":
-  nh os test ~/projects/flakes#{{host}}
+esprimo-switch:
+  nixos-rebuild switch --flake {{root}}#esprimo --target-host ben@esprimo --sudo
 
-build mode="":
-  if [ "{{mode}}" = "" ]; then nh os build ~/projects/flakes; elif [ "{{mode}}" = "up" ]; then nh os build --update ~/projects/flakes; else echo "Invalid mode '{{mode}}'. Use 'up' or omit it." >&2; exit 1; fi
+esprimo-boot:
+  nixos-rebuild boot --flake {{root}}#esprimo --target-host ben@esprimo --sudo
+
+esprimo-switch-bootstrap:
+  nixos-rebuild switch --flake {{root}}#esprimo --target-host ben@esprimo --sudo --ask-sudo-password
+
+esprimo-switch-up:
+  just update && just esprimo-switch
 
 build-ec2-image:
   nix build .#ec2-amazon
 
-fast-build target=".#checks" attic_cache="":
-  if [ "{{attic_cache}}" = "" ]; then nix-fast-build --flake {{target}} --no-link; else nix-fast-build --flake {{target}} --attic-cache {{attic_cache}} --no-link; fi
-
-update-build:
-  just update && just build
-
-boot mode="":
-  if [ "{{mode}}" = "" ]; then nh os boot ~/projects/flakes; elif [ "{{mode}}" = "up" ]; then nh os boot --update ~/projects/flakes; else echo "Invalid mode '{{mode}}'. Use 'up' or omit it." >&2; exit 1; fi
-
-update-boot:
-  just update && just boot
-
 diff:
   nvd diff /run/current-system ./result
 
+alias up := update
 update:
   nix flake update
 
@@ -78,13 +80,13 @@ nh-clean:
   nh clean all --keep-since 7d --keep 5
 
 sops-edit:
-  sops /home/ben/.local/secrets/secrets.yaml
+  sops {{secrets}}/secrets.yaml
 
 sops-rekey:
-  sops updatekeys /home/ben/.local/secrets/secrets.yaml
+  SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-/persist/sops/age/keys.txt}" sops updatekeys {{secrets}}/secrets.yaml
 
 secrets-sync host="thinkpad":
-  just update-secrets && just test-host {{host}}
+  just update-secrets && just test false {{host}}
 
 sops-edit-file file="secrets/secrets.example.yaml":
   sops {{file}}

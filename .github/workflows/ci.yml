@@ -42,5 +42,7 @@ jobs:
 
       - name: Evaluate host toplevel derivations
         run: nix eval --raw --override-input nix-secrets path:./.ci-secrets .#nixosConfigurations.thinkpad.config.system.build.toplevel.drvPath
+      - name: Evaluate ESPRIMO host toplevel derivation
+        run: nix eval --raw --override-input nix-secrets path:./.ci-secrets .#nixosConfigurations.esprimo.config.system.build.toplevel.drvPath
       - name: Evaluate server host toplevel derivation
         run: nix eval --raw --override-input nix-secrets path:./.ci-secrets .#nixosConfigurations.ec2.config.system.build.toplevel.drvPath
