@@ -9,6 +9,7 @@ cells/programs/opencode/node_modules/
 result
 result-*
 .ci-secrets/
+db/
 
 # Private config — only example templates and encrypted files are committed
 secrets/mail-accounts.nix
