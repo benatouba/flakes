@@ -30,9 +30,31 @@ in
       inputs.impermanence.nixosModules.impermanence
       inputs.home-manager.nixosModules.home-manager
       (
-        { ... }:
+        { pkgs, ... }:
         {
-          networking.hostName = "thinkpad";
+          networking = {
+            hostName = "thinkpad";
+          };
+
+          systemd.network.links = {
+            "40-enp2s0f0-wol" = {
+              matchConfig.OriginalName = "enp2s0f0";
+              linkConfig.WakeOnLan = "magic";
+            };
+            "40-enp5s0-wol" = {
+              matchConfig.OriginalName = "enp5s0";
+              linkConfig.WakeOnLan = "magic";
+            };
+            "40-wlp3s0-wol" = {
+              matchConfig.OriginalName = "wlp3s0";
+              linkConfig.WakeOnLan = "magic";
+            };
+          };
+
+          environment.systemPackages = with pkgs; [
+            ethtool
+            wakeonlan
+          ];
 
           home-manager = {
             useGlobalPkgs = true;

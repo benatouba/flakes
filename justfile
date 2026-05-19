@@ -3,6 +3,8 @@ set quiet
 
 root := justfile_directory()
 secrets := env_var_or_default("NIX_SECRETS_DIR", "/home/ben/.local/secrets")
+thinkpad_wol_macs := "84:a9:38:c4:5f:42 84:a9:38:c4:5f:41 e0:0a:f6:5e:5c:8f"
+esprimo_wol_mac := "90:1b:0e:d5:c8:be"
 
 default:
   @just --list
@@ -50,6 +52,12 @@ esprimo-switch-bootstrap:
 
 esprimo-switch-up:
   just update && just esprimo-switch
+
+wake-esprimo:
+  wakeonlan {{esprimo_wol_mac}}
+
+wake-thinkpad:
+  wakeonlan {{thinkpad_wol_macs}}
 
 build-ec2-image:
   nix build .#ec2-amazon
