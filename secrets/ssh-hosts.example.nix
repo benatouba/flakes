@@ -18,5 +18,11 @@
       user = "user";
       port = 22;
     };
+
+    esprimo = {
+      hostname = "192.168.188.10";
+      user = "ben";
+      port = 22;
+    };
   };
 }
