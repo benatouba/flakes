@@ -12,6 +12,9 @@ Hosts select branches by name instead of importing feature files directly.
 - `personal`: private user configuration such as mail, SSH, rbw, and GPG agent.
 - `addons`: optional workflow helpers controlled by `my.profile.addons`.
 - `server`: headless server defaults.
+- `dns`: Pi-hole + Unbound DNS stack.
+- `vpn`: NordVPN client services.
+- `wireguard-ui`: WireGuard UI service with SOPS-backed runtime database state.
 - `matrix`: Matrix homeserver services and bridges.
 
 Use `my.hosts.<name>.includeProfileBranches = false` for minimal hosts that should
