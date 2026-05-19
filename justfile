@@ -53,6 +53,21 @@ esprimo-switch-bootstrap:
 esprimo-switch-up:
   just update && just esprimo-switch
 
+esprimo-paperless-superuser:
+  ssh -t ben@esprimo 'sudo paperless-manage createsuperuser'
+
+esprimo-paperless-status:
+  ssh ben@esprimo 'systemctl --no-pager status paperless-web paperless-scheduler paperless-task-queue paperless-consumer'
+
+esprimo-paperless-backup:
+  ssh ben@esprimo 'sudo systemctl start borgbackup-job-paperless-office.service'
+
+esprimo-stirling-status:
+  ssh ben@esprimo 'systemctl --no-pager status stirling-pdf'
+
+esprimo-syncthing-tunnel:
+  ssh -N -L 8384:127.0.0.1:8384 ben@esprimo
+
 wake-esprimo:
   wakeonlan {{esprimo_wol_mac}}
 

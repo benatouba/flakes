@@ -23,6 +23,7 @@ in
       "server"
       "dns"
       "vpn"
+      "paperless"
     ];
 
     nixosModules = [
