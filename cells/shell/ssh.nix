@@ -32,11 +32,58 @@ in
           "cirr"
           "pi-hole"
           "ec2"
+          "esprimo"
         ];
+
+        legacyToSettings =
+          hostCfg:
+          let
+            converted =
+              lib.optionalAttrs (hostCfg ? port) { Port = hostCfg.port; }
+              // lib.optionalAttrs (hostCfg ? forwardAgent) { ForwardAgent = hostCfg.forwardAgent; }
+              // lib.optionalAttrs (hostCfg ? forwardX11) { ForwardX11 = hostCfg.forwardX11; }
+              // lib.optionalAttrs (hostCfg ? forwardX11Trusted) {
+                ForwardX11Trusted = hostCfg.forwardX11Trusted;
+              }
+              // lib.optionalAttrs (hostCfg ? identitiesOnly) { IdentitiesOnly = hostCfg.identitiesOnly; }
+              // lib.optionalAttrs (hostCfg ? identityFile) { IdentityFile = hostCfg.identityFile; }
+              // lib.optionalAttrs (hostCfg ? identityAgent) { IdentityAgent = hostCfg.identityAgent; }
+              // lib.optionalAttrs (hostCfg ? user) { User = hostCfg.user; }
+              // lib.optionalAttrs (hostCfg ? hostname) { HostName = hostCfg.hostname; }
+              // lib.optionalAttrs (hostCfg ? serverAliveInterval) {
+                ServerAliveInterval = hostCfg.serverAliveInterval;
+              }
+              // lib.optionalAttrs (hostCfg ? serverAliveCountMax) {
+                ServerAliveCountMax = hostCfg.serverAliveCountMax;
+              }
+              // lib.optionalAttrs (hostCfg ? sendEnv) { SendEnv = hostCfg.sendEnv; }
+              // lib.optionalAttrs (hostCfg ? setEnv) { SetEnv = hostCfg.setEnv; }
+              // lib.optionalAttrs (hostCfg ? compression) { Compression = hostCfg.compression; }
+              // lib.optionalAttrs (hostCfg ? checkHostIP) { CheckHostIP = hostCfg.checkHostIP; }
+              // lib.optionalAttrs (hostCfg ? proxyCommand) { ProxyCommand = hostCfg.proxyCommand; }
+              // lib.optionalAttrs (hostCfg ? proxyJump) { ProxyJump = hostCfg.proxyJump; }
+              // lib.optionalAttrs (hostCfg ? certificateFile) { CertificateFile = hostCfg.certificateFile; }
+              // lib.optionalAttrs (hostCfg ? addressFamily) { AddressFamily = hostCfg.addressFamily; }
+              // lib.optionalAttrs (hostCfg ? localForwards) { LocalForward = hostCfg.localForwards; }
+              // lib.optionalAttrs (hostCfg ? remoteForwards) { RemoteForward = hostCfg.remoteForwards; }
+              // lib.optionalAttrs (hostCfg ? dynamicForwards) { DynamicForward = hostCfg.dynamicForwards; }
+              // lib.optionalAttrs (hostCfg ? addKeysToAgent) { AddKeysToAgent = hostCfg.addKeysToAgent; }
+              // lib.optionalAttrs (hostCfg ? hashKnownHosts) { HashKnownHosts = hostCfg.hashKnownHosts; }
+              // lib.optionalAttrs (hostCfg ? userKnownHostsFile) {
+                UserKnownHostsFile = hostCfg.userKnownHostsFile;
+              }
+              // lib.optionalAttrs (hostCfg ? controlMaster) { ControlMaster = hostCfg.controlMaster; }
+              // lib.optionalAttrs (hostCfg ? controlPath) { ControlPath = hostCfg.controlPath; }
+              // lib.optionalAttrs (hostCfg ? controlPersist) { ControlPersist = hostCfg.controlPersist; }
+              // lib.optionalAttrs (hostCfg ? kexAlgorithms) { KexAlgorithms = hostCfg.kexAlgorithms; };
+          in
+          converted // (hostCfg.extraOptions or { });
 
         mkHost =
           name: hostCfg:
-          hostCfg // (if !builtins.elem name noTuKeyHosts then { identityFile = tuKey; } else { });
+          legacyToSettings (
+            hostCfg // (if !builtins.elem name noTuKeyHosts then { identityFile = tuKey; } else { })
+          );
 
         defaultOptions = {
           AddKeysToAgent = "yes";
@@ -53,24 +100,34 @@ in
           PubkeyAuthentication = "yes";
         };
 
-        matchBlocks = builtins.mapAttrs mkHost sshHosts.hosts // {
+        settings = builtins.mapAttrs mkHost sshHosts.hosts // {
           "*" = {
-            extraOptions =
-              defaultOptions
-              // lib.optionalAttrs isHardened {
-                KexAlgorithms = "sntrup761x25519-sha512,sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org";
-                HostKeyAlgorithms = "ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256";
-                Ciphers = "chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com";
-              };
+            inherit (defaultOptions)
+              AddKeysToAgent
+              IdentitiesOnly
+              HashKnownHosts
+              StrictHostKeyChecking
+              VerifyHostKeyDNS
+              ServerAliveInterval
+              ServerAliveCountMax
+              Compression
+              ForwardAgent
+              ForwardX11
+              PasswordAuthentication
+              PubkeyAuthentication
+              ;
+          }
+          // lib.optionalAttrs isHardened {
+            KexAlgorithms = "sntrup761x25519-sha512,sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org";
+            HostKeyAlgorithms = "ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256";
+            Ciphers = "chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com";
           };
 
           "tu-* !tu-proxy" = {
-            proxyJump = "tu-proxy";
+            ProxyJump = "tu-proxy";
           };
 
-          tu-proxy = sshHosts.tuProxy // {
-            identityFile = tuKey;
-          };
+          tu-proxy = legacyToSettings (sshHosts.tuProxy // { identityFile = tuKey; });
         };
       in
       {
@@ -107,7 +164,7 @@ in
         programs.ssh = {
           enable = true;
           enableDefaultConfig = false;
-          inherit matchBlocks;
+          inherit settings;
         };
       }
     )
