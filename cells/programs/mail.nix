@@ -19,6 +19,7 @@ in
         hasMailAccounts = builtins.pathExists mailAccountsPath;
         accts = if hasMailAccounts then import mailAccountsPath else { };
         a = accts;
+        tuBerlinMaildir = "tu-berlin-new";
         urlEncode = builtins.replaceStrings [ "@" "\\" ] [ "%40" "%5C" ];
         secret = name: config.sops.secrets."mail_${name}".path;
         catSecret = name: "${pkgs.coreutils}/bin/cat ${secret name}";
@@ -317,7 +318,7 @@ in
               {
                 map = [ "index" ];
                 key = "gi";
-                action = "<change-folder>~/mail/tu-berlin/Inbox<enter>";
+                action = "<change-folder>~/mail/${tuBerlinMaildir}/Inbox<enter>";
               }
               {
                 map = [ "index" ];
@@ -422,7 +423,7 @@ in
                 t = ":toggle-threads<Enter>";
                 O = ":check-mail<Enter>";
                 v = ":mark -v<Enter>";
-                gi = ":cf tu-berlin/INBOX<Enter>";
+                gi = ":cf ${tuBerlinMaildir}/INBOX<Enter>";
                 gm = ":cf gmail/INBOX<Enter>";
                 ga = ":cf alganize/INBOX<Enter>";
               };
@@ -508,7 +509,7 @@ in
             ];
           in
           ''
-            maildir = ["${home}/mail/tu-berlin", "${home}/mail/gmail", "${home}/mail/alganize"]
+            maildir = ["${home}/mail/${tuBerlinMaildir}", "${home}/mail/gmail", "${home}/mail/alganize"]
             addresses = ${toTomlList addresses}
           '';
 
@@ -587,6 +588,13 @@ in
               inherit (a.tu-berlin) aliases;
               inherit (a.tu-berlin) realName;
               inherit (a.tu-berlin) userName;
+              maildir.path = tuBerlinMaildir;
+              folders = {
+                inbox = "Inbox";
+                sent = "Sent Items";
+                drafts = "Drafts";
+                trash = "Deleted Items";
+              };
               passwordCommand = catSecret "tu_berlin";
               signature = {
                 text = a.tu-berlin.signature;
@@ -608,35 +616,32 @@ in
                 extraConfig.account.AuthMechs = "LOGIN";
                 patterns = [
                   "INBOX"
-                  "Sent"
+                  "Sent Items"
                   "Drafts"
-                  "Trash"
-                  "Junk-E-Mail"
-                  "Archives"
-                  "Archives/*"
+                  "Deleted Items"
+                  "Junk Email"
                 ];
               };
               msmtp.enable = true;
               neomutt = {
                 enable = true;
                 extraMailboxes = [
-                  "Sent"
+                  "Sent Items"
                   "Drafts"
-                  "Trash"
-                  "Junk-E-Mail"
-                  "Archives"
+                  "Deleted Items"
+                  "Junk Email"
                 ];
               };
               aerc = {
                 enable = true;
                 extraAccounts = {
-                  source = "maildir://~/mail/tu-berlin";
+                  source = "maildir://~/mail/${tuBerlinMaildir}";
                   outgoing = "smtp+starttls://${urlEncode a.tu-berlin.userName}@${a.tu-berlin.smtpHost}:587";
                   default = "INBOX";
                   aliases = builtins.head a.tu-berlin.aliases;
                   outgoing-cred-cmd = catSecret "tu_berlin";
-                  copy-to = "Sent";
-                  folders-sort = "INBOX,Sent,Drafts,Trash,Junk-E-Mail,Archives";
+                  copy-to = "Sent Items";
+                  folders-sort = "INBOX,Sent Items,Drafts,Deleted Items,Junk Email";
                 };
               };
               imapnotify = {
