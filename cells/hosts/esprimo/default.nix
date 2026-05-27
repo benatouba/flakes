@@ -22,8 +22,9 @@ in
       "secrets"
       "server"
       "dns"
-      "vpn"
+      "finance"
       "paperless"
+      "wger"
     ];
 
     nixosModules = [
@@ -73,6 +74,11 @@ in
 
           services.openssh.settings.PermitRootLogin = lib.mkForce "no";
 
+          sops.age = {
+            keyFile = lib.mkForce null;
+            sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+          };
+
           security.sudo.extraConfig = ''
             ${cfg.user.name} ALL=(root) NOPASSWD: /bin/sh -c exec\ env\ -i\ PATH=*\ *\ sh\ nix-env\ -p\ /nix/var/nix/profiles/system\ --set\ /nix/store/*-nixos-system-esprimo-*
             ${cfg.user.name} ALL=(root) NOPASSWD: /bin/sh -c *\ /nix/store/*-nixos-system-esprimo-*/bin/switch-to-configuration\ *
@@ -81,6 +87,62 @@ in
         }
       )
     ];
+  };
+
+  config.my.wger = {
+    enable = true;
+    domain = "workout.benrlschmidt.de";
+    siteUrl = "https://workout.benrlschmidt.de";
+    trustedOrigins = [
+      "http://127.0.0.1:8310"
+      "http://localhost:8310"
+      "http://esprimo:8310"
+      "http://192.168.188.197:8310"
+    ];
+    port = 8310;
+    public = {
+      enable = true;
+      domain = "workout.benrlschmidt.de";
+    };
+    registration = {
+      allowRegistration = true;
+      allowGuestUsers = false;
+      requireAdminApproval = true;
+    };
+    routine = {
+      maxDurationDays = 3650;
+    };
+    backup = {
+      enable = true;
+      schedule = "daily";
+      keep = {
+        daily = 7;
+        weekly = 4;
+        monthly = 6;
+      };
+    };
+  };
+
+  config.my.finance = {
+    enable = true;
+    domain = "finance.esprimo";
+    title = "Finance";
+    port = 5000;
+    importSchedule = "hourly";
+    postbank = {
+      enable = true;
+      sourceDir = "/var/lib/finance/sources/postbank";
+      outputDir = "/var/lib/finance/imports/postbank";
+      ledgerAccount = "Assets:Checking";
+      incomeAccount = "Income:Unknown";
+      expenseAccount = "Expenses:Unknown";
+    };
+    paperless = {
+      enable = true;
+      consumptionDir = "/var/lib/paperless/consume/import/finance";
+      mediaDir = "/var/lib/paperless/media/documents/originals";
+      baseUrl = "http://paperless.esprimo";
+    };
   };
 
   config.flake.nixosConfigurations.esprimo = lib.nixosSystem {
