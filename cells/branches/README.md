@@ -13,9 +13,11 @@ Hosts select branches by name instead of importing feature files directly.
 - `addons`: optional workflow helpers controlled by `my.profile.addons`.
 - `server`: headless server defaults.
 - `dns`: Pi-hole + Unbound DNS stack.
+- `finance`: Beancount ledger automation, Fava UI, and Paperless-oriented finance ingestion.
 - `vpn`: NordVPN client services.
 - `paperless`: Paperless-ngx document management, PDF tools, sync, and local backup services.
 - `matrix`: Matrix homeserver services and bridges.
+- `wger`: Wger workout manager stack (PostgreSQL, Redis, web, nginx, celery, backups).
 
 Use `my.hosts.<name>.includeProfileBranches = false` for minimal hosts that should
 only use their explicitly listed branches.
