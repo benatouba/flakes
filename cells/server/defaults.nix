@@ -29,12 +29,7 @@ in
           networkmanager.enable = lib.mkForce false;
           firewall = {
             enable = true;
-            allowedTCPPorts = [
-              22
-              80
-              443
-              8448
-            ];
+            allowedTCPPorts = [ 22 ];
           };
         };
 

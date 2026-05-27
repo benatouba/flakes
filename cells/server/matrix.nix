@@ -51,6 +51,12 @@ in
           };
         };
 
+        networking.firewall.allowedTCPPorts = [
+          80
+          443
+          8448
+        ];
+
         services.mautrix-telegram = lib.mkIf cfg.enableTelegramBridge {
           enable = true;
           registerToSynapse = true;

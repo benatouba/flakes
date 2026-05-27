@@ -5,6 +5,8 @@ in
 {
   config.my.branches.persist.nixosModules = [
     {
+      users.groups.sops-keys.members = [ user ];
+
       environment.persistence."/persist" = {
         hideMounts = true;
 
@@ -29,9 +31,9 @@ in
         "d /persist/home 0755 root root -"
         "d /persist/home/${user} 0700 ${user} users -"
         "d /persist/passwords 0700 root root -"
-        "d /persist/sops 0750 root users -"
-        "d /persist/sops/age 0750 root users -"
-        "f /persist/sops/age/keys.txt 0640 root users -"
+        "d /persist/sops 0750 root sops-keys -"
+        "d /persist/sops/age 0750 root sops-keys -"
+        "f /persist/sops/age/keys.txt 0640 root sops-keys -"
       ];
     }
   ];

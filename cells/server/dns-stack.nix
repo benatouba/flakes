@@ -38,7 +38,18 @@ _: {
         services.pihole-web = {
           enable = true;
           hostName = "pi.hole";
-          ports = [ 80 ];
+          ports = [ 8081 ];
+        };
+
+        services.caddy = {
+          enable = true;
+          virtualHosts."http://pi.hole".extraConfig = ''
+            @lan remote_ip private_ranges
+            handle @lan {
+              reverse_proxy 127.0.0.1:8081
+            }
+            respond 403
+          '';
         };
 
         services.pihole-ftl = {

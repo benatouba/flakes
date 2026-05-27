@@ -10,12 +10,26 @@ in
     (
       { config, ... }:
       let
+        hasSops = config ? sops;
         paperless = config.services.paperless;
       in
       {
+        assertions = [
+          {
+            assertion = hasSops;
+            message = "Paperless backup encryption requires the secrets branch (sops-nix).";
+          }
+        ];
+
+        sops.secrets.paperless_borg_passphrase = {
+          sopsFile = config.sops.defaultSopsFile;
+          owner = "root";
+          mode = "0400";
+        };
+
         services.paperless = {
           enable = true;
-          address = "0.0.0.0";
+          address = "127.0.0.1";
           port = paperlessPort;
 
           database.createLocally = true;
@@ -27,9 +41,12 @@ in
               optimize = 1;
               pdfa_image_compression = "lossless";
             };
-            PAPERLESS_FILENAME_FORMAT = "{created_year}/{correspondent}/{title}";
+            PAPERLESS_FILENAME_FORMAT = "{{ created_year }}/{{ correspondent }}/{{ title }}";
             PAPERLESS_CONSUMER_RECURSIVE = true;
             PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS = true;
+            PAPERLESS_URL = "http://paperless.esprimo";
+            PAPERLESS_ALLOWED_HOSTS = "paperless.esprimo,esprimo,127.0.0.1,localhost,192.168.188.197";
+            PAPERLESS_CSRF_TRUSTED_ORIGINS = "http://paperless.esprimo,http://esprimo";
           };
 
           exporter = {
@@ -42,10 +59,40 @@ in
         services.stirling-pdf = {
           enable = true;
           environment = {
-            SERVER_ADDRESS = "0.0.0.0";
+            SERVER_ADDRESS = "127.0.0.1";
             SERVER_PORT = stirlingPort;
             SYSTEM_DEFAULTLOCALE = "de-DE";
             METRICS_ENABLED = false;
+          };
+        };
+
+        services.caddy = {
+          enable = true;
+          virtualHosts = {
+            "http://paperless.esprimo".extraConfig = ''
+              encode zstd gzip
+              @lan remote_ip private_ranges
+              handle @lan {
+                reverse_proxy 127.0.0.1:${toString paperlessPort}
+              }
+              respond 403
+            '';
+            "http://esprimo".extraConfig = ''
+              encode zstd gzip
+              @lan remote_ip private_ranges
+              handle @lan {
+                reverse_proxy 127.0.0.1:${toString paperlessPort}
+              }
+              respond 403
+            '';
+            "http://stirling.esprimo".extraConfig = ''
+              encode zstd gzip
+              @lan remote_ip private_ranges
+              handle @lan {
+                reverse_proxy 127.0.0.1:${toString stirlingPort}
+              }
+              respond 403
+            '';
           };
         };
 
@@ -84,7 +131,10 @@ in
             "${paperless.dataDir}/syncthing/.config/syncthing/index-*"
           ];
           repo = borgRepo;
-          encryption.mode = "none";
+          encryption = {
+            mode = "repokey-blake2";
+            passCommand = "cat ${config.sops.secrets.paperless_borg_passphrase.path}";
+          };
           compression = "auto,zstd";
           startAt = "daily";
           persistentTimer = true;
@@ -102,11 +152,6 @@ in
           '';
         };
 
-        networking.firewall.allowedTCPPorts = [
-          paperlessPort
-          stirlingPort
-        ];
-
         systemd.tmpfiles.rules = [
           "d ${backupScratchDir} 0700 root root - -"
           "d ${borgRepo} 0700 root root - -"
@@ -116,6 +161,26 @@ in
           # ESPRIMO Q556 is small; keep imports/OCR usable without letting workers
           # fan out aggressively when multiple PDFs arrive at once.
           CPUQuota = lib.mkDefault "300%";
+        };
+
+        systemd.services.paperless-scheduler.preStart = lib.mkAfter ''
+          ${paperless.package}/bin/paperless-ngx shell -c '
+          from paperless.models import ApplicationConfiguration
+
+          config = ApplicationConfiguration.objects.all().first()
+          if config is None:
+              config = ApplicationConfiguration.objects.create()
+
+          config.language = "deu+eng"
+          config.output_type = "pdfa"
+          config.save(update_fields=["language", "output_type"])
+          '
+        '';
+
+        systemd.services.gotenberg.environment = {
+          OTEL_SDK_DISABLED = "true";
+          OTEL_METRICS_EXPORTER = "none";
+          OTEL_TRACES_EXPORTER = "none";
         };
       }
     )
