@@ -16,7 +16,9 @@ TRANSACTION_RE = re.compile(
     r"^\s*(\d{2}\.\d{2}\.)\s+(\d{2}\.\d{2}\.)\s+(.+?)\s+([+-])\s*([\d.]+,\d{2})\s*$"
 )
 YEAR_LINE_RE = re.compile(r"^\s*(\d{4})\s+(\d{4})\s+(.+?)\s*$")
-PERIOD_RE = re.compile(r"Kontoauszug vom\s+(\d{2}\.\d{2}\.\d{4})\s+bis\s+(\d{2}\.\d{2}\.\d{4})")
+PERIOD_RE = re.compile(
+    r"Kontoauszug vom\s+(\d{2}\.\d{2}\.\d{4})\s+bis\s+(\d{2}\.\d{2}\.\d{4})"
+)
 OPENING_BALANCE_RE = re.compile(
     r"Alter Saldo per\s+(\d{2}\.\d{2}\.\d{4}).*?EUR\s+([+-])\s*([\d.]+,\d{2})",
     re.S,
@@ -76,7 +78,9 @@ class Transaction:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Convert Postbank statements to Beancount candidates.")
+    parser = argparse.ArgumentParser(
+        description="Convert Postbank statements to Beancount candidates."
+    )
     parser.add_argument("--source-dir", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--pdftotext", required=True)
@@ -267,7 +271,12 @@ def derive_payee(
     return strip_merchant_noise(first_detail)
 
 
-def derive_narration(transaction_type: str, payee: str | None, purpose_lines: list[str], details: list[str]) -> str:
+def derive_narration(
+    transaction_type: str,
+    payee: str | None,
+    purpose_lines: list[str],
+    details: list[str],
+) -> str:
     if transaction_type == GENERIC_MARKER:
         first_detail = first_non_metadata(details)
         if first_detail:
@@ -277,7 +286,10 @@ def derive_narration(transaction_type: str, payee: str | None, purpose_lines: li
     if payee and payee.startswith("PayPal"):
         return transaction_type
 
-    if purpose_lines and ("Ihr Einkauf bei" in " ".join(purpose_lines) or "PAYPAL" in " ".join(purpose_lines)):
+    if purpose_lines and (
+        "Ihr Einkauf bei" in " ".join(purpose_lines)
+        or "PAYPAL" in " ".join(purpose_lines)
+    ):
         return transaction_type
 
     if purpose_lines:
@@ -334,20 +346,30 @@ def extract_text(pdftotext: str, pdf_path: Path) -> str:
     return result.stdout.replace("\f", "\n")
 
 
-def parse_statement(text: str) -> tuple[str, str, Decimal | None, Decimal | None, list[Transaction]]:
+def parse_statement(
+    text: str,
+) -> tuple[str, str, Decimal | None, Decimal | None, list[Transaction]]:
     period_match = PERIOD_RE.search(text)
     if period_match is None:
         raise ValueError("Could not find statement period")
 
     opening_match = OPENING_BALANCE_RE.search(text)
     closing_match = CLOSING_BALANCE_RE.search(text)
-    statement_start = datetime.strptime(period_match.group(1), "%d.%m.%Y").date().isoformat()
-    statement_end = datetime.strptime(period_match.group(2), "%d.%m.%Y").date().isoformat()
+    statement_start = (
+        datetime.strptime(period_match.group(1), "%d.%m.%Y").date().isoformat()
+    )
+    statement_end = (
+        datetime.strptime(period_match.group(2), "%d.%m.%Y").date().isoformat()
+    )
     opening_balance = (
-        parse_german_amount(opening_match.group(2), opening_match.group(3)) if opening_match is not None else None
+        parse_german_amount(opening_match.group(2), opening_match.group(3))
+        if opening_match is not None
+        else None
     )
     closing_balance = (
-        parse_german_amount(closing_match.group(1), closing_match.group(2)) if closing_match is not None else None
+        parse_german_amount(closing_match.group(1), closing_match.group(2))
+        if closing_match is not None
+        else None
     )
 
     lines = text.splitlines()
@@ -367,13 +389,23 @@ def parse_statement(text: str) -> tuple[str, str, Decimal | None, Decimal | None
         booking_year = entry.get("booking_year")
         value_year = entry.get("value_year")
         secondary_line = entry.get("secondary_line")
-        if not isinstance(booking_year, str) or not isinstance(value_year, str) or not isinstance(secondary_line, str):
-            raise ValueError(f"Incomplete transaction header for {entry['transaction_type']}")
+        if (
+            not isinstance(booking_year, str)
+            or not isinstance(value_year, str)
+            or not isinstance(secondary_line, str)
+        ):
+            raise ValueError(
+                f"Incomplete transaction header for {entry['transaction_type']}"
+            )
 
         details = [line for line in entry["details"] if isinstance(line, str)]
         purpose_lines = extract_purpose_lines(details)
-        payee = derive_payee(entry["transaction_type"], secondary_line, details, purpose_lines)
-        narration = derive_narration(entry["transaction_type"], payee, purpose_lines, details)
+        payee = derive_payee(
+            entry["transaction_type"], secondary_line, details, purpose_lines
+        )
+        narration = derive_narration(
+            entry["transaction_type"], payee, purpose_lines, details
+        )
         detail_text = " | ".join([secondary_line] + details)
 
         return Transaction(
@@ -408,7 +440,9 @@ def parse_statement(text: str) -> tuple[str, str, Decimal | None, Decimal | None
                 "booking_day_month": transaction_match.group(1),
                 "value_day_month": transaction_match.group(2),
                 "transaction_type": normalize_spaces(transaction_match.group(3)),
-                "amount": parse_german_amount(transaction_match.group(4), transaction_match.group(5)),
+                "amount": parse_german_amount(
+                    transaction_match.group(4), transaction_match.group(5)
+                ),
                 "booking_year": None,
                 "value_year": None,
                 "secondary_line": None,
@@ -434,7 +468,13 @@ def parse_statement(text: str) -> tuple[str, str, Decimal | None, Decimal | None
     if not transactions:
         raise ValueError("No transactions parsed from statement")
 
-    return statement_start, statement_end, opening_balance, closing_balance, transactions
+    return (
+        statement_start,
+        statement_end,
+        opening_balance,
+        closing_balance,
+        transactions,
+    )
 
 
 def render_statement(
@@ -447,7 +487,9 @@ def render_statement(
     pdftotext: str,
 ) -> str:
     text = extract_text(pdftotext, source_pdf)
-    statement_start, statement_end, opening_balance, closing_balance, transactions = parse_statement(text)
+    statement_start, statement_end, opening_balance, closing_balance, transactions = (
+        parse_statement(text)
+    )
     relative_source = relative_pdf.as_posix()
 
     output_lines = [
@@ -457,7 +499,9 @@ def render_statement(
     ]
 
     if opening_balance is not None:
-        output_lines.append(f"; Opening balance: {format_amount(opening_balance)} {currency}")
+        output_lines.append(
+            f"; Opening balance: {format_amount(opening_balance)} {currency}"
+        )
 
     output_lines.append("")
 

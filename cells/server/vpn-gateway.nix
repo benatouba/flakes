@@ -1,10 +1,21 @@
 { config, ... }:
+let
+  userName = config.my.user.name;
+in
 {
   config.my.branches.vpn.nixosModules = [
     (
-      { pkgs, ... }:
+      {
+        config,
+        lib,
+        pkgs,
+        ...
+      }:
       let
         nordvpnPkg = pkgs.callPackage ../../pkgs/nordvpn { };
+        useLocalDns =
+          (lib.attrByPath [ "services" "pihole-ftl" "enable" ] false config)
+          && (lib.attrByPath [ "services" "unbound" "enable" ] false config);
       in
       {
         nixpkgs.config.allowUnfree = true;
@@ -16,7 +27,7 @@
 
         users = {
           groups.nordvpn = { };
-          users.${config.my.user.name}.extraGroups = [ "nordvpn" ];
+          users.${userName}.extraGroups = [ "nordvpn" ];
         };
 
         systemd = {
@@ -70,6 +81,8 @@
           after = [
             "network-online.target"
             "nordvpnd.service"
+          ]
+          ++ lib.optionals useLocalDns [
             "pihole-ftl.service"
             "unbound.service"
           ];
@@ -83,10 +96,14 @@
             nordvpnPkg
           ];
           script = ''
-            set -u
+            set -eu
 
-            run() {
+            optional() {
               "$@" || true
+            }
+
+            require() {
+              "$@"
             }
 
             for _ in $(seq 1 30); do
@@ -96,18 +113,36 @@
               sleep 1
             done
 
-            run nordvpn set technology NORDLYNX
-            run nordvpn set lan-discovery enabled
-            run nordvpn set dns disabled
-            run nordvpn set analytics disabled
-            run nordvpn set threatprotectionlite disabled
-            # Keep host management and local DNS stable while NordVPN is active.
-            run nordvpn set routing disabled
-            run nordvpn set autoconnect enabled
+            require nordvpn set technology NORDLYNX
+            optional nordvpn set lan-discovery enabled
+            ${
+              if useLocalDns then
+                ''
+                  require nordvpn set dns disabled
+                ''
+              else
+                ''
+                  require nordvpn set dns disabled
+                ''
+            }
+            optional nordvpn set analytics disabled
+            optional nordvpn set threatprotectionlite disabled
+            ${
+              if useLocalDns then
+                ''
+                  # Keep host management and local DNS stable while NordVPN is active.
+                  require nordvpn set routing disabled
+                ''
+              else
+                ''
+                  require nordvpn set routing enabled
+                ''
+            }
+            require nordvpn set autoconnect enabled
             # Keep NordVPN firewall features off; NixOS firewall stays authoritative.
-            run nordvpn set firewall disabled
-            run nordvpn set killswitch disabled
-            run nordvpn connect
+            optional nordvpn set firewall disabled
+            optional nordvpn set killswitch disabled
+            require nordvpn connect
           '';
         };
       }

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+{% load i18n static %}
+<html lang="{{ language.short_name }}">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta charset="utf-8">
+    <meta name="author" content="BNSD community">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/png">
+
+    {% block opengraph %}
+        <meta property="og:url" content="{{ request_absolute_path }}">
+        <meta property="og:type" content="website">
+    {% endblock %}
+    {% block opengraphimages %}
+        <meta property="og:image" content="{{ image_absolute_path }}">
+    {% endblock %}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-compiled.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'fontawesomefree/css/all.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/landing_page.css' %}">
+
+    <script src="{% static 'node/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'node/@popperjs/core/dist/umd/popper.js' %}"></script>
+    <script src="{% static 'js/language.js' %}"></script>
+
+    <title>BNSD - {% translate "Community Fitness Hub" %}</title>
+</head>
+
+<body>
+{% block template %}{% endblock %}
+</body>
+</html>

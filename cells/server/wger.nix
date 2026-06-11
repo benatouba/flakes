@@ -28,6 +28,10 @@ in
         backupDir = "${dataDir}/backup";
         publicDomain = if cfg.public.domain != "" then cfg.public.domain else cfg.domain;
 
+        brandingFeaturesTemplate = ./wger-features-bnsd.html;
+        brandingTemplateFeatures = ./wger-template-features-bnsd.html;
+        brandingHeroImage = ./wger-title-foto.jpg;
+
         containerNames = [
           "wger-db"
           "wger-cache"
@@ -367,6 +371,9 @@ in
                     "${customSettingsDir}:/home/wger/custom:ro"
                     "${mediaDir}:/home/wger/media"
                     "${staticDir}:/home/wger/static"
+                    "${brandingFeaturesTemplate}:/home/wger/src/wger/software/templates/features.html:ro"
+                    "${brandingTemplateFeatures}:/home/wger/src/wger/core/templates/template_features.html:ro"
+                    "${brandingHeroImage}:/home/wger/src/wger/core/static/images/wger-title-foto.jpg:ro"
                   ];
                   extraOptions = [
                     "--network=wger-net"

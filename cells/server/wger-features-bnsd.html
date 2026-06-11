@@ -1,0 +1,179 @@
+{% extends "template_features.html" %}
+{% load i18n static crispy_forms_tags %}
+
+{% block opengraph %}
+    {{ block.super }}
+    <meta property="og:title" content="BNSD - {% translate 'Community Fitness Hub' %}">
+    <meta property="og:description"
+          content="{% blocktranslate %}BNSD is a personal training hub for our community, powered by a self-hosted wger server.{% endblocktranslate %}">
+{% endblock %}
+
+{% block opengraphimages %}
+    <meta property="og:image" content="{% static 'images/wger-title-foto.jpg' %}">
+{% endblock %}
+
+{% block template %}
+    <header class="py-3 border-bottom bg-white">
+        <div class="container-xl d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <a class="navbar-brand fs-3 fw-semibold text-decoration-none" href="{% url 'core:index' %}">
+                BNSD
+            </a>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-outline-secondary" href="{% url 'exercise:exercise:overview' %}">
+                    {% translate "Exercises" %}
+                </a>
+                <a class="btn btn-outline-secondary" href="{% url 'core:user:login' %}">
+                    {% translate "Login" %}
+                </a>
+                {% if allow_registration %}
+                    <a class="btn btn-primary" href="{% url 'core:user:registration' %}">
+                        {% translate "Join BNSD" %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="container-xl py-5">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-3">
+                        {% translate "BNSD - built for our community" %}
+                    </h1>
+                    <p class="lead mb-3">
+                        {% blocktranslate trimmed %}
+                            Train together, share routines, and keep each other accountable with our own private fitness space.
+                        {% endblocktranslate %}
+                    </p>
+                    <p class="mb-4">
+                        {% blocktranslate trimmed %}
+                            This server is tailored for friends, family, and community members who want practical planning, clear progress tracking, and a supportive environment.
+                        {% endblocktranslate %}
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <a role="button"
+                           class="btn btn-primary px-4"
+                           href="{% if user.is_authenticated %}{% url 'core:index' %}{% else %}{% url 'core:user:registration' %}{% endif %}">
+                            {% if user.is_authenticated %}
+                                {% translate "Open dashboard" %}
+                            {% else %}
+                                {% translate "Get started" %}
+                            {% endif %}
+                        </a>
+
+                        {% if allow_guest_users and not user.is_authenticated %}
+                            <a role="button" class="btn btn-outline-primary px-4" href="{% url 'core:user:demo-entries' %}">
+                                {% translate "Try demo mode" %}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-lg-6 text-center">
+                    <img src="{% static 'images/wger-title-foto.jpg' %}"
+                         alt="{% translate 'BNSD community training photo' %}"
+                         class="img-fluid rounded-3 shadow-sm">
+                </div>
+            </div>
+        </section>
+
+        <section class="container-xl pb-5">
+            <div class="row g-3 text-center">
+                <div class="col-6 col-md-3">
+                    <div class="p-3 border rounded-3 h-100">
+                        <div class="fs-2 fw-bold">{{ nr_users }}+</div>
+                        <div>{% translate "community members" %}</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 border rounded-3 h-100">
+                        <div class="fs-2 fw-bold">{{ nr_exercises }}+</div>
+                        <div>{% translate "exercise options" %}</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 border rounded-3 h-100">
+                        <div class="fs-2 fw-bold">{{ nr_ingredients }}+</div>
+                        <div>{% translate "nutrition items" %}</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 border rounded-3 h-100">
+                        <div class="fs-2 fw-bold">{{ nr_stars }}+</div>
+                        <div>{% translate "upstream project stars" %}</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container-xl pb-5">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="h-100 p-4 border rounded-3">
+                        <h2 class="h4 mb-3">{% translate "Shared routines" %}</h2>
+                        <p class="mb-0">
+                            {% blocktranslate trimmed %}
+                                Build plans together, reuse proven workouts, and keep structure without losing flexibility.
+                            {% endblocktranslate %}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="h-100 p-4 border rounded-3">
+                        <h2 class="h4 mb-3">{% translate "Personal progress" %}</h2>
+                        <p class="mb-0">
+                            {% blocktranslate trimmed %}
+                                Track sessions, body metrics, and notes over time so every step forward is visible.
+                            {% endblocktranslate %}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="h-100 p-4 border rounded-3">
+                        <h2 class="h4 mb-3">{% translate "Community first" %}</h2>
+                        <p class="mb-0">
+                            {% blocktranslate trimmed %}
+                                BNSD is for us: privacy-respecting, self-hosted, and tuned for our local group.
+                            {% endblocktranslate %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {% if allow_registration %}
+            <section class="container-xl pb-5">
+                <div class="p-4 p-md-5 border rounded-3 bg-light">
+                    <h3 class="h2 mb-3 text-center">
+                        {% translate "Join the BNSD community" %}
+                    </h3>
+                    <p class="text-center mb-4">
+                        {% blocktranslate trimmed %}
+                            Create an account to access shared plans, track your training, and stay connected.
+                        {% endblocktranslate %}
+                    </p>
+                    <form method="post" action="{% url 'core:user:registration' %}" class="row justify-content-center">
+                        {% csrf_token %}
+                        <div class="col-lg-6 col-md-8 col-12">
+                            {% crispy form %}
+                        </div>
+                    </form>
+                </div>
+            </section>
+        {% endif %}
+
+        <section class="container-xl pb-5 text-center">
+            <p class="mb-1">
+                {% blocktranslate trimmed %}
+                    Built with wger and maintained for our own BNSD community.
+                {% endblocktranslate %}
+            </p>
+            <a href="https://github.com/wger-project/wger" target="_blank" rel="noopener noreferrer">
+                {% translate "View the upstream open-source project" %}
+            </a>
+        </section>
+    </main>
+{% endblock %}
