@@ -45,6 +45,8 @@ _: {
           ".local/share/atuin"
           ".local/share/nix-index"
           ".local/share/opencode"
+          ".local/share/Steam"
+          ".local/share/steam"
         ];
       };
     }

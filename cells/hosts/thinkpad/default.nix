@@ -17,7 +17,19 @@ in
 {
   config.my.hosts.thinkpad = {
     system = "x86_64-linux";
-    branches = [ ];
+    branches = [ "desktop" ];
+    nixosModules = [
+      (
+        { pkgs, ... }:
+        {
+          programs.steam = {
+            enable = true;
+            protontricks.enable = true;
+            extraCompatPackages = [ pkgs.proton-ge-bin ];
+          };
+        }
+      )
+    ];
     hardwareModules = [
       inputs.nixos-hardware.nixosModules.lenovo-thinkpad-p14s-amd-gen2
     ];
@@ -27,6 +39,11 @@ in
     system = hostCfg.system;
     modules = [
       ./_hardware.nix
+      {
+        config.nixpkgs.config.permittedInsecurePackages = [
+          "electron-39.8.10"
+        ];
+      }
       inputs.impermanence.nixosModules.impermanence
       inputs.home-manager.nixosModules.home-manager
       (
