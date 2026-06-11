@@ -65,7 +65,7 @@ _: {
             StateDirectory = "ddclient";
             RuntimeDirectory = "ddclient";
             RuntimeDirectoryMode = "0700";
-            ExecStart = "${ddclientRun}/bin/ddclient-run";
+            ExecStart = "${ddclientRun}";
           };
         };
 
