@@ -84,27 +84,28 @@
             git
             neovim
 
+            actionlint
+            attic-client
+            deadnix
+            nh
             nil
+            nix-diff
+            nix-fast-build
+            nix-output-monitor
+            nix-tree
+            nix-update
             nixd
             nixfmt
-            statix
-            deadnix
-            actionlint
+            nixos-generators
+            nurl
+            nvd
             shellcheck
             shfmt
-            nix-fast-build
-            nix-diff
-            nix-tree
-            nix-output-monitor
-            nvd
-            nh
-            nixos-generators
-            attic-client
-            nix-update
-            nurl
+            statix
+            vscode-json-languageserver
 
-            editorconfig-checker
             commitlint
+            editorconfig-checker
             just
           ]
           ++ (config.checks.pre-commit-check.enabledPackages or [ ]);

@@ -15,6 +15,7 @@ _: {
           lsof
           pciutils
           unzip
+          uv
           socat
           wget
           zip
