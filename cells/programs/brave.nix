@@ -8,6 +8,7 @@ _: {
             "nngceckbapebfimnlniiiahkandclblb"
             "hfjbmagddngcpeloejdejnfgbamkjaeg"
             "eimadpbcbfnmbkopoojfekhnkhdbieeh"
+            "fmkadmapgofadopljbjfkapdkoienihi"
           ];
         };
       }
@@ -25,6 +26,7 @@ _: {
             { id = "nngceckbapebfimnlniiiahkandclblb"; } # Bitwarden
             { id = "hfjbmagddngcpeloejdejnfgbamkjaeg"; } # Vimium C
             { id = "eimadpbcbfnmbkopoojfekhnkhdbieeh"; } # Dark Reader
+            { id = "fmkadmapgofadopljbjfkapdkoienihi"; } # React Developer Tools
             { id = "ekhagklcjbdpajgpjgmbionohlpdbjgc"; } # Zotero Connector
           ];
         };

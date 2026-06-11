@@ -23,9 +23,16 @@ in
         urlEncode = builtins.replaceStrings [ "@" "\\" ] [ "%40" "%5C" ];
         secret = name: config.sops.secrets."mail_${name}".path;
         catSecret = name: "${pkgs.coreutils}/bin/cat ${secret name}";
+        mbsyncLockFile = "${config.xdg.cacheHome}/mbsync.lock";
+        mbsyncPackage = pkgs.writeShellScriptBin "mbsync" ''
+          exec ${pkgs.util-linux}/bin/flock -w 180 ${lib.escapeShellArg mbsyncLockFile} ${pkgs.isync}/bin/mbsync "$@"
+        '';
         notifyCmd =
           account:
           "${pkgs.libnotify}/bin/notify-send -a 'Mail' -i mail-unread '${account}' 'New mail received'";
+        syncAndNotifyCmd =
+          channel: account:
+          "${mbsyncPackage}/bin/mbsync --pull-new --quiet ${lib.escapeShellArg "${channel}:INBOX"} && ${notifyCmd account}";
         queryAddresses = pkgs.writeShellScript "query-addresses" ''
           query="$1"
           [ -z "$query" ] && exit 1
@@ -111,6 +118,7 @@ in
               color_directcolor = "yes";
               attach_save_dir = "~/downloads";
               query_command = "\"${queryAddresses} '%s'\"";
+              use_threads = "threads";
             };
             extraConfig = ''
               # Theme: ${theme.slug}
@@ -346,7 +354,10 @@ in
             ];
           };
 
-          mbsync.enable = true;
+          mbsync = {
+            enable = true;
+            package = mbsyncPackage;
+          };
           msmtp.enable = true;
 
           aerc = {
@@ -491,6 +502,7 @@ in
 
         services.mbsync = {
           enable = true;
+          package = mbsyncPackage;
           frequency = "*:0/5";
           postExec = "${pkgs.maildir-rank-addr}/bin/maildir-rank-addr";
         };
@@ -571,7 +583,6 @@ in
         '';
 
         home.packages = with pkgs; [
-          isync
           lynx
           maildir-rank-addr
           openldap
@@ -647,7 +658,7 @@ in
               imapnotify = {
                 enable = true;
                 boxes = [ "INBOX" ];
-                onNotify = notifyCmd "TU Berlin";
+                onNotify = syncAndNotifyCmd "tu-berlin" "TU Berlin";
               };
             };
 
@@ -672,6 +683,7 @@ in
                 patterns = [
                   "*"
                   "![Gmail]*"
+                  "!Drafts"
                   "[Gmail]/Sent Mail"
                   "[Gmail]/Drafts"
                   "[Gmail]/Trash"
@@ -702,7 +714,7 @@ in
               imapnotify = {
                 enable = true;
                 boxes = [ "INBOX" ];
-                onNotify = notifyCmd "Gmail";
+                onNotify = syncAndNotifyCmd "gmail" "Gmail";
               };
             };
 
@@ -724,6 +736,11 @@ in
               mbsync = {
                 enable = true;
                 create = "maildir";
+                patterns = [
+                  "*"
+                  "!Sent"
+                  "!Trash"
+                ];
               };
               msmtp.enable = true;
               neomutt = {
@@ -749,7 +766,7 @@ in
               imapnotify = {
                 enable = true;
                 boxes = [ "INBOX" ];
-                onNotify = notifyCmd "Alganize";
+                onNotify = syncAndNotifyCmd "alganize" "Alganize";
               };
             };
           };

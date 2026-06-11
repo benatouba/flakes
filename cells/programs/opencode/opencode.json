@@ -8,15 +8,29 @@
     "opencode-plugin-openspec",
     "opentmux"
   ],
+  "lsp": true,
   "mcp": {
     "vuetify-mcp": {
       "type": "remote",
       "url": "https://mcp.vuetifyjs.com/mcp",
       "enabled": true,
       "timeout": 5000
+    },
+    "filesystem": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "."],
+      "enabled": true
+    },
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp"],
+      "enabled": false
     }
   },
   "permission": {
+    "skill": {
+      "*": "allow",
+    },
     "read": {
       "*": "allow"
     },
