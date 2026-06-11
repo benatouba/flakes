@@ -3,35 +3,54 @@ _: {
     (
       {
         config,
-        lib,
         pkgs,
         ...
       }:
       let
-        ddclientRun = pkgs.writeShellScript "ddclient-run" ''
+        domain = "benrlschmidt.de";
+        hostname = "workout";
+        ttl = 600;
+        godaddyApi = "api.godaddy.com";
+
+        updateScript = pkgs.writeShellScript "godaddy-ddns-update" ''
           set -euo pipefail
+
+          DOMAIN=${domain}
+          HOSTNAME=${hostname}
+          FQDN="$HOSTNAME.$DOMAIN"
 
           api_key=$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.godaddy_ddns_api_key.path})
           api_secret=$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.godaddy_ddns_api_secret.path})
+          auth="Authorization: sso-key $api_key:$api_secret"
 
-          umask 077
-          cat > "$RUNTIME_DIRECTORY/ddclient.conf" << EOF
-          cache=$STATE_DIRECTORY/ddclient.cache
-          foreground=YES
-          use=web, web=checkip.dyndns.com/, web-skip='Current IP Address: '
-          protocol=godaddy
-          login=$api_key
-          password=$api_secret
-          zone=benrlschmidt.de
-          ssl=yes
-          wildcard=YES
-          quiet=yes
-          verbose=no
-          ttl=600
-          workout.benrlschmidt.de
-          EOF
+          public_ip=$(${pkgs.curl}/bin/curl -sf https://api.ipify.org)
+          if [ -z "$public_ip" ]; then
+            echo "ERROR: could not determine public IP" >&2
+            exit 1
+          fi
 
-          exec ${lib.getExe pkgs.ddclient} -file "$RUNTIME_DIRECTORY/ddclient.conf"
+          current_ip=$(
+            ${pkgs.curl}/bin/curl -sf \
+              -H "$auth" \
+              -H "Accept: application/json" \
+              "https://${godaddyApi}/v1/domains/$DOMAIN/records/A/$HOSTNAME" \
+            | ${pkgs.jq}/bin/jq -r '.[0].data // empty'
+          )
+
+          if [ "$current_ip" = "$public_ip" ]; then
+            echo "$FQDN already points to $public_ip, no update needed"
+            exit 0
+          fi
+
+          echo "updating $FQDN from ''${current_ip:-<none>} to $public_ip"
+          ${pkgs.curl}/bin/curl -sf \
+            -X PUT \
+            -H "$auth" \
+            -H "Content-Type: application/json" \
+            "https://${godaddyApi}/v1/domains/$DOMAIN/records/A/$HOSTNAME" \
+            -d "$(${pkgs.jq}/bin/jq -n --arg ip "$public_ip" --arg name "$HOSTNAME" --argjson ttl ${toString ttl} \
+              '[{data: $ip, name: $name, type: "A", ttl: $ttl}]')"
+          echo "updated $FQDN to $public_ip"
         '';
       in
       {
@@ -65,7 +84,7 @@ _: {
             StateDirectory = "ddclient";
             RuntimeDirectory = "ddclient";
             RuntimeDirectoryMode = "0700";
-            ExecStart = "${ddclientRun}";
+            ExecStart = "${updateScript}";
           };
         };
 
