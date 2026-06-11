@@ -34,18 +34,19 @@ _: {
           oh-my-zsh = {
             enable = true;
             plugins = [
-              "fzf"
-              "zoxide"
-              "git"
-              "tmux"
-              "history"
-              "eza"
-              "sudo"
-              "copypath"
-              "web-search"
               "colored-man-pages"
+              "copypath"
+              "direnv"
+              "eza"
+              "fzf"
+              "git"
+              "history"
               "ssh-agent"
+              "sudo"
+              "tmux"
               "uv"
+              "web-search"
+              "zoxide"
             ];
           };
 
@@ -87,18 +88,8 @@ _: {
               # direnv (optimized): refresh on startup + directory changes only.
               # This avoids running `direnv export zsh` before every prompt.
               if (( $+commands[direnv] )); then
-                _prefer_pnpm_home_in_devenv() {
-                  if [[ -n "$DEVENV_ROOT" && -n "$PNPM_HOME" && -x "$PNPM_HOME/pnpm" ]]; then
-                    typeset -a _path_entries
-                    _path_entries=(''${(s/:/)PATH})
-                    _path_entries=(''${_path_entries:#$PNPM_HOME})
-                    export PATH="$PNPM_HOME:''${(j/:/)_path_entries}"
-                  fi
-                }
-
                 _direnv_chpwd_hook() {
                   eval "$(direnv export zsh)"
-                  _prefer_pnpm_home_in_devenv
                 }
 
                 autoload -U add-zsh-hook
@@ -160,6 +151,7 @@ _: {
           enable = true;
           nix-direnv.enable = true;
           enableZshIntegration = false;
+          silent = true;
         };
       }
     )
