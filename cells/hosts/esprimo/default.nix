@@ -25,11 +25,15 @@ in
       "finance"
       "paperless"
       "wger"
+      "ddns"
     ];
 
     nixosModules = [
       (
-        { pkgs, ... }:
+        {
+          pkgs,
+          ...
+        }:
         {
           networking = {
             hostName = "esprimo";
