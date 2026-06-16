@@ -17,7 +17,10 @@ in
 {
   config.my.hosts.thinkpad = {
     system = "x86_64-linux";
-    branches = [ "desktop" ];
+    branches = [
+      "desktop"
+      "printing"
+    ];
     nixosModules = [
       (
         { pkgs, ... }:
