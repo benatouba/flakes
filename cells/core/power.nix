@@ -30,7 +30,7 @@ _: {
           AHCI_RUNTIME_PM_ON_BAT = "auto";
 
           WIFI_PWR_ON_AC = "off";
-          WIFI_PWR_ON_BAT = "on";
+          WIFI_PWR_ON_BAT = "off";
           WOL_DISABLE = "Y";
 
           USB_AUTOSUSPEND = 1;

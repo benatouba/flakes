@@ -52,6 +52,12 @@ in
       (
         { pkgs, ... }:
         {
+          boot.extraModprobeConfig = ''
+            options rtw89_core disable_ps_mode=Y
+            options rtw89_pci disable_aspm_l1=Y disable_aspm_l1ss=Y disable_clkreq=Y
+            options mac80211 beacon_loss_count=50 max_probe_tries=10 probe_wait_ms=2000
+          '';
+
           networking = {
             hostName = "thinkpad";
           };
@@ -63,10 +69,6 @@ in
             };
             "40-enp5s0-wol" = {
               matchConfig.OriginalName = "enp5s0";
-              linkConfig.WakeOnLan = "magic";
-            };
-            "40-wlp3s0-wol" = {
-              matchConfig.OriginalName = "wlp3s0";
               linkConfig.WakeOnLan = "magic";
             };
           };

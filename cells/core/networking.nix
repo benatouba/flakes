@@ -30,6 +30,7 @@ in
           networkmanager = {
             enable = lib.mkDefault true;
             dns = "systemd-resolved";
+            wifi.powersave = false;
             plugins = [ pkgs.networkmanager-openconnect ];
             settings = {
               connectivity = {
