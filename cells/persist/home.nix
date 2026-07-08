@@ -48,6 +48,10 @@ _: {
           ".local/share/Steam"
           ".local/share/steam"
         ];
+
+        files = [
+          ".claude.json"
+        ];
       };
     }
   ];
