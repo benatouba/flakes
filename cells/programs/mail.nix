@@ -38,39 +38,14 @@ in
           [ -z "$query" ] && exit 1
 
           tsv="''${XDG_CACHE_HOME:-$HOME/.cache}/maildir-rank-addr/addressbook.tsv"
-          password=$(cat ${secret "tu_berlin"})
 
-          # Search local history (TSV is pre-sorted by rank)
-          local_results=""
+          # Search local history across all accounts (TSV is pre-sorted by rank)
+          all=""
           if [ -f "$tsv" ]; then
-            local_results=$(${pkgs.gawk}/bin/awk -F'\t' -v q="''${query}" '
+            all=$(${pkgs.gawk}/bin/awk -F'\t' -v q="''${query}" '
               tolower($1) ~ tolower(q) || tolower($2) ~ tolower(q) { print $1 "\t" $2 }
             ' "$tsv")
           fi
-
-          # Search TU Berlin LDAP (silent failure if unreachable / off VPN)
-          ldap_results=$(
-            ${pkgs.openldap}/bin/ldapsearch \
-              -H ldaps://ldap.tu-berlin.de \
-              -D "${a.tu-berlin.userName}" \
-              -w "$password" \
-              -b "ou=people,dc=tu-berlin,dc=de" \
-              -x \
-              "(|(cn=*''${query}*)(mail=*''${query}*))" \
-              cn mail 2>/dev/null \
-            | ${pkgs.gawk}/bin/awk '
-                /^cn:/   { name  = substr($0, 5) }
-                /^mail:/ { email = substr($0, 7) }
-                /^$/     { if (email != "" && name != "") print email "\t" name; email=""; name="" }
-                END      { if (email != "" && name != "") print email "\t" name }
-              '
-          )
-
-          # Merge: local first (ranked), then LDAP; deduplicate by email
-          all=$(
-            { echo "$local_results"; echo "$ldap_results"; } \
-            | ${pkgs.gawk}/bin/awk -F'\t' 'NF>=2 && !seen[$1]++ { print }'
-          )
 
           count=$(echo "$all" | ${pkgs.gawk}/bin/awk 'NF' | wc -l)
           echo "$count addresses found for ''${query}"
@@ -585,7 +560,6 @@ in
         home.packages = with pkgs; [
           lynx
           maildir-rank-addr
-          openldap
           urlscan
         ];
 
