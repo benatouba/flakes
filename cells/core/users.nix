@@ -18,13 +18,6 @@ in
             "audio"
             "networkmanager"
           ];
-          packages = with pkgs; [
-            gdal
-            hugo
-            gimp
-            nodejs_latest
-            pnpm
-          ];
         };
 
       }

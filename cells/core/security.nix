@@ -38,6 +38,20 @@ in
 
         services.openssh.enable = false;
 
+        networking = {
+          firewall = {
+            enable = true;
+            logRefusedConnections = true;
+            logRefusedPackets = true;
+            allowedTCPPorts = [ ];
+            allowedUDPPorts = [ ];
+          }
+          // lib.optionalAttrs isHardened {
+            allowPing = false;
+          };
+          nftables.enable = true;
+        };
+
         boot.kernel.sysctl = {
           "kernel.kptr_restrict" = 2;
           "kernel.yama.ptrace_scope" = 1;

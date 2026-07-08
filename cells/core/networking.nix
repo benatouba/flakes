@@ -1,9 +1,6 @@
-{ config, lib, ... }:
-let
-  isHardened = config.my.profile.security.level == "hardened";
-in
+{ lib, ... }:
 {
-  config.my.branches.security.nixosModules = [
+  config.my.branches.base.nixosModules = [
     (
       { pkgs, ... }:
       {
@@ -46,17 +43,6 @@ in
               };
             };
           };
-          firewall = {
-            enable = true;
-            logRefusedConnections = true;
-            logRefusedPackets = true;
-            allowedTCPPorts = [ ];
-            allowedUDPPorts = [ ];
-          }
-          // lib.optionalAttrs isHardened {
-            allowPing = false;
-          };
-          nftables.enable = true;
         };
 
         environment.systemPackages = [ pkgs.openconnect ];

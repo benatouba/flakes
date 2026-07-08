@@ -7,8 +7,13 @@ _: {
           bitwarden-desktop
           commitmsgfmt
           devenv
+          gdal
+          gimp
+          hugo
           libreoffice-fresh
+          nodejs_latest
           obsidian
+          pnpm
           ripgrep-all
           zoom-us
         ];
