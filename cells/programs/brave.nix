@@ -29,6 +29,7 @@ _: {
             { id = "fmkadmapgofadopljbjfkapdkoienihi"; } # React Developer Tools
             { id = "ekhagklcjbdpajgpjgmbionohlpdbjgc"; } # Zotero Connector
             { id = "mnjggcdmjocbbbhaepdhchncahnbgone"; } # Sponsorblock
+            { id = "bhlhnicpbhignbdhedgjhgdocnmhomnp"; } # Colorzilla
           ];
         };
       }
