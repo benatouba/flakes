@@ -22,7 +22,7 @@ _: {
           PLATFORM_PROFILE_ON_BAT = "low-power";
 
           PCIE_ASPM_ON_AC = "default";
-          PCIE_ASPM_ON_BAT = "powersave";
+          PCIE_ASPM_ON_BAT = "default";
 
           RUNTIME_PM_ON_AC = "on";
           RUNTIME_PM_ON_BAT = "auto";

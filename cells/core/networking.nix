@@ -12,8 +12,6 @@ in
           resolved = {
             enable = true;
             settings.Resolve = {
-              # DNSOverTLS = "opportunistic";
-              # Captive portals often forge DNS answers until login succeeds.
               DNSSEC = false;
               FallbackDNS = [
                 "1.1.1.1"
@@ -31,13 +29,20 @@ in
             enable = lib.mkDefault true;
             dns = "systemd-resolved";
             wifi.powersave = false;
+            wifi.scanRandMacAddress = false; # reduces roam-triggering rescans
             plugins = [ pkgs.networkmanager-openconnect ];
             settings = {
               connectivity = {
-                enabled = true;
+                enabled = false;
                 uri = "http://nmcheck.gnome.org/check_network_status.txt";
                 interval = 300;
                 response = "NetworkManager is online";
+              };
+              connection = {
+                "wifi.cloned-mac-address" = "preserve";
+              };
+              device = {
+                "wifi.backend" = "wpa_supplicant";
               };
             };
           };

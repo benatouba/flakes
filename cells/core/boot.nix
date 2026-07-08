@@ -5,14 +5,15 @@ _: {
       {
         boot = {
           supportedFilesystems = [ "btrfs" ];
-          kernelPackages = pkgs.linuxPackages_latest;
+          # Pinned to the latest 6.x series; linuxPackages_latest would jump to major version 7.
+          kernelPackages = pkgs.linuxPackages_6_12;
           loader = {
             grub = {
               enable = true;
               efiSupport = true;
               efiInstallAsRemovable = true;
               useOSProber = false;
-              configurationLimit = 10;
+              configurationLimit = 5;
               mirroredBoots = [
                 {
                   path = "/boot/efi";
