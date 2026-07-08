@@ -145,13 +145,19 @@ esprimo-syncthing-tunnel:
   ssh -N -L 8384:127.0.0.1:8384 ben@esprimo
 
 esprimo-wger-status:
-  ssh ben@esprimo 'systemctl --no-pager status docker-wger-db docker-wger-cache docker-wger-web docker-wger-nginx docker-wger-celery-worker docker-wger-celery-beat wger-db-backup.timer'
+  ssh ben@esprimo 'systemctl --no-pager status docker-wger-db docker-wger-cache docker-wger-web docker-wger-nginx docker-wger-celery-worker docker-wger-celery-beat docker-wger-powersync wger-powersync-storage-setup wger-db-backup.timer wger-powersync-compact.timer'
 
 esprimo-wger-logs service="web":
   ssh -t ben@esprimo "sudo docker logs --tail=200 --follow wger-{{service}}"
 
 esprimo-wger-backup:
   ssh -t ben@esprimo 'sudo systemctl start wger-db-backup.service'
+
+esprimo-wger-generate-jwt-keys:
+  ssh -t ben@esprimo 'sudo docker exec wger-web python3 manage.py generate-jwt-keys'
+
+esprimo-wger-powersync-compact:
+  ssh -t ben@esprimo 'sudo systemctl start wger-powersync-compact.service'
 
 wake-esprimo:
   wakeonlan {{esprimo_wol_mac}}

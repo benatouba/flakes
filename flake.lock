@@ -171,11 +171,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783479733,
-        "narHash": "sha256-d/JatqgG+Pmo+IuCTZfnrEAPWU3fdha48GQeXuFO+bE=",
+        "lastModified": 1783525612,
+        "narHash": "sha256-OEFYdbtG6Qy04KGteknnrx15Uo2XXkYVuUvBvFNEn+Q=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "cee3f0e7fec85d80c149c7afc29926747f7bd3c2",
+        "rev": "1aac8895fea6fcabc6a0184c63a80fb2f99fd208",
         "type": "github"
       },
       "original": {
@@ -720,11 +720,11 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1781208856,
-        "narHash": "sha256-ustO7v3+Yiv3PjnqcSTSRgDJBRGJhv05IiWL241za6U=",
+        "lastModified": 1783526855,
+        "narHash": "sha256-8AfGEc8S7oHRpiDpp+s48pM6fV+Mv/oyXr94HUUnbs0=",
         "ref": "refs/heads/main",
-        "rev": "1a675f72f24b48eb752205aa6d86b85721b195c4",
-        "revCount": 19,
+        "rev": "f12c8cfe6a58c876d1d762008efdc145b9b47ab0",
+        "revCount": 21,
         "type": "git",
         "url": "file:///home/ben/.local/secrets"
       },

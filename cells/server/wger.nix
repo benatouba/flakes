@@ -39,7 +39,8 @@ in
           "wger-nginx"
           "wger-celery-worker"
           "wger-celery-beat"
-        ];
+        ]
+        ++ lib.optional cfg.powersync.enable "wger-powersync";
 
         containerUnits = map (name: "docker-${name}") containerNames;
         containerServiceUnits = map (unit: "${unit}.service") containerUnits;
@@ -54,8 +55,6 @@ in
             RestartSec = "10s";
           };
         };
-
-        maxDumpFiles = cfg.backup.keep.daily + cfg.backup.keep.weekly + cfg.backup.keep.monthly;
 
         customSettingsDir = pkgs.runCommand "wger-custom-settings" { } ''
           mkdir -p "$out/wger_adminapproval"
@@ -222,6 +221,25 @@ in
               proxy_set_header X-Forwarded-Host $host;
               proxy_set_header X-Forwarded-Proto $wger_forwarded_proto;
             }
+
+            location /ps/ {
+              resolver 127.0.0.11 ipv6=off valid=30s;
+              # `set` must run before `rewrite ... break`: both are rewrite-module
+              # directives and `break` stops that phase, leaving the variable unset.
+              set $wger_powersync_upstream http://powersync:8080;
+              rewrite ^/ps/(.*)$ /$1 break;
+              proxy_pass $wger_powersync_upstream;
+              proxy_http_version 1.1;
+              proxy_set_header Host $http_host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $wger_forwarded_proto;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection "upgrade";
+              proxy_buffering off;
+              proxy_read_timeout 1d;
+              proxy_send_timeout 1d;
+            }
           }
         '';
 
@@ -244,17 +262,51 @@ in
             | ${pkgs.gzip}/bin/gzip -c > "$dumpFile"
           ${pkgs.coreutils}/bin/chmod 0600 "$dumpFile"
 
+          # Grandfather-father-son retention: the newest `daily` dumps, plus the
+          # newest dump of each of the last `weekly` ISO weeks and `monthly`
+          # months. The timestamp is parsed from the file name, so the list
+          # sorts newest-first lexicographically.
           mapfile -t dumps < <(
-            ${pkgs.findutils}/bin/find ${backupDir} -mindepth 1 -maxdepth 1 -type f -name 'wger-*.sql.gz' -printf '%T@ %p\n' \
-              | ${pkgs.coreutils}/bin/sort -nr \
-              | ${pkgs.gawk}/bin/awk '{$1=""; sub(/^ /, ""); print}'
+            ${pkgs.findutils}/bin/find ${backupDir} -mindepth 1 -maxdepth 1 -type f -name 'wger-*.sql.gz' -printf '%f\n' \
+              | ${pkgs.coreutils}/bin/sort -r
           )
 
-          if [ "''${#dumps[@]}" -gt ${toString maxDumpFiles} ]; then
-            for file in "''${dumps[@]:${toString maxDumpFiles}}"; do
-              ${pkgs.coreutils}/bin/rm -f -- "$file"
-            done
-          fi
+          declare -A keep seenWeek seenMonth
+          dailyKept=0 weeksKept=0 monthsKept=0
+
+          for name in "''${dumps[@]}"; do
+            date="''${name:5:8}"
+
+            if [ "$dailyKept" -lt ${toString cfg.backup.keep.daily} ]; then
+              keep[$name]=1
+              dailyKept=$((dailyKept + 1))
+            fi
+
+            if week="$(${pkgs.coreutils}/bin/date -d "$date" +%G-%V 2>/dev/null)"; then
+              if [ -z "''${seenWeek[$week]:-}" ]; then
+                seenWeek[$week]=1
+                if [ "$weeksKept" -lt ${toString cfg.backup.keep.weekly} ]; then
+                  keep[$name]=1
+                  weeksKept=$((weeksKept + 1))
+                fi
+              fi
+
+              month="''${date:0:6}"
+              if [ -z "''${seenMonth[$month]:-}" ]; then
+                seenMonth[$month]=1
+                if [ "$monthsKept" -lt ${toString cfg.backup.keep.monthly} ]; then
+                  keep[$name]=1
+                  monthsKept=$((monthsKept + 1))
+                fi
+              fi
+            fi
+          done
+
+          for name in "''${dumps[@]}"; do
+            if [ -z "''${keep[$name]:-}" ]; then
+              ${pkgs.coreutils}/bin/rm -f -- "${backupDir}/$name"
+            fi
+          done
         '';
 
         dbPasswordSyncScript = pkgs.writeShellScript "wger-sync-db-password" ''
@@ -282,6 +334,258 @@ in
           ALTER USER ${dbUser} WITH PASSWORD :'password';
           SQL
         '';
+
+        powersyncConfigDir = pkgs.runCommand "wger-powersync-config" { } ''
+          mkdir -p "$out"
+
+          cat > "$out/powersync.yaml" <<'YAML'
+          # yaml-language-server: $schema=../schema/schema.json
+
+          # Note that this example uses YAML custom tags for environment variable substitution.
+          # Using `!env [variable name]` will substitute the value of the environment variable named
+          # [variable name].
+          #
+          # Only environment variables with names starting with `PS_` can be substituted.
+          #
+          # e.g. With the environment variable `export PS_STORAGE_MONGO_URI=mongodb://localhost:27017`
+          # and YAML code:
+          #  uri: !env PS_STORAGE_MONGO_URI
+          # The YAML will resolve to:
+          #  uri: mongodb://localhost:27017
+          #
+          # If using VS Code see the `.vscode/settings.json` definitions which define custom tags.
+
+          # migrations:
+          #   # Migrations run automatically by default.
+          #   # Setting this to true will skip automatic migrations.
+          #   # Migrations can be triggered externally by altering the container `command`.
+          #   disable_auto_migration: true
+
+          # Settings for telemetry reporting
+          # See https://docs.powersync.com/self-hosting/telemetry
+          telemetry:
+            disable_telemetry_sharing: true
+
+            # Expose prometheus metrics on this port
+            prometheus_port: 9090
+
+          # Settings for source database replication
+          replication:
+            # Specify database connection details
+            # Note only 1 connection is currently supported
+            # Multiple connection support is on the roadmap
+            connections:
+              - type: postgresql
+                uri: !env PS_DATABASE_URI
+
+                # Or use individual params
+                # hostname: db # From the Docker Compose service name
+                # port: 5432
+                # database: postgres
+                # username: postgres
+                # password: mypassword
+
+                # SSL settings
+                sslmode: disable # 'verify-full' (default) or 'verify-ca' or 'disable'
+                # 'disable' is OK for local/private networks, not for public networks
+
+
+          # Connection settings for sync bucket storage
+          storage:
+            type: postgresql
+            uri: !env PS_STORAGE_PG_URI
+            sslmode: disable
+
+          # The port which the PowerSync API server will listen on
+          port: !env PS_PORT
+
+          # Workaround for PSYNC_S2305 bug: PowerSync counts source rows instead of DISTINCT
+          # CTE results. Users with large nutrition logs (>1000 log items) can hit the limit
+          # even though the number of distinct ingredients is well below it.
+          # See https://github.com/powersync-ja/powersync-service/issues/682
+          #     https://github.com/wger-project/flutter/issues/1237
+          api:
+            parameters:
+              max_parameter_query_results: 2000
+
+          # Specify sync rules
+          sync_rules:
+            path: sync_rules.yaml
+
+          # Client (application end user) authentication settings
+          client_auth:
+            allow_local_jwks: true
+            jwks_uri: !env PS_JWKS_URL
+
+            # JWKS audience
+            audience: ["powersync"]
+          YAML
+
+          cat > "$out/sync_rules.yaml" <<'YAML'
+          # Note that changes to this file are not watched.
+          # The service needs to be restarted for changes to take effect.
+
+          # Warning: a user may have at most 1000 buckets, i.e. parameter-query results
+          # summed across all streams. This counts the *parameter* rows, not the data
+          # rows inside a bucket (a single bucket can hold any number of rows). For a
+          # stream with a `with:` CTE the count is the number of rows the CTE returns,
+          # so for `user_ingredients` below that is the number of distinct ingredients
+          # a user has ever referenced. Exceeding the limit is a hard error
+          # (PSYNC_S2305 "Too many parameter query results").
+          # See https://docs.powersync.com/sync/rules/parameter-queries
+          #
+          # Streams are split by update frequency (cold / medium / hot) so that
+          # bucket compaction can collapse the head of hot buckets without being
+          # blocked by long-lived rows from cold tables.
+          #
+          # For details, see the documentation:
+          # https://docs.powersync.com/sync/streams/overview
+          # https://docs.powersync.com/maintenance-ops/compacting-buckets
+
+          config:
+            edition: 3
+
+          streams:
+            # Global reference data, shared by all users, changes rarely enough
+            core:
+              auto_subscribe: true
+              queries:
+                - SELECT * FROM core_language
+                - SELECT * FROM core_license
+                - SELECT * FROM core_repetitionunit
+                - SELECT * FROM core_weightunit
+                - SELECT * FROM exercises_exercise
+                - SELECT * FROM exercises_translation
+                - SELECT * FROM exercises_alias
+                - SELECT * FROM exercises_exercisecomment
+                - SELECT * FROM exercises_muscle
+                - SELECT * FROM exercises_exercise_muscles
+                - SELECT * FROM exercises_exercise_muscles_secondary
+                - SELECT * FROM exercises_equipment
+                - SELECT * FROM exercises_exercise_equipment
+                - SELECT * FROM exercises_exercisecategory
+                - SELECT * FROM exercises_exerciseimage
+                - SELECT * FROM exercises_exercisevideo
+
+            # COLD, per-user data that almost never changes after creation.
+            user_profile:
+              auto_subscribe: true
+              queries:
+                - SELECT * FROM core_userprofile WHERE CAST(user_id AS TEXT) = auth.user_id()
+                - SELECT * FROM gallery_image WHERE CAST(user_id AS TEXT) = auth.user_id()
+
+            # COLD but potentially large, only the per-user *filter set* changes when the user logs new foods
+            user_ingredients:
+              auto_subscribe: true
+              with:
+                user_ingredients: |
+                  SELECT DISTINCT nutrition_synced_ingredient.id
+                  FROM nutrition_synced_ingredient
+                  WHERE nutrition_synced_ingredient.id IN (
+                          SELECT nutrition_logitem.ingredient_id FROM nutrition_logitem
+                          JOIN nutrition_nutritionplan ON nutrition_logitem.plan_id = nutrition_nutritionplan.id
+                          WHERE CAST(nutrition_nutritionplan.user_id AS TEXT) = auth.user_id())
+                     OR nutrition_synced_ingredient.id IN (
+                          SELECT nutrition_mealitem.ingredient_id FROM nutrition_mealitem
+                          JOIN nutrition_meal ON nutrition_mealitem.meal_id = nutrition_meal.id
+                          JOIN nutrition_nutritionplan ON nutrition_meal.plan_id = nutrition_nutritionplan.id
+                          WHERE CAST(nutrition_nutritionplan.user_id AS TEXT) = auth.user_id())
+              queries:
+                - SELECT * FROM nutrition_synced_ingredient AS nutrition_ingredient WHERE id IN user_ingredients
+                - |
+                  SELECT nutrition_image.* FROM nutrition_image
+                  WHERE nutrition_image.ingredient_id IN user_ingredients
+                - |
+                  SELECT nutrition_ingredientweightunit.* FROM nutrition_ingredientweightunit
+                  WHERE nutrition_ingredientweightunit.ingredient_id IN user_ingredients
+
+            # MEDIUM. Edited e.g. when the user builds or edits their routine or nutrition plan,
+            # but not on every workout.
+            user_planning:
+              auto_subscribe: true
+              queries:
+                # Routines (templates excluded)
+                - SELECT * FROM manager_routine WHERE CAST(user_id AS TEXT) = auth.user_id() AND is_template = FALSE
+
+                # Measurements
+                - SELECT * FROM measurements_category WHERE CAST(user_id AS TEXT) = auth.user_id()
+                - |
+                  SELECT measurements_measurement.*
+                  FROM measurements_measurement
+                  INNER JOIN measurements_category
+                    ON measurements_measurement.category_id = measurements_category.id
+                  WHERE CAST(measurements_category.user_id AS TEXT) = auth.user_id()
+
+                # Nutrition plan structure (not the log items)
+                - SELECT * FROM nutrition_nutritionplan WHERE CAST(user_id AS TEXT) = auth.user_id()
+                - |
+                  SELECT nutrition_meal.*
+                  FROM nutrition_meal
+                  JOIN nutrition_nutritionplan
+                    ON nutrition_meal.plan_id = nutrition_nutritionplan.id
+                  WHERE CAST(nutrition_nutritionplan.user_id AS TEXT) = auth.user_id()
+                - |
+                  SELECT nutrition_mealitem.*
+                  FROM nutrition_mealitem
+                  JOIN nutrition_meal
+                    ON nutrition_mealitem.meal_id = nutrition_meal.id
+                  JOIN nutrition_nutritionplan
+                    ON nutrition_meal.plan_id = nutrition_nutritionplan.id
+                  WHERE CAST(nutrition_nutritionplan.user_id AS TEXT) = auth.user_id()
+
+
+            # HOT. Generates  one or more new rows per workout / meal. Compaction has the
+            # biggest impact here, so it must stay isolated from the other streams above
+            user_activity:
+              auto_subscribe: true
+              queries:
+                # Weight tracking
+                - SELECT uuid AS id, weight, date, user_id FROM weight_weightentry WHERE CAST(user_id AS TEXT) = auth.user_id()
+
+                # Workout sessions and per-set logs
+                - SELECT * FROM manager_workoutsession WHERE CAST(user_id AS TEXT) = auth.user_id()
+                - SELECT * FROM manager_workoutlog WHERE CAST(user_id AS TEXT) = auth.user_id()
+
+                # Nutrition log entries
+                - |
+                  SELECT nutrition_logitem.*
+                  FROM nutrition_logitem
+                  JOIN nutrition_nutritionplan
+                    ON nutrition_logitem.plan_id = nutrition_nutritionplan.id
+                  WHERE CAST(nutrition_nutritionplan.user_id AS TEXT) = auth.user_id()
+          YAML
+        '';
+
+        powersyncStorageSetupScript = pkgs.writeShellScript "wger-setup-powersync-storage" ''
+          set -euo pipefail
+
+          for attempt in $(${pkgs.coreutils}/bin/seq 1 60); do
+            if ${pkgs.docker}/bin/docker exec wger-web python3 manage.py setup-powersync-storage; then
+              exit 0
+            fi
+
+            if [ "$attempt" -eq 60 ]; then
+              echo "Wger web container did not accept setup-powersync-storage in time" >&2
+              exit 1
+            fi
+
+            ${pkgs.coreutils}/bin/sleep 2
+          done
+        '';
+
+        powersyncCompactScript = pkgs.writeShellScript "wger-powersync-compact" ''
+          set -euo pipefail
+
+          ${pkgs.docker}/bin/docker run --rm \
+            --name=wger-powersync-compact \
+            --network=wger-net \
+            --env-file=${config.sops.templates."wger-prod.env".path} \
+            -v ${powersyncConfigDir}:/config:ro \
+            -e POWERSYNC_CONFIG_PATH=/config/powersync.yaml \
+            -e PS_JWKS_URL=http://web:8000/api/v2/powersync-keys \
+            docker.io/journeyapps/powersync-service:${cfg.powersync.package} \
+            compact
+        '';
       in
       lib.mkIf cfg.enable (
         lib.mkMerge [
@@ -304,6 +608,21 @@ in
                 wger-db = {
                   image = "docker.io/postgres:${cfg.postgresPackage}";
                   pull = imagePullPolicy;
+                  cmd = [
+                    "postgres"
+                    "-c"
+                    "wal_level=logical"
+                    "-c"
+                    "shared_buffers=256MB"
+                    "-c"
+                    "effective_cache_size=768MB"
+                    "-c"
+                    "work_mem=8MB"
+                    "-c"
+                    "random_page_cost=1.1"
+                    "-c"
+                    "max_connections=30"
+                  ];
                   environment = {
                     POSTGRES_USER = dbUser;
                     POSTGRES_DB = dbName;
@@ -321,6 +640,7 @@ in
                   extraOptions = [
                     "--network=wger-net"
                     "--network-alias=db"
+                    "--shm-size=256m"
                     "--health-cmd=pg_isready -U ${dbUser}"
                     "--health-interval=10s"
                     "--health-timeout=5s"
@@ -387,7 +707,7 @@ in
                 wger-nginx = {
                   image = "docker.io/nginx:${cfg.nginxPackage}";
                   pull = imagePullPolicy;
-                  dependsOn = [ "wger-web" ];
+                  dependsOn = [ "wger-web" ] ++ lib.optional cfg.powersync.enable "wger-powersync";
                   volumes = [
                     "${staticDir}:/wger/static:ro"
                     "${mediaDir}:/wger/media:ro"
@@ -451,7 +771,34 @@ in
                   ];
                   autoStart = true;
                 };
-              };
+              }
+              // (lib.optionalAttrs cfg.powersync.enable {
+                wger-powersync = {
+                  image = "docker.io/journeyapps/powersync-service:${cfg.powersync.package}";
+                  pull = imagePullPolicy;
+                  dependsOn = [
+                    "wger-db"
+                    "wger-web"
+                  ];
+                  cmd = [
+                    "start"
+                    "-r"
+                    "unified"
+                  ];
+                  volumes = [ "${powersyncConfigDir}:/config:ro" ];
+                  environmentFiles = [ config.sops.templates."wger-prod.env".path ];
+                  environment = {
+                    POWERSYNC_CONFIG_PATH = "/config/powersync.yaml";
+                    PS_JWKS_URL = "http://web:8000/api/v2/powersync-keys";
+                  };
+                  extraOptions = [
+                    "--network=wger-net"
+                    "--network-alias=powersync"
+                    "--security-opt=no-new-privileges:true"
+                  ];
+                  autoStart = true;
+                };
+              });
             };
 
             systemd.services =
@@ -501,11 +848,13 @@ in
                   after = [
                     "wger-docker-network.service"
                     "docker-wger-web.service"
-                  ];
+                  ]
+                  ++ lib.optional cfg.powersync.enable "docker-wger-powersync.service";
                   requires = [
                     "wger-docker-network.service"
                     "docker-wger-web.service"
-                  ];
+                  ]
+                  ++ lib.optional cfg.powersync.enable "docker-wger-powersync.service";
                 };
               }
               // {
@@ -536,7 +885,8 @@ in
                     "docker-wger-celery-worker.service"
                     "docker-wger-celery-beat.service"
                     "docker-wger-nginx.service"
-                  ];
+                  ]
+                  ++ lib.optional cfg.powersync.enable "docker-wger-powersync.service";
                   serviceConfig = {
                     Type = "oneshot";
                     ExecStart = dbPasswordSyncScript;
@@ -551,6 +901,48 @@ in
                   serviceConfig = {
                     Type = "oneshot";
                     ExecStart = pgDumpScript;
+                  };
+                };
+              })
+              // (lib.optionalAttrs cfg.powersync.enable {
+                docker-wger-powersync = containerServiceDefaults // {
+                  after = [
+                    "wger-docker-network.service"
+                    "wger-powersync-storage-setup.service"
+                  ];
+                  requires = [
+                    "wger-docker-network.service"
+                    "wger-powersync-storage-setup.service"
+                  ];
+                };
+
+                wger-powersync-storage-setup = {
+                  description = "Bootstrap PowerSync PostgreSQL storage role and schema";
+                  after = [
+                    "wger-docker-network.service"
+                    "docker-wger-web.service"
+                    "wger-db-password-sync.service"
+                  ];
+                  requires = [
+                    "wger-docker-network.service"
+                    "docker-wger-web.service"
+                    "wger-db-password-sync.service"
+                  ];
+                  before = [ "docker-wger-powersync.service" ];
+                  serviceConfig = {
+                    Type = "oneshot";
+                    ExecStart = powersyncStorageSetupScript;
+                  };
+                };
+
+                wger-powersync-compact = {
+                  description = "Compact Wger PowerSync bucket storage";
+                  after = [ "docker-wger-powersync.service" ];
+                  requires = [ "docker-wger-powersync.service" ];
+                  serviceConfig = {
+                    Type = "oneshot";
+                    TimeoutStartSec = "1h";
+                    ExecStart = powersyncCompactScript;
                   };
                 };
               });
@@ -572,7 +964,14 @@ in
               restartUnits = containerServiceUnits;
             };
 
-            sops.secrets.wger_signing_key = {
+            sops.secrets.wger_jwt_private_key = {
+              sopsFile = config.sops.defaultSopsFile;
+              owner = "root";
+              mode = "0400";
+              restartUnits = containerServiceUnits;
+            };
+
+            sops.secrets.wger_jwt_public_key = {
               sopsFile = config.sops.defaultSopsFile;
               owner = "root";
               mode = "0400";
@@ -586,13 +985,22 @@ in
               restartUnits = containerServiceUnits;
             };
 
+            sops.secrets.wger_powersync_storage_password = lib.mkIf cfg.powersync.enable {
+              sopsFile = config.sops.defaultSopsFile;
+              owner = "root";
+              mode = "0400";
+              restartUnits = containerServiceUnits;
+            };
+
             sops.templates."wger-prod.env" = {
               owner = "root";
               mode = "0400";
               restartUnits = containerServiceUnits;
               content = ''
                 SECRET_KEY=${config.sops.placeholder.wger_secret_key}
-                SIGNING_KEY=${config.sops.placeholder.wger_signing_key}
+                JWT_PRIVATE_KEY=${config.sops.placeholder.wger_jwt_private_key}
+                JWT_PUBLIC_KEY=${config.sops.placeholder.wger_jwt_public_key}
+                REFRESH_TOKEN_LIFETIME=${toString cfg.jwt.refreshTokenLifetimeHours}
                 POSTGRES_PASSWORD=${config.sops.placeholder.wger_db_password}
 
                 TIME_ZONE=${cfg.timezone}
@@ -606,6 +1014,12 @@ in
                 ALLOW_REGISTRATION=${lib.boolToString cfg.registration.allowRegistration}
                 ALLOW_GUEST_USERS=${lib.boolToString cfg.registration.allowGuestUsers}
                 ALLOW_UPLOAD_VIDEOS=false
+
+                SYNC_EXERCISES_CELERY=True
+                SYNC_EXERCISE_IMAGES_CELERY=True
+                SYNC_EXERCISE_VIDEOS_CELERY=True
+                SYNC_INGREDIENTS_CELERY=True
+                DOWNLOAD_INGREDIENTS_FROM=WGER
 
                 USE_CELERY=true
                 CELERY_BROKER=redis://cache:6379/2
@@ -634,6 +1048,12 @@ in
                 DJANGO_DEBUG=False
                 WGER_USE_GUNICORN=True
                 EXERCISE_CACHE_TTL=86400
+                ${lib.optionalString cfg.powersync.enable ''
+                  PS_STORAGE_PG_URI=postgres://powersync_storage:${config.sops.placeholder.wger_powersync_storage_password}@db:5432/${dbName}
+                  PS_DATABASE_URI=postgres://${dbUser}:${config.sops.placeholder.wger_db_password}@db:5432/${dbName}
+                  PS_PORT=8080
+                  POWERSYNC_URL_PATH=ps
+                ''}
               '';
             };
 
@@ -666,14 +1086,12 @@ in
               };
             };
 
-            networking.firewall.allowedTCPPorts =
-              if cfg.public.enable then
-                [
-                  80
-                  443
-                ]
-              else
-                [ cfg.port ];
+            # The wger nginx container only binds to 127.0.0.1, so there is
+            # nothing to open in non-public mode.
+            networking.firewall.allowedTCPPorts = lib.mkIf cfg.public.enable [
+              80
+              443
+            ];
 
             systemd.timers.wger-db-backup = lib.mkIf cfg.backup.enable {
               description = "Timer for Wger PostgreSQL backup";
@@ -682,6 +1100,16 @@ in
                 OnCalendar = cfg.backup.schedule;
                 Persistent = true;
                 Unit = "wger-db-backup.service";
+              };
+            };
+
+            systemd.timers.wger-powersync-compact = lib.mkIf cfg.powersync.enable {
+              description = "Timer for Wger PowerSync bucket compaction";
+              wantedBy = [ "timers.target" ];
+              timerConfig = {
+                OnCalendar = cfg.powersync.compactSchedule;
+                Persistent = true;
+                Unit = "wger-powersync-compact.service";
               };
             };
           })

@@ -26,13 +26,13 @@ in
 
     package = mkOption {
       type = types.str;
-      default = "2.5";
-      description = "Container image tag for docker.io/wger/server.";
+      default = "2.6.0";
+      description = "Container image tag for docker.io/wger/server. Pin an exact patch tag; the pull policy is `missing`, so mutable tags never re-pull.";
     };
 
     redisPackage = mkOption {
       type = types.str;
-      default = "7-alpine";
+      default = "8-alpine";
       description = "Container image tag for docker.io/redis.";
     };
 
@@ -44,7 +44,7 @@ in
 
     nginxPackage = mkOption {
       type = types.str;
-      default = "1.28-alpine";
+      default = "1.30-alpine";
       description = "Container image tag for docker.io/nginx.";
     };
 
@@ -58,7 +58,7 @@ in
       enable = mkOption {
         type = types.bool;
         default = false;
-        description = "Expose Wger through the host nginx reverse proxy with ACME TLS.";
+        description = "Expose Wger through the host Caddy reverse proxy with ACME TLS.";
       };
 
       domain = mkOption {
@@ -108,6 +108,34 @@ in
       };
     };
 
+    jwt = {
+      refreshTokenLifetimeHours = mkOption {
+        type = types.int;
+        default = 3000;
+        description = "Lifetime of Wger JWT refresh tokens, in hours.";
+      };
+    };
+
+    powersync = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable the PowerSync service for mobile app offline sync.";
+      };
+
+      package = mkOption {
+        type = types.str;
+        default = "1.23.3";
+        description = "Container image tag for docker.io/journeyapps/powersync-service.";
+      };
+
+      compactSchedule = mkOption {
+        type = types.str;
+        default = "daily";
+        description = "systemd calendar expression for the PowerSync bucket compaction timer.";
+      };
+    };
+
     backup = {
       enable = mkOption {
         type = types.bool;
@@ -125,19 +153,19 @@ in
         daily = mkOption {
           type = types.int;
           default = 7;
-          description = "Number of daily database dumps to retain.";
+          description = "Number of most recent database dumps to retain.";
         };
 
         weekly = mkOption {
           type = types.int;
           default = 4;
-          description = "Number of weekly database dumps to retain.";
+          description = "Number of distinct ISO weeks for which to retain the newest dump.";
         };
 
         monthly = mkOption {
           type = types.int;
           default = 6;
-          description = "Number of monthly database dumps to retain.";
+          description = "Number of distinct months for which to retain the newest dump.";
         };
       };
     };
