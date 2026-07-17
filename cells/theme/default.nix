@@ -19,6 +19,7 @@ in
             inherit (theme.cursor) name;
             inherit (theme.cursor) size;
             gtk.enable = true;
+            enable = true;
           };
         };
         dconf.settings = {
