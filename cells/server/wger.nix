@@ -1018,7 +1018,7 @@ in
                 SYNC_EXERCISES_CELERY=True
                 SYNC_EXERCISE_IMAGES_CELERY=True
                 SYNC_EXERCISE_VIDEOS_CELERY=True
-                SYNC_INGREDIENTS_CELERY=True
+                SYNC_INGREDIENTS_CELERY=False
                 DOWNLOAD_INGREDIENTS_FROM=WGER
 
                 USE_CELERY=true

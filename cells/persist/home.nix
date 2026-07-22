@@ -30,6 +30,7 @@ _: {
           ".config/opencode"
           ".config/github-copilot"
           ".config/gh"
+          ".railway"
           ".zoom"
           ".cache/nix"
           ".cache/Cypress"
