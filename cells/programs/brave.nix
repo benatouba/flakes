@@ -30,6 +30,7 @@ _: {
             { id = "ekhagklcjbdpajgpjgmbionohlpdbjgc"; } # Zotero Connector
             { id = "mnjggcdmjocbbbhaepdhchncahnbgone"; } # Sponsorblock
             { id = "bhlhnicpbhignbdhedgjhgdocnmhomnp"; } # Colorzilla
+            { id = "pjjgklgkfeoeiebjogplpnibpfnffkng"; } # Undistracted
           ];
         };
       }
