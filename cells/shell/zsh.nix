@@ -100,8 +100,15 @@ _: {
               # Starship prompt
               eval "$(starship init zsh)"
 
-              # Keep Down Arrow native, let Atuin own Up Arrow.
-              # bindkey '^[[B' down-line-or-beginning-search
+              # Arrow keys stay native: prefix-search the local zsh history.
+              # Atuin records everything but binds nothing; Ctrl-R runs the
+              # fzf-over-atuin widget in ~/.zsh/fzf.zsh.
+              autoload -U up-line-or-beginning-search down-line-or-beginning-search
+              zle -N up-line-or-beginning-search
+              zle -N down-line-or-beginning-search
+              for key in '^[[A' '^[OA'; do bindkey "$key" up-line-or-beginning-search; done
+              for key in '^[[B' '^[OB'; do bindkey "$key" down-line-or-beginning-search; done
+
               fpath=(~/.zsh/completions $fpath)
               autoload -U compinit
               compinit
