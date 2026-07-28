@@ -93,6 +93,19 @@ in
     ];
   };
 
+  # workout.benrlschmidt.de is a CNAME onto this name. The benrlschmidt.de zone
+  # lives on Netlify DNS, which has no usable dynamic-update API, so only the
+  # one static CNAME is kept there and the moving part lives at deSEC.
+  config.my.ddns.hostname = "esprimo-benrlschmidt.dedyn.io";
+
+  # Serve the public name straight to LAN clients so local access does not
+  # depend on the CNAME chain or on the router's NAT hairpin. my.dns is a
+  # flake-level namespace, so this lands on every host running the dns branch
+  # (esprimo and rpi-pihole). That is deliberate: both answer LAN queries, and
+  # if they disagreed then which resolver a client happened to pick would decide
+  # whether it reached wger directly or was bounced back in through the router.
+  config.my.dns.localRecords."workout.benrlschmidt.de" = "192.168.188.197";
+
   config.my.wger = {
     enable = true;
     domain = "workout.benrlschmidt.de";

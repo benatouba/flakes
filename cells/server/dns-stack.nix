@@ -1,7 +1,11 @@
-_: {
+{ config, ... }:
+let
+  cfg = config.my.dns;
+in
+{
   config.my.branches.dns.nixosModules = [
     (
-      { ... }:
+      { lib, ... }:
       {
         services.unbound = {
           enable = true;
@@ -108,6 +112,8 @@ _: {
               upstreams = [ "127.0.0.1#5335" ];
               domainNeeded = true;
               listeningMode = "ALL";
+              # Split-horizon overrides; see my.dns.localRecords.
+              hosts = lib.mapAttrsToList (name: address: "${address} ${name}") cfg.localRecords;
             };
             webserver.api.cli_pw = true;
           };
