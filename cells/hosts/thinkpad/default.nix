@@ -64,6 +64,19 @@ in
             hostName = "thinkpad";
           };
 
+          # The disk is not encrypted, so anything paged out to the swap
+          # partition persists in the clear.  A random per-boot key closes that
+          # without repartitioning.  Safe here only because hibernation is
+          # already off (security.protectKernelImage forces nohibernate);
+          # re-enabling hibernate means undoing this first.
+          # by-partuuid is mandatory — the UUID is erased on every boot.
+          swapDevices = lib.mkForce [
+            {
+              device = "/dev/disk/by-partuuid/22f53553-15a6-42af-a045-1f79341e741e";
+              randomEncryption.enable = true;
+            }
+          ];
+
           systemd.network.links = {
             "40-enp2s0f0-wol" = {
               matchConfig.OriginalName = "enp2s0f0";

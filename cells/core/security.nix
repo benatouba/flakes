@@ -38,6 +38,11 @@ in
 
         services.openssh.enable = false;
 
+        # Keep firmware current.  The P14s has good LVFS coverage, and this is
+        # how UEFI and Thunderbolt/USB4 fixes actually land — `fwupdmgr
+        # refresh && fwupdmgr update`.
+        services.fwupd.enable = true;
+
         networking = {
           firewall = {
             enable = true;

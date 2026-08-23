@@ -10,6 +10,13 @@
             enable = true;
             settings.Resolve = {
               DNSSEC = false;
+              # LLMNR answers name lookups from anyone on the local link and is
+              # the standard credential-relay foothold on untrusted networks.
+              # Nothing here needs it; mDNS covers local discovery.
+              LLMNR = false;
+              # Encrypt DNS where the resolver supports it.  "opportunistic"
+              # rather than "true" so captive portals still work.
+              DNSOverTLS = "opportunistic";
               FallbackDNS = [
                 "1.1.1.1"
                 "1.0.0.1"
