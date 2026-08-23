@@ -22,15 +22,25 @@ _: {
           PLATFORM_PROFILE_ON_BAT = "low-power";
 
           PCIE_ASPM_ON_AC = "default";
-          PCIE_ASPM_ON_BAT = "default";
+          # Let the kernel drive PCIe links into L1/L1SS on battery instead of
+          # leaving the policy to firmware.  Worth ~0.5-1 W across the NVMe,
+          # wifi and USB controllers.
+          PCIE_ASPM_ON_BAT = "powersupersave";
 
           RUNTIME_PM_ON_AC = "on";
           RUNTIME_PM_ON_BAT = "auto";
           AHCI_RUNTIME_PM_ON_AC = "on";
           AHCI_RUNTIME_PM_ON_BAT = "auto";
 
+          # Pack wakeups onto fewer cores/dies so the rest can reach deeper
+          # package C-states.
+          SCHED_POWERSAVE_ON_BAT = 1;
+
           WIFI_PWR_ON_AC = "off";
-          WIFI_PWR_ON_BAT = "off";
+          # rtw89 (RTL8852AE) power save.  Historically buggy on kernels
+          # 5.16-6.1; re-enabled on battery for 7.x.  If wifi starts dropping
+          # or stalling on battery, set this back to "off" first.
+          WIFI_PWR_ON_BAT = "on";
           WOL_DISABLE = "Y";
 
           USB_AUTOSUSPEND = 1;

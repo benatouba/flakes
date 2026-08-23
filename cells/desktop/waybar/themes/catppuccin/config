@@ -67,9 +67,9 @@
 				"today": "<span color='#ff6699'><b><u>{}</u></b></span>"
 			}
 		},
-		"format": "  {:%a %H:%M:%S}",
+		"format": "  {:%a %H:%M}",
 		"format-alt": "  {:%A, %d %B %Y}",
-		"interval": 1
+		"interval": 60
 	},
 	"cpu": {
 		"format": " {usage}%",

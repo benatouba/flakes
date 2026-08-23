@@ -42,7 +42,10 @@ in
           firewall = {
             enable = true;
             logRefusedConnections = true;
-            logRefusedPackets = true;
+            # Off on purpose: on any busy/public network this logs every
+            # stray broadcast, waking the CPU and writing to the journal
+            # continuously.  Refused *connections* are still logged.
+            logRefusedPackets = false;
             allowedTCPPorts = [ ];
             allowedUDPPorts = [ ];
           }

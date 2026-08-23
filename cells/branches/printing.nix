@@ -17,8 +17,10 @@ _: {
           services.avahi = {
             enable = true;
             nssmdns4 = true;
-            publish.enable = true;
-            publish.userServices = true;
+            # Discovery only.  Publishing made the laptop announce itself over
+            # multicast on a timer, which kept the wifi radio out of power save
+            # on every network it joined; nothing here needs to be discoverable.
+            publish.enable = false;
             openFirewall = true;
           };
 

@@ -25,7 +25,10 @@
           networkmanager = {
             enable = lib.mkDefault true;
             dns = "systemd-resolved";
-            wifi.powersave = false;
+            # Left unset on purpose: TLP owns wifi power management via
+            # WIFI_PWR_ON_{AC,BAT}, and a value here would fight it on every
+            # connection activation.
+            wifi.powersave = null;
             wifi.scanRandMacAddress = false; # reduces roam-triggering rescans
             plugins = [ pkgs.networkmanager-openconnect ];
             settings = {

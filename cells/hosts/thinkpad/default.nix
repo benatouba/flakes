@@ -52,10 +52,13 @@ in
       (
         { pkgs, ... }:
         {
-          boot.extraModprobeConfig = ''
-            options rtw89_pci disable_aspm_l1=y disable_aspm_l1ss=y
-            options rtw89_core disable_ps_mode=y
-          '';
+          # NOTE: the RTL8852AE previously needed
+          #   options rtw89_pci disable_aspm_l1=y disable_aspm_l1ss=y
+          #   options rtw89_core disable_ps_mode=y
+          # to stay stable.  Those were kernel 5.16-6.1 era workarounds and
+          # together cost ~1.5-2 W by pinning the PCIe link out of L1 and the
+          # radio out of power save.  Dropped on kernel 7.x — restore this
+          # block (and TLP's WIFI_PWR_ON_BAT="off") if the link misbehaves.
 
           networking = {
             hostName = "thinkpad";
@@ -76,6 +79,30 @@ in
             ethtool
             wakeonlan
           ];
+
+          # The eDP backlight is the largest single consumer on this machine:
+          # ~3-4 W of an ~11 W idle draw at 100%.  Cap it to 40% whenever the
+          # charger is pulled.  This only ever lowers brightness, so nudging it
+          # back up on battery sticks until the next unplug, and plugging in
+          # never overrides a level you chose by hand.
+          systemd.services.battery-brightness-cap = {
+            description = "Cap panel brightness when running on battery";
+            serviceConfig = {
+              Type = "oneshot";
+              ExecStart = pkgs.writeShellScript "battery-brightness-cap" ''
+                set -eu
+                brightnessctl="${pkgs.brightnessctl}/bin/brightnessctl -c backlight"
+                cap=$(( $($brightnessctl max) * 40 / 100 ))
+                if [ "$($brightnessctl get)" -gt "$cap" ]; then
+                  $brightnessctl set "$cap"
+                fi
+              '';
+            };
+          };
+
+          services.udev.extraRules = ''
+            SUBSYSTEM=="power_supply", KERNEL=="AC", ATTR{online}=="0", RUN+="${pkgs.systemd}/bin/systemctl --no-block start battery-brightness-cap.service"
+          '';
 
           home-manager = {
             useGlobalPkgs = true;

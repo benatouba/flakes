@@ -15,7 +15,10 @@ in
       {
         nix = {
           settings = {
-            auto-optimise-store = true;
+            # Deliberately off — see nix.optimise below.  auto-optimise-store
+            # runs a full hard-link dedup pass at the end of every single
+            # build, which is a lot of extra disk churn on a laptop.
+            auto-optimise-store = false;
             sandbox = true;
             allowed-users = [ "@wheel" ];
             trusted-users = lib.mkForce [
@@ -53,6 +56,15 @@ in
             automatic = true;
             dates = "weekly";
             options = "--delete-older-than 14d";
+            randomizedDelaySec = "30min";
+          };
+
+          # Same dedup work as auto-optimise-store, but batched into one
+          # weekly run just after GC instead of after every build.
+          optimise = {
+            automatic = true;
+            dates = [ "weekly" ];
+            randomizedDelaySec = "45min";
           };
           package = pkgs.nixVersions.latest;
           registry.nixpkgs.flake = inputs.nixpkgs;
@@ -64,6 +76,15 @@ in
           '';
         };
         nixpkgs.config.allowUnfree = true;
+
+        # Store maintenance is heavily I/O bound and can run for minutes.
+        # Never let it fire on battery; a run skipped this way is simply
+        # dropped until the timer's next weekly elapse, which is fine for GC.
+        # Run `systemctl start nix-gc nix-optimise` by hand to force one.
+        systemd.services = {
+          nix-gc.unitConfig.ConditionACPower = true;
+          nix-optimise.unitConfig.ConditionACPower = true;
+        };
 
         system = {
           autoUpgrade = {
