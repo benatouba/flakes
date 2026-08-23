@@ -40,6 +40,12 @@ in
           neededForUsers = true;
           sopsFile = defaultSopsFile;
         };
+        sops.secrets.github_netrc = {
+          sopsFile = defaultSopsFile;
+          owner = "root";
+          group = "wheel";
+          mode = "0440";
+        };
 
         users.mutableUsers = lib.mkForce false;
         users.users.root.hashedPasswordFile = lib.mkForce config.sops.secrets.${rootPasswordKey}.path;

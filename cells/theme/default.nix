@@ -1,22 +1,38 @@
-{ config, ... }:
+{
+  config,
+  inputs,
+  ...
+}:
 let
   theme = config.my.theme;
   c = theme.colors;
   accentHex = c.${theme.accent};
+  cursorName = "catppuccin-${theme.cursor.flavor}-${theme.cursor.accent}-cursors";
 in
 {
   config.my.branches.desktop.hmModules = [
+    inputs.catppuccin.homeModules.default
     (
       { pkgs, ... }:
       {
+        catppuccin = {
+          enable = true;
+          autoEnable = false;
+          flavor = theme.flavor;
+          accent = theme.accent;
+          cursors = {
+            enable = true;
+            inherit (theme.cursor) flavor accent;
+          };
+          kvantum.enable = true;
+        };
+
         home = {
           sessionVariables = {
             GTK_THEME = theme.gtk.theme;
             XCURSOR_SIZE = toString theme.cursor.size;
           };
           pointerCursor = {
-            package = pkgs.catppuccin-cursors;
-            inherit (theme.cursor) name;
             inherit (theme.cursor) size;
             gtk.enable = true;
             enable = true;
@@ -32,10 +48,13 @@ in
           gtk4.theme = null;
           theme = {
             name = theme.gtk.theme;
-            package = pkgs.${theme.gtk.package};
+            package = pkgs.catppuccin-gtk.override {
+              variant = theme.gtk.flavor;
+              accents = [ theme.gtk.accent ];
+            };
           };
           cursorTheme = {
-            inherit (theme.cursor) name;
+            name = cursorName;
             inherit (theme.cursor) size;
           };
           iconTheme = {
@@ -62,18 +81,12 @@ in
           '';
         };
 
-        # Qt theming via Kvantum
+        # Qt theming via Kvantum (theme files applied by catppuccin.kvantum)
         qt = {
           enable = true;
           platformTheme.name = "kvantum";
           style.name = "kvantum";
         };
-        xdg.configFile."Kvantum/kvantum.kvconfig".text = ''
-          [General]
-          theme=${theme.kvantum}
-        '';
-        xdg.configFile."Kvantum/${theme.kvantum}".source =
-          "${pkgs.catppuccin-kvantum}/share/Kvantum/${theme.kvantum}";
 
         # GTK CSS colors generated from theme palette
         xdg.configFile."gtk-3.0/colors.css".text = ''
@@ -133,7 +146,7 @@ in
         xdg.configFile."xsettingsd/xsettingsd.conf".text = ''
           Net/ThemeName "${theme.gtk.theme}"
           Net/IconThemeName "${theme.icons.name}"
-          Gtk/CursorThemeName "${theme.cursor.name}"
+          Gtk/CursorThemeName "${cursorName}"
           Gtk/CursorThemeSize ${toString theme.cursor.size}
           Net/EnableEventSounds 1
           EnableInputFeedbackSounds 0

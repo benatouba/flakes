@@ -22,6 +22,10 @@
       url = "github:nix-community/neovim-nightly-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    catppuccin = {
+      url = "github:catppuccin/nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     claude-code.url = "github:sadjow/claude-code-nix";
     hyprland = {
       url = "github:hyprwm/Hyprland";

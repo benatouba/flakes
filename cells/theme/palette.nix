@@ -3,6 +3,7 @@ let
   themes = {
     catppuccin-mocha = {
       slug = "catppuccin-mocha";
+      flavor = "mocha";
       variant = "dark";
       colors = {
         rosewater = "f5e0dc";
@@ -35,18 +36,19 @@ let
       accent = "mauve";
       borderColor = "ffc0cb";
       gtk = {
-        theme = "Catppuccin-Frappe-Pink";
-        package = "catppuccin-frappe-gtk";
+        flavor = "frappe";
+        accent = "pink";
+        theme = "catppuccin-frappe-pink-standard";
       };
       icons = {
         name = "Papirus-Dark";
       };
       cursor = {
-        name = "Catppuccin-Frappe-Dark";
-        size = 20;
+        flavor = "frappe";
+        accent = "dark";
+        size = 16;
       };
       colorScheme = "prefer-dark";
-      kvantum = "catppuccin-mocha-mauve";
       weztermColorScheme = "Catppuccin Mocha";
       starshipPalette = "catppuccin_mocha";
       waybarVariation = "mocha";
@@ -70,6 +72,7 @@ let
 
     catppuccin-latte = {
       slug = "catppuccin-latte";
+      flavor = "latte";
       variant = "light";
       colors = {
         rosewater = "dc8a78";
@@ -102,18 +105,19 @@ let
       accent = "mauve";
       borderColor = "C4ACEB";
       gtk = {
-        theme = "Catppuccin-Latte-Green";
-        package = "catppuccin-latte-gtk";
+        flavor = "latte";
+        accent = "green";
+        theme = "catppuccin-latte-green-standard";
       };
       icons = {
         name = "Papirus-Light";
       };
       cursor = {
-        name = "Catppuccin-Latte-Dark";
-        size = 20;
+        flavor = "latte";
+        accent = "dark";
+        size = 16;
       };
       colorScheme = "prefer-light";
-      kvantum = "catppuccin-latte-mauve";
       weztermColorScheme = "Catppuccin Latte";
       starshipPalette = "catppuccin_latte";
       waybarVariation = "latte";

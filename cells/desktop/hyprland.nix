@@ -570,6 +570,8 @@ in
     (
       { pkgs, ... }:
       {
+        # nixpkgs.overlays = [ inputs.hyprland.overlays.hyprland-packages ];
+
         programs.hyprland.enable = true;
 
         environment.systemPackages = with pkgs; [

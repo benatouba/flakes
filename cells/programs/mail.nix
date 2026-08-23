@@ -1,9 +1,24 @@
-{ config, inputs, ... }:
+{
+  config,
+  inputs,
+  lib,
+  ...
+}:
 let
   theme = config.my.theme;
   c = theme.colors;
   secretsRoot = toString inputs.nix-secrets;
   mailAccountsPath = "${secretsRoot}/mail-accounts.nix";
+  sopsFile = "${secretsRoot}/secrets.yaml";
+  outlookClientIdSecret = "mail_outlook_client_id";
+
+  # Same probe as cells/shell/railway.nix: sops leaves mapping keys in plaintext,
+  # so the key can be checked without decrypting. Outlook cannot authenticate at
+  # all without OAuth2, so the whole account is gated on the client id being
+  # present rather than hard-failing activation until it is added.
+  hasOutlookClientId =
+    builtins.pathExists sopsFile
+    && lib.hasInfix "${outlookClientIdSecret}:" (builtins.readFile sopsFile);
 in
 {
 
@@ -20,12 +35,61 @@ in
         accts = if hasMailAccounts then import mailAccountsPath else { };
         a = accts;
         tuBerlinMaildir = "tu-berlin-new";
+        outlookMaildir = "outlook";
+
+        # Outlook.com reports *localized* IMAP folder names. These are the German
+        # names a live.de mailbox uses, consistent with the alganize account below.
+        # mbsync syncs with `Patterns *`, so the sync works whatever they are named
+        # — after the first sync, check `ls ~/mail/outlook` and correct these here
+        # if the server returned English names (Sent/Drafts/Deleted/Junk/Archive).
+        outlookFolders = {
+          sent = "Gesendete Elemente";
+          drafts = "Entwürfe";
+          trash = "Gelöschte Elemente";
+          junk = "Junk-E-Mail";
+          archive = "Archiv";
+        };
+        outlookMailboxes = [
+          outlookFolders.sent
+          outlookFolders.drafts
+          outlookFolders.trash
+          outlookFolders.junk
+          outlookFolders.archive
+        ];
+
         urlEncode = builtins.replaceStrings [ "@" "\\" ] [ "%40" "%5C" ];
         secret = name: config.sops.secrets."mail_${name}".path;
         catSecret = name: "${pkgs.coreutils}/bin/cat ${secret name}";
+
+        # Google presents app passwords as "xxxx xxxx xxxx xxxx", but the IMAP and
+        # SMTP servers expect the 16 characters with no spaces — pasted verbatim, the
+        # login just fails. This strips whitespace so the secret works either way.
+        #
+        # It has to be a script rather than a `cat ... | tr` pipeline: a string
+        # passwordCommand is split on spaces, and home-manager shell-escapes every
+        # element when generating imapnotify's config, which would turn the pipe into
+        # a literal argument. A single store path survives that intact.
+        catSecretUnspaced =
+          name:
+          pkgs.writeShellScript "mail-secret-${name}" ''
+            exec ${pkgs.coreutils}/bin/tr -d '[:space:]' < ${secret name}
+          '';
+
+        # nixpkgs builds isync without the XOAUTH2 SASL plugin by default, which
+        # makes OAuth2 IMAP impossible. The override wraps mbsync with a SASL_PATH
+        # that includes cyrus-sasl-xoauth2. Required for Outlook.
+        isyncPackage = pkgs.isync.override { withCyrusSaslXoauth2 = true; };
+
+        # Microsoft issues a *new* refresh token on every refresh, so the token
+        # cannot live in sops: a git-tracked, build-time-encrypted file is not
+        # something a background sync can rewrite. oama keeps the rotating refresh
+        # token in gnome-keyring and mints short-lived access tokens on demand.
+        # Only the non-rotating client id comes from sops.
+        oamaAccess = email: "${pkgs.oama}/bin/oama access ${lib.escapeShellArg email}";
+
         mbsyncLockFile = "${config.xdg.cacheHome}/mbsync.lock";
         mbsyncPackage = pkgs.writeShellScriptBin "mbsync" ''
-          exec ${pkgs.util-linux}/bin/flock -w 180 ${lib.escapeShellArg mbsyncLockFile} ${pkgs.isync}/bin/mbsync "$@"
+          exec ${pkgs.util-linux}/bin/flock -w 180 ${lib.escapeShellArg mbsyncLockFile} ${isyncPackage}/bin/mbsync "$@"
         '';
         notifyCmd =
           account:
@@ -59,6 +123,17 @@ in
             message = "The personal branch requires ${mailAccountsPath} to exist.";
           }
         ];
+
+        warnings = lib.optional (hasMailAccounts && !hasOutlookClientId) ''
+          Mail: `${outlookClientIdSecret}` is missing from ${sopsFile}, so the
+          outlook (${a.outlook.address}) account is disabled. Outlook.com retired
+          basic auth for personal accounts on 2024-09-16, so it needs an OAuth2
+          client id from an Azure app registration. Add it with:
+            sops ~/.local/secrets/secrets.yaml   # ${outlookClientIdSecret}: <client-id>
+            just update-secrets
+          then rebuild and run:
+            oama authorize microsoft ${a.outlook.address} --device
+        '';
       }
       // lib.optionalAttrs hasMailAccounts {
         services.imapnotify.enable = true;
@@ -67,7 +142,27 @@ in
             mail_tu_berlin = { };
             mail_gmail = { };
             mail_alganize = { };
+          }
+          // lib.optionalAttrs hasOutlookClientId {
+            ${outlookClientIdSecret} = { };
           };
+        };
+
+        xdg.configFile."oama/config.yaml" = lib.mkIf hasOutlookClientId {
+          text = ''
+            # Generated by Home Manager. Rotating tokens live in gnome-keyring,
+            # which PAM unlocks at login so the mbsync timer refreshes unattended.
+            encryption:
+                tag: KEYRING
+
+            services:
+              microsoft:
+                client_id_cmd: |
+                  ${pkgs.coreutils}/bin/cat ${config.sops.secrets.${outlookClientIdSecret}.path}
+                auth_endpoint: https://login.microsoftonline.com/common/oauth2/v2.0/devicecode
+                auth_scope: https://outlook.office.com/IMAP.AccessAsUser.All https://outlook.office.com/SMTP.Send offline_access
+                tenant: common
+          '';
         };
 
         programs = {
@@ -326,7 +421,12 @@ in
                 key = "M";
                 action = "<tag-pattern>~U<enter><tag-prefix-cond><clear-flag>N<untag-pattern>.<enter>";
               }
-            ];
+            ]
+            ++ lib.optional hasOutlookClientId {
+              map = [ "index" ];
+              key = "go";
+              action = "<change-folder>~/mail/${outlookMaildir}/Inbox<enter>";
+            };
           };
 
           mbsync = {
@@ -412,6 +512,9 @@ in
                 gi = ":cf ${tuBerlinMaildir}/INBOX<Enter>";
                 gm = ":cf gmail/INBOX<Enter>";
                 ga = ":cf alganize/INBOX<Enter>";
+              }
+              // lib.optionalAttrs hasOutlookClientId {
+                go = ":cf ${outlookMaildir}/INBOX<Enter>";
               };
               "messages:folder=Trash" = {
                 d = ":delete<Enter>";
@@ -493,10 +596,17 @@ in
             ++ [
               a.gmail.address
               a.alganize.address
-            ];
+            ]
+            ++ lib.optional hasOutlookClientId a.outlook.address;
+            maildirs = [
+              "${home}/mail/${tuBerlinMaildir}"
+              "${home}/mail/gmail"
+              "${home}/mail/alganize"
+            ]
+            ++ lib.optional hasOutlookClientId "${home}/mail/${outlookMaildir}";
           in
           ''
-            maildir = ["${home}/mail/${tuBerlinMaildir}", "${home}/mail/gmail", "${home}/mail/alganize"]
+            maildir = ${toTomlList maildirs}
             addresses = ${toTomlList addresses}
           '';
 
@@ -557,11 +667,16 @@ in
           application/vnd.oasis.opendocument.*; xdg-open %s
         '';
 
-        home.packages = with pkgs; [
-          lynx
-          maildir-rank-addr
-          urlscan
-        ];
+        home.packages =
+          with pkgs;
+          [
+            lynx
+            maildir-rank-addr
+            urlscan
+          ]
+          # Needed interactively for the one-time `oama authorize` device-code flow
+          # and for `oama show`/`renew` when debugging Outlook auth.
+          ++ lib.optional hasOutlookClientId oama;
 
         accounts.email = {
           maildirBasePath = "mail";
@@ -640,7 +755,7 @@ in
               inherit (a.gmail) address;
               inherit (a.gmail) realName;
               inherit (a.gmail) userName;
-              passwordCommand = catSecret "gmail";
+              passwordCommand = "${catSecretUnspaced "gmail"}";
               imap = {
                 host = a.gmail.imapHost;
                 port = 993;
@@ -680,7 +795,7 @@ in
                   source = "maildir://~/mail/gmail";
                   outgoing = "smtps://${urlEncode a.gmail.userName}@${a.gmail.smtpHost}:465";
                   default = "INBOX";
-                  outgoing-cred-cmd = catSecret "gmail";
+                  outgoing-cred-cmd = "${catSecretUnspaced "gmail"}";
                   copy-to = "Sent";
                   folders-sort = "INBOX,Sent,[Gmail]/Sent Mail,[Gmail]/Drafts,[Gmail]/Trash,[Gmail]/All Mail";
                 };
@@ -741,6 +856,69 @@ in
                 enable = true;
                 boxes = [ "INBOX" ];
                 onNotify = syncAndNotifyCmd "alganize" "Alganize";
+              };
+            };
+          }
+          // lib.optionalAttrs hasOutlookClientId {
+            # Outlook.com personal accounts lost basic auth (and app passwords) on
+            # 2024-09-16, so every leg here authenticates with an OAuth2 access
+            # token from oama instead of a password: mbsync via SASL XOAUTH2, msmtp
+            # via `auth xoauth2`, aerc via the smtp+xoauth2 scheme. neomutt needs no
+            # OAuth config of its own — it reads the maildir and sends via msmtp.
+            outlook = {
+              inherit (a.outlook) address;
+              inherit (a.outlook) realName;
+              inherit (a.outlook) userName;
+              maildir.path = outlookMaildir;
+              passwordCommand = oamaAccess a.outlook.address;
+              # inbox is left at the default "Inbox" so the local maildir matches
+              # the other three accounts.
+              folders = { inherit (outlookFolders) sent drafts trash; };
+              imap = {
+                host = a.outlook.imapHost;
+                port = 993;
+                tls.enable = true;
+              };
+              smtp = {
+                host = a.outlook.smtpHost;
+                port = 587;
+                tls.useStartTls = true;
+              };
+              mbsync = {
+                enable = true;
+                create = "maildir";
+                extraConfig.account.AuthMechs = "XOAUTH2";
+                # Left broad so the sync succeeds regardless of how Microsoft
+                # localizes the folder names for this mailbox.
+                patterns = [ "*" ];
+              };
+              msmtp = {
+                enable = true;
+                extraConfig.auth = "xoauth2";
+              };
+              neomutt = {
+                enable = true;
+                extraMailboxes = outlookMailboxes;
+              };
+              aerc = {
+                enable = true;
+                extraAccounts = {
+                  source = "maildir://~/mail/${outlookMaildir}";
+                  # No token_endpoint: aerc then treats the cred-cmd output as an
+                  # access token rather than a refresh token, which is what oama
+                  # hands out. oama owns the refresh, so aerc must not duplicate it.
+                  outgoing = "smtp+xoauth2://${urlEncode a.outlook.userName}@${a.outlook.smtpHost}:587";
+                  default = "INBOX";
+                  outgoing-cred-cmd = oamaAccess a.outlook.address;
+                  copy-to = outlookFolders.sent;
+                  folders-sort = lib.concatStringsSep "," ([ "INBOX" ] ++ outlookMailboxes);
+                };
+              };
+              imapnotify = {
+                enable = true;
+                boxes = [ "INBOX" ];
+                onNotify = syncAndNotifyCmd "outlook" "Outlook";
+                extraConfig.xoAuth2 = true;
               };
             };
           };

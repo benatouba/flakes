@@ -13,6 +13,11 @@
       user = "git";
     };
 
+    statusAlganizeDisk = {
+      hostname = "ssh.frankfurt.render.com";
+      user = "srv-d6jespngi27c73d3tk1g";
+    };
+
     "tu-proxy" = {
       hostname = "proxy.example.org";
       user = "user";

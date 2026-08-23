@@ -7,6 +7,7 @@ in
     type = types.submodule {
       options = {
         slug = mkOption { type = types.str; };
+        flavor = mkOption { type = types.str; };
         variant = mkOption {
           type = types.enum [
             "dark"
@@ -58,7 +59,8 @@ in
           type = types.submodule {
             options = {
               theme = mkOption { type = types.str; };
-              package = mkOption { type = types.str; };
+              flavor = mkOption { type = types.str; };
+              accent = mkOption { type = types.str; };
             };
           };
         };
@@ -70,13 +72,13 @@ in
         cursor = mkOption {
           type = types.submodule {
             options = {
-              name = mkOption { type = types.str; };
+              flavor = mkOption { type = types.str; };
+              accent = mkOption { type = types.str; };
               size = mkOption { type = types.int; };
             };
           };
         };
         colorScheme = mkOption { type = types.str; };
-        kvantum = mkOption { type = types.str; };
         weztermColorScheme = mkOption { type = types.str; };
         starshipPalette = mkOption { type = types.str; };
         waybarVariation = mkOption { type = types.str; };

@@ -57,6 +57,7 @@ in
           package = pkgs.nixVersions.latest;
           registry.nixpkgs.flake = inputs.nixpkgs;
           extraOptions = ''
+            netrc-file = /run/secrets/github_netrc
             keep-outputs     = true
             keep-derivations = true
             warn-dirty       = true

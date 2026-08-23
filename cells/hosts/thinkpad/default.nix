@@ -57,13 +57,6 @@ in
             options rtw89_core disable_ps_mode=y
           '';
 
-          # Test entry for the rtw89 driver on current kernels: boot it from the
-          # GRUB menu; the default entry stays on the 6.12 LTS pin from core/boot.nix.
-          # The rtw89 modprobe workarounds above apply here too.
-          specialisation.kernel-latest.configuration = {
-            boot.kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
-          };
-
           networking = {
             hostName = "thinkpad";
           };

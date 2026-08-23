@@ -10,7 +10,7 @@ _: {
           gdal
           gimp
           hugo
-          libreoffice-fresh
+          libreoffice
           nodejs_latest
           obsidian
           pnpm

@@ -5,8 +5,7 @@ _: {
       {
         boot = {
           supportedFilesystems = [ "btrfs" ];
-          # Pinned to the latest 6.x series; linuxPackages_latest would jump to major version 7.
-          kernelPackages = pkgs.linuxPackages_6_12;
+          kernelPackages = pkgs.linuxPackages_latest;
           loader = {
             grub = {
               enable = true;
