@@ -77,21 +77,14 @@ in
             }
           ];
 
-          systemd.network.links = {
-            "40-enp2s0f0-wol" = {
-              matchConfig.OriginalName = "enp2s0f0";
-              linkConfig.WakeOnLan = "magic";
-            };
-            "40-enp5s0-wol" = {
-              matchConfig.OriginalName = "enp5s0";
-              linkConfig.WakeOnLan = "magic";
-            };
-          };
+          # No Wake-on-LAN here.  Two systemd.network.links used to set
+          # WakeOnLan=magic on the dock NICs, but TLP re-applies
+          # WOL_DISABLE="Y" on every power event and wins, so it never
+          # actually worked.  To genuinely want WoL on this machine, set
+          # WOL_DISABLE="N" in core/power.nix and restore the links.
 
-          environment.systemPackages = with pkgs; [
-            ethtool
-            wakeonlan
-          ];
+          # ethtool/wakeonlan went with the WoL links above; esprimo declares
+          # its own copies where they are actually used.
 
           # The eDP backlight is the largest single consumer on this machine:
           # ~3-4 W of an ~11 W idle draw at 100%.  Cap it to 40% whenever the

@@ -1,6 +1,8 @@
+# NOTE: `inputs` is no longer an argument here — hyprpicker now comes from
+# nixpkgs. The two commented-out `inputs.*` lines below would need it added
+# back if they are ever re-enabled.
 {
   config,
-  inputs,
   lib,
   ...
 }:
@@ -575,7 +577,7 @@ in
         programs.hyprland.enable = true;
 
         environment.systemPackages = with pkgs; [
-          inputs.hyprpicker.packages.${pkgs.stdenv.hostPlatform.system}.hyprpicker
+          hyprpicker
           hyprlock
           pamixer
         ];

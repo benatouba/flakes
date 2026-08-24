@@ -3,16 +3,12 @@ _: {
     (
       { pkgs, ... }:
       {
+        # Plain nixpkgs waybar on purpose.  An overrideAttrs here (previously
+        # -Dexperimental=true) changes the derivation hash, so no binary cache
+        # can ever serve it and every nixpkgs bump means a full C++ rebuild.
+        # The config uses no group/drawer constructs, so nothing needed it.
         environment.systemPackages = with pkgs; [
           waybar
-        ];
-
-        nixpkgs.overlays = [
-          (_final: prev: {
-            waybar = prev.waybar.overrideAttrs (oldAttrs: {
-              mesonFlags = oldAttrs.mesonFlags ++ [ "-Dexperimental=true" ];
-            });
-          })
         ];
       }
     )

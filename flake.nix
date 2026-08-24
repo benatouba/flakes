@@ -16,7 +16,6 @@
 
     import-tree.url = "github:vic/import-tree";
 
-    hyprpicker.url = "github:hyprwm/hyprpicker";
     neovim-nightly = {
       url = "github:nix-community/neovim-nightly-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
