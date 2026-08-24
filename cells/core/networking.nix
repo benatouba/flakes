@@ -9,7 +9,15 @@
           resolved = {
             enable = true;
             settings.Resolve = {
-              DNSSEC = false;
+              # "allow-downgrade" rather than true, specifically because of the
+              # home Pi-hole: it blocks by returning forged answers, and strict
+              # validation turns every blocked *signed* domain into a SERVFAIL
+              # instead of a clean block.  Downgrade mode validates when the
+              # resolver path actually supports DNSSEC and quietly falls back
+              # when it doesn't.  Strictly better than off, and by design
+              # defeatable by an active MITM that strips DNSSEC — the honest
+              # middle ground for a laptop that roams.
+              DNSSEC = "allow-downgrade";
               # LLMNR answers name lookups from anyone on the local link and is
               # the standard credential-relay foothold on untrusted networks.
               # Nothing here needs it; mDNS covers local discovery.

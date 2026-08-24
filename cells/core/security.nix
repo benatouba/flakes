@@ -10,6 +10,15 @@ in
         security = {
           rtkit.enable = true;
           protectKernelImage = true;
+          # NOTE: this currently enforces nothing, and that is not fixable by
+          # adding pkgs.apparmor-profiles.  All 198 upstream profiles attach to
+          # /usr (172) or /opt (13) paths; none reference /nix/store, so on
+          # NixOS they match no binary at all.  76 of them are additionally
+          # flags=(unconfined) stubs that enforce nothing even on Debian.
+          # Kept enabled so that NixOS modules which do ship their own policies
+          # are honoured if one is added later — but do not read this line as
+          # meaning desktop apps are confined.  Real confinement here comes
+          # from systemd service hardening, not AppArmor.
           apparmor.enable = true;
 
           polkit.extraConfig = ''
