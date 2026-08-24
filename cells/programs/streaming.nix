@@ -32,7 +32,7 @@ _: {
             obs-pipewire-audio-capture # Per-app audio capture via PipeWire
             obs-multi-rtmp # Simultaneous streaming to Twitch + YouTube
             obs-backgroundremoval # Webcam background removal
-            obs-move-transition # Smooth source animations
+            # obs-move-transition # Smooth source animations
             obs-source-record # Record individual sources while streaming
             obs-vaapi # Hardware-accelerated encoding (AMD VCN)
           ];
