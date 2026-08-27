@@ -43,6 +43,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    # Source-only (QML + bash, MIT). Vendored piecemeal by pkgs/omarchy-shell;
+    # see that derivation for the allowlist of what we actually build. Upstream
+    # reports itself as 4.0.0.alpha, so bump this pin deliberately and re-check
+    # the allowlist each time rather than tracking the branch.
+    omarchy = {
+      url = "github:basecamp/omarchy/quattro";
+      flake = false;
+    };
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
