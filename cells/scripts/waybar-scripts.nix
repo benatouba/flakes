@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, ... }:
 let
   theme = config.my.theme;
 in
@@ -56,18 +56,31 @@ in
           cava -p ~/.config/cava/config1 | sed -u 's/;//g;s/0/▁/g;s/1/▂/g;s/2/▃/g;s/3/▄/g;s/4/▅/g;s/5/▆/g;s/6/▇/g;s/7/█/g;'
         '';
 
+        myswaylock = pkgs.writeShellScriptBin "myswaylock" ''
+          swaylock  \
+                 --screenshots \
+                 --clock \
+                 --indicator \
+                 --indicator-radius 100 \
+                 --indicator-thickness 7 \
+                 --effect-blur 7x5 \
+                 --effect-vignette 0.5:0.5 \
+                 --ring-color 3b4252 \
+                 --key-hl-color 880033 \
+                 --line-color 00000000 \
+                 --inside-color 00000088 \
+                 --separator-color 00000000 \
+                 --grace 2 \
+                 --fade-in 0.3
+        '';
       in
       {
         home.packages = [
-          border_color
-          cava-internal
-        ]
-        # Both drive the waybar binary, which cells/desktop/waybar.nix only
-        # installs on the non-Omarchy path. Without this they sit on PATH and
-        # fail silently.
-        ++ lib.optionals (!config.my.enableOmarchyShell) [
           launch-waybar
           waybar-toggle
+          border_color
+          cava-internal
+          myswaylock
         ];
       }
     )
