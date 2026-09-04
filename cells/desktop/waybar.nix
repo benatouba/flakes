@@ -1,9 +1,5 @@
-{ config, lib, ... }:
-{
-  # Waybar and the Omarchy Quickshell bar are mutually exclusive: both anchor a
-  # layer-shell surface at the top of every monitor. See
-  # cells/desktop/omarchy-shell.nix.
-  config.my.branches.desktop.nixosModules = lib.optionals (!config.my.enableOmarchyShell) [
+_: {
+  config.my.branches.desktop.nixosModules = [
     (
       { pkgs, ... }:
       {
@@ -18,7 +14,7 @@
     )
   ];
 
-  config.my.branches.desktop.hmModules = lib.optionals (!config.my.enableOmarchyShell) [
+  config.my.branches.desktop.hmModules = [
     {
       xdg.configFile."waybar" = {
         source = ./waybar;

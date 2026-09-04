@@ -38,21 +38,6 @@ let
 
   cursorEnvConf = "env = XCURSOR_SIZE, ${toString theme.cursor.size}";
 
-  # hyprlock.conf used to `source = colors.conf`, a file only matugen writes and
-  # nothing in this repo ever runs, so $primary/$on_primary/$error/$shadow were
-  # undefined and the background pointed at a cache directory that never
-  # existed. Feed it from my.theme instead, the same way themeConf does for
-  # Hyprland itself. hypridle locks at 480s and before every suspend, so this is
-  # on the daily path.
-  hyprlockPrelude = ''
-    ${"$"}primary = rgb(${theme.colors.${theme.accent}})
-    ${"$"}on_primary = rgb(${theme.colors.base})
-    ${"$"}error = rgb(${theme.colors.red})
-    ${"$"}shadow = rgb(${theme.colors.crust})
-    ${"$"}font = ${theme.font.sans}
-    ${"$"}wallpaper = ${../../dotfiles/wallpapers}/${theme.slug}.png
-  '';
-
   legacyHyprlandConfig = builtins.concatStringsSep "\n" (
     [
       themeConf
@@ -316,154 +301,29 @@ let
       ]
   );
 
-  # Waybar + swaync, or the Omarchy Quickshell shell that replaces both. Kept
-  # in their original positions so the generated config is unchanged while
-  # my.enableOmarchyShell is off. See cells/desktop/omarchy-shell.nix.
-  omarchyShell = config.my.enableOmarchyShell;
-
-  autostartCommands = [
-    "~/.config/hypr/scripts/resetXdgPortal.sh"
-    "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
-    "systemctl --user restart pipewire"
-  ]
-  # hyprpolkitagent is not installed in this configuration and has no user
-  # unit, so this only ever failed silently. The Omarchy shell ships a polkit
-  # agent plugin; without it there is no agent at all, which is still what the
-  # waybar path gets.
-  ++ lib.optional (!omarchyShell) "systemctl --user start hyprpolkitagent"
-  ++ lib.optional (!omarchyShell) "launch-waybar"
-  ++ lib.optional omarchyShell "omarchy-launch-shell"
-  ++ [ "nm-applet" ]
-  ++ lib.optional (!omarchyShell) "swaync"
-  ++ [
-    "hyprpaper"
-    "sleep 1 && bash ~/.config/hypr/scripts/random-wallpaper.sh"
-    "xsettingsd"
-    "hyprsunset -t 5200"
-  ]
-  # The Omarchy clipboard plugin runs its own wl-paste watchers and keeps its
-  # own history, so running cliphist alongside it would capture everything
-  # twice.
-  ++ lib.optionals (!omarchyShell) [
-    "wl-paste --type text --watch cliphist store"
-    "wl-paste --type image --watch cliphist store"
-  ]
-  ++ [
-    "wezterm-mux-server --daemonize --cwd ~/"
-    "hypridle"
-  ];
-
   autostartLua = lib.concatStringsSep "\n" (
-    map (command: ''
-      hl.exec_cmd(${luaString command})
-    '') autostartCommands
+    map
+      (command: ''
+        hl.exec_cmd(${luaString command})
+      '')
+      [
+        "~/.config/hypr/scripts/resetXdgPortal.sh"
+        "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+        "systemctl --user start hyprpolkitagent"
+        "systemctl --user restart pipewire"
+        "launch-waybar"
+        "nm-applet"
+        "swaync"
+        "hyprpaper"
+        "sleep 1 && bash ~/.config/hypr/scripts/random-wallpaper.sh"
+        "xsettingsd"
+        "hyprsunset -t 5200"
+        "wl-paste --type text --watch cliphist store"
+        "wl-paste --type image --watch cliphist store"
+        "wezterm-mux-server --daemonize --cwd ~/"
+        "hypridle"
+      ]
   );
-
-  # Omarchy's helpers drive the shell's on-screen display; brightnessctl and
-  # pamixer do the same job silently. Same keys either way — only the command
-  # behind them changes, and with the shell running it gains an OSD.
-  volumeBindsLua =
-    if omarchyShell then
-      ''
-        hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("omarchy-audio-output-volume raise"), { locked = true, repeating = true })
-        hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("omarchy-audio-output-volume lower"), { locked = true, repeating = true })
-        hl.bind("XF86AudioMute", hl.dsp.exec_cmd("omarchy-audio-output-volume mute-toggle"), { locked = true })
-      ''
-    else
-      ''
-        hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer --allow-boost -i 5"), { locked = true, repeating = true })
-        hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer -d 5"), { locked = true, repeating = true })
-        hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pamixer -t"), { locked = true })
-      '';
-
-  brightnessBindsLua =
-    if omarchyShell then
-      ''
-        hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("omarchy-brightness-display +5%"), { locked = true, repeating = true })
-        hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("omarchy-brightness-display 5%-"), { locked = true, repeating = true })
-      ''
-    else
-      ''
-        hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -c backlight set +5%"), { locked = true, repeating = true })
-        hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -c backlight set 5%-"), { locked = true, repeating = true })
-      '';
-
-  # Routing the transport keys through the shell gives track changes an OSD;
-  # playerctl does the same job silently. Same keys either way.
-  mediaBindsLua =
-    if omarchyShell then
-      ''
-        hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("omarchy-shell media playPause"), { locked = true })
-        hl.bind("XF86AudioNext", hl.dsp.exec_cmd("omarchy-shell media next"), { locked = true })
-        hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("omarchy-shell media previous"), { locked = true })
-      ''
-    else
-      ''
-        hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-        hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
-        hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
-      '';
-
-  # The rofi pipeline referenced cliphist_theme.rasi, which does not exist —
-  # dotfiles/rofi ships config-cliphist.rasi — so this binding was broken. The
-  # shell's clipboard overlay replaces it outright.
-  clipboardBindLua =
-    if omarchyShell then
-      ''
-        hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("omarchy-shell shell toggle omarchy.clipboard"))
-      ''
-    else
-      ''
-        hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | rofi -dmenu -theme config-cliphist | cliphist decode | wl-copy"))
-      '';
-
-  barToggleCommand =
-    if omarchyShell then "omarchy-shell -q shell toggle omarchy.bar" else "waybar-toggle";
-
-  # Bindings adopted from Omarchy Quattro (default/hypr/bindings/utilities.lua).
-  # Everything here lands on keys this config leaves free; where Omarchy's own
-  # default collided with a binding above, the Omarchy one moved rather than the
-  # existing one. Notably: Omarchy puts the notification family on bare
-  # SUPER + comma (taken here by workspace e-1) so it moves to the SUPER + ALT
-  # prefix, and its network panel moves off SUPER + CTRL + W (silent move to the
-  # web workspace) onto SUPER + CTRL + N.
-  #
-  # Deliberately not adopted: SUPER + SPACE (Omarchy menu) and
-  # SUPER + CTRL + SPACE (background switcher) need plugins we do not ship,
-  # SUPER + CTRL + 1..9 (bar panel by index) collides with silent workspace
-  # moves and is redundant with the panel letters, and SUPER + SHIFT + BACKSPACE
-  # (gaps) duplicates SUPER + G / SUPER + SHIFT + G.
-  #
-  # Still unbound because they need helpers we did not vendor:
-  # SUPER + CTRL + PRINT (OCR, wants tesseract) and ALT + PRINT (screen
-  # recording, wants wf-recorder and the capture script family).
-  #
-  # SUPER + CTRL + BACKSPACE (single-window square aspect) is also left out. It
-  # goes through omarchy-hyprland-toggle, which copies a .lua flag file into
-  # ~/.local/state/omarchy/toggles/hypr and relies on the user's hyprland.lua
-  # doing require("default.hypr.toggles") to source that directory. That is
-  # Omarchy's Hyprland config layer, which this repo deliberately does not
-  # adopt, so the binding would be inert.
-  omarchyBindsLua = lib.optionalString omarchyShell ''
-    hl.bind(mainMod .. " + CTRL + A", hl.dsp.exec_cmd("omarchy-shell shell toggle omarchy.audio"))
-    hl.bind(mainMod .. " + CTRL + B", hl.dsp.exec_cmd("omarchy-shell shell toggle omarchy.bluetooth"))
-    hl.bind(mainMod .. " + CTRL + D", hl.dsp.exec_cmd("omarchy-shell shell toggle omarchy.monitor"))
-    hl.bind(mainMod .. " + CTRL + N", hl.dsp.exec_cmd("omarchy-shell shell toggle omarchy.network"))
-    hl.bind(mainMod .. " + CTRL + P", hl.dsp.exec_cmd("omarchy-shell shell toggle omarchy.power"))
-    hl.bind(mainMod .. " + CTRL + ALT + D", hl.dsp.exec_cmd("omarchy-shell shell toggle omarchy.clock"))
-    hl.bind(mainMod .. " + CTRL + T", hl.dsp.exec_cmd("omarchy-launch-or-focus-tui btop"))
-
-    hl.bind(mainMod .. " + ALT + comma", hl.dsp.exec_cmd("omarchy-shell notifications dismissOne"))
-    hl.bind(mainMod .. " + SHIFT + ALT + comma", hl.dsp.exec_cmd("omarchy-shell notifications dismissAll"))
-    hl.bind(mainMod .. " + CTRL + comma", hl.dsp.exec_cmd("omarchy-shell notifications toggleDnd"))
-    hl.bind(mainMod .. " + ALT + period", hl.dsp.exec_cmd("omarchy-shell notifications invokeLast"))
-    hl.bind(mainMod .. " + CTRL + ALT + comma", hl.dsp.exec_cmd("omarchy-shell notifications showHistory"))
-
-    hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd("pkill hyprpicker || hyprpicker -a"))
-    hl.bind(mainMod .. " + BACKSPACE", hl.dsp.exec_cmd("omarchy-hyprland-window-transparency-toggle"))
-    hl.bind(mainMod .. " + CTRL + E", hl.dsp.exec_cmd("omarchy-shell shell toggle omarchy.emojis"))
-    hl.bind(mainMod .. " + CTRL + ALT + N", hl.dsp.exec_cmd("omarchy-toggle-nightlight"))
-  '';
 
   hyprlandLua = ''
     ${colorVars}
@@ -679,11 +539,16 @@ let
     hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
     hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
-    ${volumeBindsLua}
+    hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer --allow-boost -i 5"), { locked = true, repeating = true })
+    hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer -d 5"), { locked = true, repeating = true })
+    hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pamixer -t"), { locked = true })
     hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("pamixer --default-source -t && amixer -q -c1 sset Capture toggle"), { locked = true })
     hl.bind(mainMod .. " + F4", hl.dsp.exec_cmd("pamixer --default-source -t && amixer -q -c1 sset Capture toggle"))
-    ${brightnessBindsLua}
-    ${mediaBindsLua}
+    hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -c backlight set +5%"), { locked = true, repeating = true })
+    hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -c backlight set 5%-"), { locked = true, repeating = true })
+    hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+    hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
+    hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
     hl.bind("Print", hl.dsp.exec_cmd("hyprshot -m region"))
     hl.bind("CTRL + Print", hl.dsp.exec_cmd("hyprshot -zm region"))
     hl.bind("SHIFT + Print", hl.dsp.exec_cmd("hyprshot -m display"))
@@ -693,12 +558,10 @@ let
     hl.bind("ALT + W", hl.dsp.exec_cmd("bash " .. scriptsDir .. "/random-wallpaper.sh"))
     hl.bind("ALT + SHIFT + C", hl.dsp.exec_cmd("bash " .. scriptsDir .. "/toggle-charge.sh"))
     hl.bind(mainMod .. " + ALT + L", hl.dsp.exec_cmd("hyprlock"))
-    hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(${luaString barToggleCommand}))
-    ${clipboardBindLua}
+    hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("waybar-toggle"))
+    hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | rofi -dmenu -theme cliphist_theme.rasi | cliphist decode | wl-copy"))
     hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("rofi-rbw -a copy -t password --clear-after 20"))
     hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("rofi-rbw --no-help --clear-after 20 --selector-args=\"-theme-str 'window { width: 800px;}'\""))
-
-    ${omarchyBindsLua}
 
     ${rulesLua}
   '';
@@ -769,8 +632,7 @@ in
 
         xdg.configFile."hypr/hypridle.conf".source = ./hyprland/hypridle.conf;
         xdg.configFile."hypr/hyprpaper.conf".source = ./hyprland/hyprpaper.conf;
-        xdg.configFile."hypr/hyprlock.conf".text =
-          hyprlockPrelude + builtins.readFile ./hyprland/hyprlock.conf;
+        xdg.configFile."hypr/hyprlock.conf".source = ./hyprland/hyprlock.conf;
         xdg.configFile."hypr/hyprlock/status.sh" = {
           source = ./hyprland/hyprlock/status.sh;
           executable = true;

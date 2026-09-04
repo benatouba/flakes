@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, ... }:
 let
   theme = config.my.theme;
   wallpaperPath = ../../dotfiles/wallpapers/${theme.slug}.png;
@@ -8,15 +8,7 @@ in
     (
       { pkgs, ... }:
       let
-        # The Omarchy theme wallpapers join the pool when the shell is enabled.
-        # They are flattened into a single directory precisely so that
-        # -maxdepth 1 still reaches them; see pkgs/omarchy-wallpapers.
-        wallpaperRoots = lib.concatStringsSep " " (
-          [ "~/pictures/wallpaper" ]
-          ++ lib.optional config.my.enableOmarchyShell "${pkgs.omarchy-wallpapers}/share/omarchy/wallpapers"
-        );
-
-        pick_random = ''find ${wallpaperRoots} -maxdepth 1 -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) 2>/dev/null | shuf -n1'';
+        pick_random = ''find ~/pictures/wallpaper -maxdepth 1 -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) | shuf -n1'';
 
         set_wallpaper = pkgs.writeShellScriptBin "set_wallpaper" ''
           IMG="$1"
