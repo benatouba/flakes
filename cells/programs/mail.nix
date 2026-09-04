@@ -91,12 +91,95 @@ in
         mbsyncPackage = pkgs.writeShellScriptBin "mbsync" ''
           exec ${pkgs.util-linux}/bin/flock -w 180 ${lib.escapeShellArg mbsyncLockFile} ${isyncPackage}/bin/mbsync "$@"
         '';
-        notifyCmd =
-          account:
-          "${pkgs.libnotify}/bin/notify-send -a 'Mail' -i mail-unread '${account}' 'New mail received'";
+        # Two-way sync. `Sync All`, isync's default, already carried both
+        # messages and flags in both directions; these two settings finish the
+        # job at the folder and deletion level.
+        #
+        # Create Both — a folder made on either side is created on the other.
+        # Previously `Create Near`, so a folder made here stayed here.
+        #
+        # Expunge Both — deletions become effective instead of being left as a
+        # \Deleted flag on the opposite copy, which is what isync's manual
+        # recommends once a setup is known good. Note what this hands over: `d`
+        # in neomutt plus the next sync permanently removes the server copy, and
+        # because the gmail channel syncs [Gmail]/All Mail, a delete there is a
+        # delete from every label at once. Set Expunge back to "none" to return
+        # to flag-only propagation.
+        mbsyncTwoWay = {
+          create = "both";
+          expunge = "both";
+        };
+
+        # Notify only when a message actually arrived.
+        #
+        # goimapnotify's onNewMail hook — what home-manager's `onNotify` maps to
+        # — does not only fire for new mail. internal/imap/watch.go queues a
+        # synthetic SYNC event every time it connects to a mailbox ("issue fake
+        # event to trigger a first time sync"), and internal/runner/runner.go
+        # routes SYNC to that same hook. Every reconnect — a network blip, a
+        # resume from suspend, a restart of the unit, an OAuth refresh —
+        # therefore ran the old `mbsync && notify-send` pair, which announced
+        # "New mail received" whether or not anything had. With hundreds of
+        # already-unread messages sitting in an inbox that reads as a
+        # notification about mail that has been there for weeks.
+        #
+        # Genuine arrivals are a narrower thing than "the mailbox changed", so
+        # the decision comes from the maildir rather than from the event. isync
+        # encodes flags in the ":2,..." filename suffix and renames in place, so
+        # the part before that suffix is a stable per-message identity: reading,
+        # flagging or deleting a message — here or on the server — never makes
+        # it look new. Anything present after the sync that was not present
+        # before genuinely just arrived.
+        #
+        # Flag changes and deletions reach goimapnotify as separate events
+        # (onChangedMail, onDeletedMail). Both are left unset, so neither has
+        # ever notified and neither does now.
+        newMailNotify = pkgs.writeShellApplication {
+          name = "mail-sync-notify";
+          runtimeInputs = [
+            mbsyncPackage
+            pkgs.coreutils
+            pkgs.findutils
+            pkgs.gnused
+            pkgs.libnotify
+          ];
+          text = ''
+            channel="$1"
+            label="$2"
+            inbox="$3"
+
+            ids() {
+              { find "$inbox/new" "$inbox/cur" -maxdepth 1 -type f -printf '%f\n' 2>/dev/null || true; } \
+                | sed 's/:2,.*$//' \
+                | sort -u
+            }
+
+            before=$(ids)
+            mbsync --pull-new --quiet "$channel:INBOX"
+            after=$(ids)
+
+            arrived=$(comm -13 <(printf '%s\n' "$before") <(printf '%s\n' "$after") | grep -c . || true)
+            [ "$arrived" -gt 0 ] || exit 0
+
+            if [ "$arrived" -eq 1 ]; then
+              body="1 new message"
+            else
+              body="$arrived new messages"
+            fi
+
+            notify-send -a Mail -i mail-unread "$label" "$body"
+          '';
+        };
+
+        # home-manager names each mbsync channel after its account, so the
+        # account name is also the channel to pull.
         syncAndNotifyCmd =
-          channel: account:
-          "${mbsyncPackage}/bin/mbsync --pull-new --quiet ${lib.escapeShellArg "${channel}:INBOX"} && ${notifyCmd account}";
+          account: label:
+          let
+            inherit (config.accounts.email.accounts.${account}) folders maildir;
+            inbox = "${maildir.absPath}/${folders.inbox}";
+          in
+          "${newMailNotify}/bin/mail-sync-notify ${lib.escapeShellArg account} ${lib.escapeShellArg label} ${lib.escapeShellArg inbox}";
         queryAddresses = pkgs.writeShellScript "query-addresses" ''
           query="$1"
           [ -z "$query" ] && exit 1
@@ -142,6 +225,7 @@ in
             mail_tu_berlin = { };
             mail_gmail = { };
             mail_alganize = { };
+            mail_alganize_kundenservice = { };
           }
           // lib.optionalAttrs hasOutlookClientId {
             ${outlookClientIdSecret} = { };
@@ -409,6 +493,11 @@ in
                 action = "<change-folder>~/mail/alganize/Inbox<enter>";
               }
               {
+                map = [ "index" ];
+                key = "gk";
+                action = "<change-folder>~/mail/alganize-kundenservice/Inbox<enter>";
+              }
+              {
                 map = [
                   "pager"
                   "index"
@@ -416,10 +505,27 @@ in
                 key = "U";
                 action = "<pipe-message>${pkgs.urlscan}/bin/urlscan<enter>";
               }
+              # Mark read. `M` takes the whole mailbox, Esc-M the thread under
+              # the cursor; `.` is neomutt's alias for the ~A "all messages"
+              # pattern, so the untag afterwards leaves nothing selected.
+              #
+              # <tag-prefix-cond> applies <clear-flag> to the tagged messages and
+              # abandons the rest of the macro when nothing matched, so `M` on an
+              # already-read mailbox cannot fall through to the current message.
+              #
+              # The trailing <sync-mailbox> writes the \Seen flags into the
+              # maildir there and then. Without it neomutt holds them until the
+              # mailbox is closed, and the next mbsync run would have nothing to
+              # push, so the mail would still look unread everywhere else.
               {
                 map = [ "index" ];
                 key = "M";
-                action = "<tag-pattern>~U<enter><tag-prefix-cond><clear-flag>N<untag-pattern>.<enter>";
+                action = "<tag-pattern>~U<enter><tag-prefix-cond><clear-flag>N<untag-pattern>.<enter><sync-mailbox>";
+              }
+              {
+                map = [ "index" ];
+                key = "\\eM";
+                action = "<tag-thread><tag-prefix-cond><clear-flag>N<untag-pattern>.<enter><sync-mailbox>";
               }
             ]
             ++ lib.optional hasOutlookClientId {
@@ -512,6 +618,7 @@ in
                 gi = ":cf ${tuBerlinMaildir}/INBOX<Enter>";
                 gm = ":cf gmail/INBOX<Enter>";
                 ga = ":cf alganize/INBOX<Enter>";
+                gk = ":cf alganize-kundenservice/INBOX<Enter>";
               }
               // lib.optionalAttrs hasOutlookClientId {
                 go = ":cf ${outlookMaildir}/INBOX<Enter>";
@@ -596,12 +703,14 @@ in
             ++ [
               a.gmail.address
               a.alganize.address
+              a.alganize-kundenservice.address
             ]
             ++ lib.optional hasOutlookClientId a.outlook.address;
             maildirs = [
               "${home}/mail/${tuBerlinMaildir}"
               "${home}/mail/gmail"
               "${home}/mail/alganize"
+              "${home}/mail/alganize-kundenservice"
             ]
             ++ lib.optional hasOutlookClientId "${home}/mail/${outlookMaildir}";
           in
@@ -712,7 +821,7 @@ in
               };
               mbsync = {
                 enable = true;
-                create = "maildir";
+                inherit (mbsyncTwoWay) create expunge;
                 extraConfig.account.AuthMechs = "LOGIN";
                 patterns = [
                   "INBOX"
@@ -768,7 +877,7 @@ in
               };
               mbsync = {
                 enable = true;
-                create = "maildir";
+                inherit (mbsyncTwoWay) create expunge;
                 patterns = [
                   "*"
                   "![Gmail]*"
@@ -824,7 +933,7 @@ in
               };
               mbsync = {
                 enable = true;
-                create = "maildir";
+                inherit (mbsyncTwoWay) create expunge;
                 patterns = [
                   "*"
                   "!Sent"
@@ -858,6 +967,61 @@ in
                 onNotify = syncAndNotifyCmd "alganize" "Alganize";
               };
             };
+
+            # Same all-inkl/Kasserver mailbox type as alganize above, so the
+            # settings mirror it: IMAPS + smtps on port 465, German folder
+            # names, basic auth against the sops password.
+            alganize-kundenservice = {
+              inherit (a.alganize-kundenservice) address;
+              inherit (a.alganize-kundenservice) realName;
+              inherit (a.alganize-kundenservice) userName;
+              passwordCommand = catSecret "alganize_kundenservice";
+              imap = {
+                host = a.alganize-kundenservice.imapHost;
+                port = 993;
+                tls.enable = true;
+              };
+              smtp = {
+                host = a.alganize-kundenservice.smtpHost;
+                port = 465;
+                tls.enable = true;
+              };
+              mbsync = {
+                enable = true;
+                inherit (mbsyncTwoWay) create expunge;
+                patterns = [
+                  "*"
+                  "!Sent"
+                  "!Trash"
+                ];
+              };
+              msmtp.enable = true;
+              neomutt = {
+                enable = true;
+                extraMailboxes = [
+                  "Gesendet"
+                  "Entwürfe"
+                  "Papierkorb"
+                  "Archiv"
+                ];
+              };
+              aerc = {
+                enable = true;
+                extraAccounts = {
+                  source = "maildir://~/mail/alganize-kundenservice";
+                  outgoing = "smtps://${a.alganize-kundenservice.userName}@${a.alganize-kundenservice.smtpHost}:465";
+                  default = "INBOX";
+                  outgoing-cred-cmd = catSecret "alganize_kundenservice";
+                  copy-to = "Gesendet";
+                  folders-sort = "INBOX,Gesendet,Entwürfe,Papierkorb,Archiv";
+                };
+              };
+              imapnotify = {
+                enable = true;
+                boxes = [ "INBOX" ];
+                onNotify = syncAndNotifyCmd "alganize-kundenservice" "Alganize Kundenservice";
+              };
+            };
           }
           // lib.optionalAttrs hasOutlookClientId {
             # Outlook.com personal accounts lost basic auth (and app passwords) on
@@ -886,7 +1050,7 @@ in
               };
               mbsync = {
                 enable = true;
-                create = "maildir";
+                inherit (mbsyncTwoWay) create expunge;
                 extraConfig.account.AuthMechs = "XOAUTH2";
                 # Left broad so the sync succeeds regardless of how Microsoft
                 # localizes the folder names for this mailbox.

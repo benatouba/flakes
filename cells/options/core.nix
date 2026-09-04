@@ -28,10 +28,5 @@ in
       type = types.str;
       default = "25.05";
     };
-
-    enableNoctalia = mkOption {
-      type = types.bool;
-      default = false;
-    };
   };
 }

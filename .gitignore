@@ -6,6 +6,7 @@ devenv.lock
 node_modules/
 cells/programs/opencode/node_modules/
 **/CLAUDE.md
+**/AGENTS.md
 
 result
 result-*
