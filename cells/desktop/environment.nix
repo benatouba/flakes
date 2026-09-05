@@ -27,9 +27,11 @@ _: {
         ];
       };
 
-      # Create ~/downloads on boot (tmpfs root wipes it each reboot)
+      # Create these on boot (tmpfs root wipes them each reboot)
       systemd.user.tmpfiles.rules = [
         "d %h/downloads 0755 - - -"
+        "d %h/pictures 0755 - - -"
+        "d %h/pictures/screenshots 0755 - - -"
       ];
     }
   ];

@@ -549,9 +549,16 @@ let
     hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
     hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
     hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
-    hl.bind("Print", hl.dsp.exec_cmd("hyprshot -m region"))
-    hl.bind("CTRL + Print", hl.dsp.exec_cmd("hyprshot -zm region"))
-    hl.bind("SHIFT + Print", hl.dsp.exec_cmd("hyprshot -m display"))
+    -- The capture toolkit in cells/scripts/capture.nix. The three SUPER/ALT
+    -- chords are Omarchy's own and were free here; they give hyprpicker and
+    -- wf-recorder -- both installed, neither previously called from anywhere --
+    -- their first keybinds. The descriptions show up in `hyprctl binds`.
+    hl.bind("Print", hl.dsp.exec_cmd("capture-screenshot region"), { description = "Screenshot region" })
+    hl.bind("SHIFT + Print", hl.dsp.exec_cmd("capture-screenshot display"), { description = "Screenshot display" })
+    hl.bind("CTRL + Print", hl.dsp.exec_cmd("capture-screenshot window"), { description = "Screenshot window" })
+    hl.bind("SUPER + Print", hl.dsp.exec_cmd("capture-color"), { description = "Colour picker" })
+    hl.bind("SUPER + CTRL + Print", hl.dsp.exec_cmd("capture-text"), { description = "Extract text (OCR)" })
+    hl.bind("ALT + Print", hl.dsp.exec_cmd("capture-record"), { description = "Screen recording" })
     hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd("hyprctl --batch \"keyword general:gaps_out 5;keyword general:gaps_in 3\""))
     hl.bind(mainMod .. " + G", hl.dsp.exec_cmd("hyprctl --batch \"keyword general:gaps_out 0;keyword general:gaps_in 0\""))
     hl.bind(mainMod .. " + backslash", hl.dsp.exec_cmd("hyprctl switchxkblayout all next"))

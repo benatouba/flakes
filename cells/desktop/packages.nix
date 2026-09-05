@@ -39,10 +39,14 @@ _: {
           pkgs.sway-contrib.grimshot
           hyprpaper
           hypridle
-          hyprshot
           hyprsunset
           imagemagick
           jq
+          # Region selection and annotation for cells/scripts/capture.nix.
+          # hyprshot used to vendor its own picker; the capture commands drive
+          # grim and slurp directly, so the picker has to be installed.
+          slurp
+          satty
           libnotify
           kdePackages.kdeconnect-kde
           nemo
