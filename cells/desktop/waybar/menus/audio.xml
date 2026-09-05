@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkMenu" id="menu">
+    <child><object class="GtkMenuItem" id="mixer"><property name="label">Mixer…</property></object></child>
+    <child><object class="GtkSeparatorMenuItem" id="sep1"/></child>
+    <child><object class="GtkMenuItem" id="mute"><property name="label">Toggle mute</property></object></child>
+    <child><object class="GtkMenuItem" id="mute-mic"><property name="label">Toggle microphone</property></object></child>
+    <child><object class="GtkSeparatorMenuItem" id="sep2"/></child>
+    <child><object class="GtkMenuItem" id="vol-0"><property name="label">0 %</property></object></child>
+    <child><object class="GtkMenuItem" id="vol-25"><property name="label">25 %</property></object></child>
+    <child><object class="GtkMenuItem" id="vol-50"><property name="label">50 %</property></object></child>
+    <child><object class="GtkMenuItem" id="vol-75"><property name="label">75 %</property></object></child>
+    <child><object class="GtkMenuItem" id="vol-100"><property name="label">100 %</property></object></child>
+  </object>
+</interface>

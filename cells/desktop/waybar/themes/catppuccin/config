@@ -3,18 +3,20 @@
 	"position": "top",
 	"spacing": 4,
 	"modules-left": [
-		"hyprland/workspaces"
+		"hyprland/workspaces",
+		"hyprland/window"
 	],
 	"modules-center": [
 		"clock"
 	],
 	"modules-right": [
+		"mpris",
 		"idle_inhibitor",
+		"custom/nightlight",
+		"group/stats",
 		"pulseaudio",
+		"pulseaudio#source",
 		"backlight",
-		"cpu",
-		"memory",
-		"disk",
 		"network",
 		"bluetooth",
 		"battery",
@@ -30,14 +32,21 @@
 		"format": "{icon}",
 		"all-outputs": true,
 		"format-icons": {
-			"terminal": "",
+			"terminal": "",
 			"web": "󰖟",
 			"music": "󰝚",
 			"email": "󰇮",
-			"active": "",
-			"default": "",
-			"urgent": ""
+			"active": "",
+			"default": "",
+			"urgent": ""
 		}
+	},
+	"hyprland/window": {
+		"format": "{title}",
+		"max-length": 60,
+		"separate-outputs": true,
+		"tooltip-format": "{title}",
+		"on-click-middle": "hyprctl dispatch killactive"
 	},
 	"idle_inhibitor": {
 		"format": "{icon}",
@@ -48,6 +57,19 @@
 		"on-click-right": "hyprlock",
 		"tooltip-format-activated": "Idle inhibitor: active (screen stays awake)",
 		"tooltip-format-deactivated": "Idle inhibitor: inactive (will sleep on idle)"
+	},
+	"custom/nightlight": {
+		"format": "{}",
+		"return-type": "json",
+		"interval": 5,
+		"exec": "bash ~/.config/waybar/scripts/nightlight.sh",
+		"menu": "on-click",
+		"menu-file": "~/.config/waybar/menus/nightlight.xml",
+		"menu-actions": {
+			"warm": "bash -c 'hyprctl hyprsunset temperature 4000 && printf 4000 > \"${XDG_RUNTIME_DIR:-/tmp}/waybar-nightlight\"'",
+			"evening": "bash -c 'hyprctl hyprsunset temperature 5200 && printf 5200 > \"${XDG_RUNTIME_DIR:-/tmp}/waybar-nightlight\"'",
+			"off": "bash -c 'hyprctl hyprsunset identity && printf off > \"${XDG_RUNTIME_DIR:-/tmp}/waybar-nightlight\"'"
+		}
 	},
 	"clock": {
 		"tooltip-format": "<tt><small>{calendar}</small></tt>",
@@ -69,17 +91,58 @@
 		},
 		"format": "  {:%a %H:%M}",
 		"format-alt": "  {:%A, %d %B %Y}",
-		"interval": 60
+		"interval": 60,
+		"menu": "on-click-middle",
+		"menu-file": "~/.config/waybar/menus/clock.xml",
+		"menu-actions": {
+			"copy-date": "bash -c 'date +%F | wl-copy'",
+			"copy-time": "bash -c 'date +%H:%M | wl-copy'",
+			"copy-week": "bash -c 'date +%G-W%V | wl-copy'",
+			"copy-stamp": "bash -c 'date --iso-8601=seconds | wl-copy'"
+		}
+	},
+	"mpris": {
+		"format": "{status_icon} {dynamic}",
+		"format-stopped": "{status_icon}",
+		"status-icons": {
+			"playing": "󰏤",
+			"paused": "󰐊",
+			"stopped": "󰓛"
+		},
+		"dynamic-order": [
+			"title",
+			"artist"
+		],
+		"dynamic-separator": "  ·  ",
+		"dynamic-len": 40,
+		"tooltip-format": "{status_icon} {title}\n{artist}\n{album}",
+		"on-click-middle": "playerctl next",
+		"on-click-right": "playerctl previous",
+		"on-scroll-up": "playerctl previous",
+		"on-scroll-down": "playerctl next"
+	},
+	"group/stats": {
+		"orientation": "horizontal",
+		"drawer": {
+			"transition-duration": 300,
+			"children-class": "stats-item",
+			"transition-left-to-right": false
+		},
+		"modules": [
+			"cpu",
+			"memory",
+			"disk"
+		]
 	},
 	"cpu": {
 		"format": " {usage}%",
-		"on-click": "wezterm start -- btop",
+		"on-click": "wezterm start --always-new-process --class org.waybar.btop -- btop",
 		"tooltip": true,
 		"interval": 5
 	},
 	"memory": {
 		"format": " {}%",
-		"on-click": "wezterm start -- btop",
+		"on-click": "wezterm start --always-new-process --class org.waybar.btop -- btop",
 		"tooltip-format": "{used:0.1f}G / {total:0.1f}G used",
 		"interval": 5
 	},
@@ -87,19 +150,35 @@
 		"interval": 30,
 		"format": "󰋊 {percentage_used}%",
 		"path": "/",
-		"on-click": "wezterm start -- btop",
+		"on-click": "wezterm start --always-new-process --class org.waybar.btop -- btop",
 		"tooltip-format": "{used} / {total} used on {path}"
 	},
 	"network": {
-		"format-wifi": "  {essid} ({signalStrength}%)",
+		"format-wifi": "{icon} {essid} ({signalStrength}%)",
 		"format-ethernet": "󰈀 {ifname}",
-		"format-disconnected": "󰖪 Disconnected",
-		"on-click": "nm-connection-editor",
+		"format-disconnected": "󰤮 Disconnected",
+		"format-icons": [
+			"󰤯",
+			"󰤟",
+			"󰤢",
+			"󰤥",
+			"󰤨"
+		],
 		"on-click-right": "bash -c 'if [ \"$(nmcli -t -f WIFI g)\" = enabled ]; then nmcli radio wifi off; else nmcli radio wifi on; fi'",
-		"tooltip-format-wifi": "  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBits} Down: {bandwidthDownBits}",
+		"on-click-middle": "wezterm start --always-new-process --class org.waybar.nmtui -- nmtui",
+		"tooltip-format-wifi": "{icon} {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBits} Down: {bandwidthDownBits}",
 		"tooltip-format-ethernet": "󰈀 {ifname}\nIP: {ipaddr}\nUp: {bandwidthUpBits} Down: {bandwidthDownBits}",
 		"tooltip-format-disconnected": "Disconnected",
-		"max-length": 30
+		"max-length": 30,
+		"menu": "on-click",
+		"menu-file": "~/.config/waybar/menus/network.xml",
+		"menu-actions": {
+			"networks": "wezterm start --always-new-process --class org.waybar.nmtui -- nmtui",
+			"wifi-on": "nmcli radio wifi on",
+			"wifi-off": "nmcli radio wifi off",
+			"reconnect": "bash -c 'nmcli networking off && sleep 1 && nmcli networking on'",
+			"copy-ip": "bash -c 'ip -4 -j addr show scope global | jq -r \".[0].addr_info[0].local\" | wl-copy'"
+		}
 	},
 	"bluetooth": {
 		"format": "󰂯 {status}",
@@ -107,13 +186,20 @@
 		"format-connected-battery": "󰂱 {device_alias} {device_battery_percentage}%",
 		"format-disabled": "󰂲",
 		"format-off": "󰂲",
-		"on-click": "blueman-manager",
-		"on-click-right": "rfkill toggle bluetooth",
 		"format-no-controller": "",
+		"on-click-right": "rfkill toggle bluetooth",
+		"on-click-middle": "wezterm start --always-new-process --class org.waybar.bluetui -- bluetui",
 		"tooltip-format": "{controller_alias}\n{num_connections} connected",
 		"tooltip-format-connected": "{controller_alias}\n\n{device_enumerate}",
 		"tooltip-format-enumerate-connected": "{device_alias}",
-		"tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_battery_percentage}%"
+		"tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_battery_percentage}%",
+		"menu": "on-click",
+		"menu-file": "~/.config/waybar/menus/bluetooth.xml",
+		"menu-actions": {
+			"devices": "wezterm start --always-new-process --class org.waybar.bluetui -- bluetui",
+			"on": "rfkill unblock bluetooth",
+			"off": "rfkill block bluetooth"
+		}
 	},
 	"battery": {
 		"states": {
@@ -121,39 +207,97 @@
 			"critical": 15
 		},
 		"format": "{icon} {capacity}%",
-		"format-charging": "󰂄 {capacity}%",
+		"format-charging": "{icon} {capacity}%",
 		"format-plugged": "󰚥 {capacity}%",
 		"format-alt": "{icon} {time}",
-		"on-click": "wezterm start -- btop",
+		"format-icons": {
+			"charging": [
+				"󰢜",
+				"󰂆",
+				"󰂇",
+				"󰂈",
+				"󰢝",
+				"󰂉",
+				"󰢞",
+				"󰂊",
+				"󰂋",
+				"󰂅"
+			],
+			"default": [
+				"󰁺",
+				"󰁻",
+				"󰁼",
+				"󰁽",
+				"󰁾",
+				"󰁿",
+				"󰂀",
+				"󰂁",
+				"󰂂",
+				"󰁹"
+			]
+		},
 		"on-click-right": "~/.config/hypr/scripts/toggle-charge.sh",
-		"format-icons": [
-			"󰁺",
-			"󰁻",
-			"󰁽",
-			"󰁿",
-			"󰁹"
-		],
-		"tooltip-format": "{timeTo}\nPower: {power:.1f}W"
+		"on-click-middle": "wezterm start --always-new-process --class org.waybar.btop -- btop",
+		"tooltip-format": "{timeTo}\nPower: {power:.1f}W",
+		"menu": "on-click",
+		"menu-file": "~/.config/waybar/menus/battery.xml",
+		"menu-actions": {
+			"lock": "hyprlock",
+			"suspend": "systemctl suspend",
+			"logout": "hyprctl dispatch exit",
+			"reboot": "systemctl reboot",
+			"shutdown": "systemctl poweroff",
+			"charge": "bash ~/.config/hypr/scripts/toggle-charge.sh",
+			"monitor": "wezterm start --always-new-process --class org.waybar.btop -- btop"
+		}
 	},
 	"pulseaudio": {
 		"format": "{icon} {volume}%",
 		"format-muted": "󰝟 muted",
 		"format-icons": {
 			"headphone": "󰋋",
+			"headset": "󰋎",
+			"hands-free": "󰋎",
+			"phone": "󰏲",
+			"portable": "󰦧",
+			"car": "󰄋",
+			"hdmi": "󰡁",
 			"default": [
 				"󰕿",
 				"󰖀",
 				"󰕾"
 			]
 		},
-		"on-click": "pavucontrol",
-		"on-click-right": "pamixer -t"
+		"tooltip-format": "{desc}\nVolume {volume}%",
+		"scroll-step": 5,
+		"max-volume": 100,
+		"on-click-right": "pamixer -t",
+		"on-click-middle": "wezterm start --always-new-process --class org.waybar.wiremix -- wiremix",
+		"menu": "on-click",
+		"menu-file": "~/.config/waybar/menus/audio.xml",
+		"menu-actions": {
+			"mixer": "wezterm start --always-new-process --class org.waybar.wiremix -- wiremix",
+			"mute": "pamixer -t",
+			"mute-mic": "pamixer --default-source -t",
+			"vol-0": "pamixer --set-volume 0",
+			"vol-25": "pamixer --set-volume 25",
+			"vol-50": "pamixer --set-volume 50",
+			"vol-75": "pamixer --set-volume 75",
+			"vol-100": "pamixer --set-volume 100"
+		}
+	},
+	"pulseaudio#source": {
+		"format": "{format_source}",
+		"format-source": "󰍬 {volume}%",
+		"format-source-muted": "󰍭",
+		"tooltip-format": "Microphone: {format_source}",
+		"scroll-step": 5,
+		"on-click": "pamixer --default-source -t",
+		"on-click-right": "pamixer --default-source -t",
+		"on-click-middle": "wezterm start --always-new-process --class org.waybar.wiremix -- wiremix"
 	},
 	"backlight": {
 		"format": "{icon} {percent}%",
-		"on-click": "brightnessctl set +5%",
-		"on-click-right": "brightnessctl set 5%-",
-		"on-click-middle": "brightnessctl set 50%",
 		"format-icons": [
 			"",
 			"",
@@ -165,7 +309,16 @@
 			"",
 			""
 		],
-		"scroll-step": 5
+		"tooltip-format": "Brightness {percent}%",
+		"scroll-step": 5,
+		"menu": "on-click",
+		"menu-file": "~/.config/waybar/menus/backlight.xml",
+		"menu-actions": {
+			"b-25": "brightnessctl -c backlight set 25%",
+			"b-50": "brightnessctl -c backlight set 50%",
+			"b-75": "brightnessctl -c backlight set 75%",
+			"b-100": "brightnessctl -c backlight set 100%"
+		}
 	},
 	"custom/notification": {
 		"tooltip-format": "Left: Toggle notifications\nRight: Do not disturb",
@@ -188,7 +341,9 @@
 		"escape": true
 	},
 	"hyprland/language": {
-		"format": "󰌌 {short}"
+		"format": "󰌌 {short}",
+		"tooltip-format": "{long}",
+		"on-click": "hyprctl switchxkblayout all next"
 	},
 	"tray": {
 		"icon-size": 16,

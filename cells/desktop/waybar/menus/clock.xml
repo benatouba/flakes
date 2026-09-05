@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkMenu" id="menu">
+    <child><object class="GtkMenuItem" id="copy-date"><property name="label">Copy date</property></object></child>
+    <child><object class="GtkMenuItem" id="copy-time"><property name="label">Copy time</property></object></child>
+    <child><object class="GtkMenuItem" id="copy-week"><property name="label">Copy ISO week</property></object></child>
+    <child><object class="GtkMenuItem" id="copy-stamp"><property name="label">Copy timestamp</property></object></child>
+  </object>
+</interface>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkMenu" id="menu">
+    <child><object class="GtkMenuItem" id="warm"><property name="label">Warm — 4000 K</property></object></child>
+    <child><object class="GtkMenuItem" id="evening"><property name="label">Evening — 5200 K</property></object></child>
+    <child><object class="GtkSeparatorMenuItem" id="sep1"/></child>
+    <child><object class="GtkMenuItem" id="off"><property name="label">Off</property></object></child>
+  </object>
+</interface>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkMenu" id="menu">
+    <child><object class="GtkMenuItem" id="devices"><property name="label">Devices…</property></object></child>
+    <child><object class="GtkSeparatorMenuItem" id="sep1"/></child>
+    <child><object class="GtkMenuItem" id="on"><property name="label">Turn on</property></object></child>
+    <child><object class="GtkMenuItem" id="off"><property name="label">Turn off</property></object></child>
+  </object>
+</interface>

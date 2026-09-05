@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkMenu" id="menu">
+    <child><object class="GtkMenuItem" id="b-25"><property name="label">25 %</property></object></child>
+    <child><object class="GtkMenuItem" id="b-50"><property name="label">50 %</property></object></child>
+    <child><object class="GtkMenuItem" id="b-75"><property name="label">75 %</property></object></child>
+    <child><object class="GtkMenuItem" id="b-100"><property name="label">100 %</property></object></child>
+  </object>
+</interface>

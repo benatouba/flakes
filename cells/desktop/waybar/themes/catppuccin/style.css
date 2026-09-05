@@ -48,9 +48,35 @@ button {
 #idle_inhibitor,
 #custom-notification,
 #language,
-#custom-power {
+#custom-power,
+#window,
+#mpris,
+#custom-nightlight {
   background-color: alpha(@surface0, 0.4);
   padding: 0 0.75rem;
+}
+
+/* Every pill lifts slightly under the pointer, so a module reads as something
+   you can act on. The bar had no hover feedback outside #workspaces before. */
+#tray:hover,
+#backlight:hover,
+#clock:hover,
+#battery:hover,
+#pulseaudio:hover,
+#cpu:hover,
+#memory:hover,
+#disk:hover,
+#network:hover,
+#bluetooth:hover,
+#idle_inhibitor:hover,
+#custom-notification:hover,
+#language:hover,
+#custom-power:hover,
+#window:hover,
+#mpris:hover,
+#custom-nightlight:hover {
+  background-color: alpha(@surface0, 0.75);
+  transition: background-color 150ms ease-in-out;
 }
 
 #clock {
@@ -114,6 +140,14 @@ button {
   color: @overlay0;
 }
 
+#pulseaudio.source {
+  color: @sky;
+}
+
+#pulseaudio.source.source-muted {
+  color: @overlay0;
+}
+
 #idle_inhibitor {
   color: @lavender;
 }
@@ -132,4 +166,52 @@ button {
 
 #custom-power {
   color: @red;
+}
+
+#window {
+  color: @subtext0;
+}
+
+#mpris {
+  color: @green;
+}
+
+#mpris.paused {
+  color: @overlay1;
+}
+
+#custom-nightlight {
+  color: @peach;
+}
+
+#custom-nightlight.off {
+  color: @overlay0;
+}
+
+/* cpu/memory/disk live in a `group/stats` drawer: the leader stays put and the
+   other two slide out on hover. The container itself is transparent so the
+   three keep the pills they already had. */
+#stats {
+  background: transparent;
+}
+
+#stats .stats-item {
+  transition: opacity 300ms ease-in-out;
+}
+
+/* Popup menus, so a click lands on something that matches the bar rather than
+   the raw GTK theme. */
+menu {
+  background-color: @base;
+  color: @text;
+  border: 1px solid @surface1;
+}
+
+menuitem {
+  padding: 0.25rem 0.75rem;
+}
+
+menuitem:hover {
+  background-color: alpha(@surface0, 0.75);
+  color: @text;
 }
