@@ -2,6 +2,7 @@
 <interface>
   <object class="GtkMenu" id="menu">
     <child><object class="GtkMenuItem" id="networks"><property name="label">Networks…</property></object></child>
+    <child><object class="GtkMenuItem" id="share"><property name="label">Share Wi-Fi…</property></object></child>
     <child><object class="GtkSeparatorMenuItem" id="sep1"/></child>
     <child><object class="GtkMenuItem" id="wifi-on"><property name="label">Wi-Fi on</property></object></child>
     <child><object class="GtkMenuItem" id="wifi-off"><property name="label">Wi-Fi off</property></object></child>

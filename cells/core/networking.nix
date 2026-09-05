@@ -35,6 +35,19 @@
           };
         };
 
+        # PMTUD depends on ICMP "fragmentation needed" getting back to us, and
+        # plenty of hotel APs, captive portals and VPN concentrators drop it.
+        # The symptom is nasty to diagnose: the handshake succeeds and small
+        # requests work, then anything larger hangs. Mode 1 turns on probing
+        # only after such a black hole is detected, so it costs nothing on a
+        # healthy link.
+        #
+        # The other network sysctls are split by intent: congestion control and
+        # the qdisc sit with the rest of the throughput tuning in
+        # cells/core/power.nix, and the anti-spoofing set in
+        # cells/core/security.nix.
+        boot.kernel.sysctl."net.ipv4.tcp_mtu_probing" = 1;
+
         networking = {
           useDHCP = lib.mkDefault false;
           networkmanager = {
