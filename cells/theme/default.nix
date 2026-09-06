@@ -138,6 +138,12 @@ in
         '';
         xdg.configFile."gtk-4.0/gtk.css".text = "@import 'colors.css';";
 
+        # xsettingsd as a supervised unit rather than a bare exec-once. Its
+        # `settings` option is left empty on purpose: the module only passes
+        # `-c <file>` when settings are set, so with none it runs bare and reads
+        # the ~/.config/xsettingsd/xsettingsd.conf written below.
+        services.xsettingsd.enable = true;
+
         # Desktop integration (xsettingsd, electron, chromium flags)
         home.packages = with pkgs; [
           xsettingsd

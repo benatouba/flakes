@@ -301,27 +301,32 @@ let
       ]
   );
 
+  # Almost everything that used to live here is now a systemd user unit bound to
+  # graphical-session.target, which home-manager's hyprland module already
+  # starts for us (it emits the dbus-update-activation-environment line and
+  # starts hyprland-session.target as the very first startup command). Units
+  # get restarted when they die; an exec-once does not.
+  #
+  # Removed rather than converted:
+  #
+  #   resetXdgPortal.sh   The file does not exist and never did in this repo,
+  #                       so this failed on every single login.
+  #   dbus-update-...     home-manager emits its own, earlier and with more
+  #                       variables (DISPLAY, HYPRLAND_INSTANCE_SIGNATURE,
+  #                       XDG_SESSION_TYPE too). Ours raced it.
+  #   restart pipewire    pipewire is socket-activated; restarting it on every
+  #                       login and every config reload is pure churn.
+  #
+  # Only what genuinely cannot be a unit yet is left. wezterm-mux-server
+  # self-daemonises, so a unit needs Type=forking or --no-daemonize; worth
+  # doing, but not in this change.
   autostartLua = lib.concatStringsSep "\n" (
     map
       (command: ''
         hl.exec_cmd(${luaString command})
       '')
       [
-        "~/.config/hypr/scripts/resetXdgPortal.sh"
-        "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
-        "systemctl --user start hyprpolkitagent"
-        "systemctl --user restart pipewire"
-        "launch-waybar"
-        "nm-applet"
-        "swaync"
-        "hyprpaper"
-        "sleep 1 && bash ~/.config/hypr/scripts/random-wallpaper.sh"
-        "xsettingsd"
-        "hyprsunset -t 5200"
-        "wl-paste --type text --watch cliphist store"
-        "wl-paste --type image --watch cliphist store"
         "wezterm-mux-server --daemonize --cwd ~/"
-        "hypridle"
       ]
   );
 
@@ -635,6 +640,66 @@ in
             # inputs.hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprexpo
           ];
           extraConfig = if useLuaConfig then hyprlandLua else legacyHyprlandConfig;
+        };
+
+        # Supervised session components. Each of these modules writes its own
+        # config file only when `settings` is non-empty, so leaving settings
+        # alone keeps the xdg.configFile entries below authoritative and this
+        # is purely about getting a unit that restarts on failure.
+        #
+        # They default to WantedBy/PartOf/After on graphical-session.target,
+        # which hyprland-session.target binds to, so there is nothing to wire.
+        services = {
+          hypridle.enable = true;
+          hyprpaper.enable = true;
+          hyprsunset = {
+            enable = true;
+            # Was `hyprsunset -t 5200` as an exec-once.
+            extraArgs = [
+              "-t"
+              "5200"
+            ];
+          };
+          cliphist = {
+            enable = true;
+            # Emits both the text watcher and a second unit for images, which
+            # is what the two wl-paste exec-once lines used to do.
+            #
+            # One behavioural difference worth knowing: the module runs the
+            # first watcher as `wl-paste --watch`, where the old exec-once said
+            # `wl-paste --type text --watch`. Untyped, wl-paste reports the
+            # preferred type, so an image copy can be picked up by both
+            # watchers. cliphist's -max-dedupe-search handles the duplicate,
+            # and the module exposes no hook for wl-paste's own arguments, so
+            # this is left at the module default rather than pinned by
+            # overriding ExecStart with hardcoded store paths.
+            allowImages = true;
+          };
+          network-manager-applet.enable = true;
+
+          # `systemctl --user start hyprpolkitagent` was in the autostart list,
+          # but the package was never installed and no such unit existed — so
+          # this session has been running with security.polkit.enable = true and
+          # no agent at all. Anything needing a privilege prompt had nothing to
+          # prompt with, including the `pkexec tlp chargeonce` behind the waybar
+          # battery menu's charge toggle.
+          hyprpolkitagent.enable = true;
+        };
+
+        # hyprpaper has to be up before anything asks it to set a wallpaper.
+        # This replaces `sleep 1 && random-wallpaper.sh`, which was guessing at
+        # how long the IPC socket takes to appear.
+        systemd.user.services.random-wallpaper = {
+          Unit = {
+            Description = "Pick a random wallpaper";
+            After = [ "hyprpaper.service" ];
+            PartOf = [ "graphical-session.target" ];
+          };
+          Service = {
+            Type = "oneshot";
+            ExecStart = "${pkgs.bash}/bin/bash %h/.config/hypr/scripts/random-wallpaper.sh";
+          };
+          Install.WantedBy = [ "graphical-session.target" ];
         };
 
         xdg.configFile."hypr/hypridle.conf".source = ./hyprland/hypridle.conf;

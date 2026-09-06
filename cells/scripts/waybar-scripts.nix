@@ -7,80 +7,58 @@ in
     (
       { pkgs, ... }:
       let
-        launch-waybar = pkgs.writeShellScriptBin "launch-waybar" ''
-          SDIR="$HOME/.config/waybar"
-          STATE_DIR="$HOME/.local/state/waybar"
-          DISABLED_FILE="$STATE_DIR/waybar-disabled"
+        # Where launch-waybar used to compute these at runtime, they are now
+        # resolved once here and baked into the unit.
+        waybarDir = "%h/.config/waybar/themes/catppuccin";
+        waybarConfig = "${waybarDir}/config";
+        waybarStyle = "${waybarDir}/${theme.waybarVariation}/style.css";
 
-          mkdir -p "$STATE_DIR"
-
-          [[ -f "$DISABLED_FILE" ]] && exit 0
-
-          CONFIG="$SDIR/themes/catppuccin/config"
-          STYLE="$SDIR/themes/catppuccin/${theme.waybarVariation}/style.css"
-
-          if [[ ! -f "$CONFIG" || ! -f "$STYLE" ]]; then
-            CONFIG="$SDIR/themes/default/config"
-            STYLE="$SDIR/themes/default/style.css"
-          fi
-
-          pkill -x .waybar-wrapped 2>/dev/null || true
-          pkill -x waybar 2>/dev/null || true
-          waybar -c "$CONFIG" -s "$STYLE" >/dev/null 2>&1 &
-        '';
-
-        waybar-toggle = pkgs.writeShellScriptBin "waybar-toggle" ''
-          STATE_DIR="$HOME/.local/state/waybar"
-          DISABLED_FILE="$STATE_DIR/waybar-disabled"
-
-          mkdir -p "$STATE_DIR"
-
-          if [[ -f "$DISABLED_FILE" ]]; then
-            rm "$DISABLED_FILE"
-            launch-waybar
-          else
-            touch "$DISABLED_FILE"
-            killall .waybar-wrapped 2>/dev/null
-          fi
-        '';
-
-        border_color = pkgs.writeShellScriptBin "border_color" ''
-          function border_color {
-            hyprctl keyword general:col.active_border rgb\(${theme.borderColor}\)
-          }
-
-          socat - UNIX-CONNECT:/tmp/hypr/$(echo $HYPRLAND_INSTANCE_SIGNATURE)/.socket2.sock | while read line; do border_color $line; done
-        '';
+        # Toggling the bar is now starting and stopping a unit, so the
+        # ~/.local/state/waybar/waybar-disabled sentinel is gone: systemd
+        # already knows whether waybar is running, and the old script had to
+        # keep the file and the process agreeing by hand.
+        waybar-toggle = pkgs.writeShellApplication {
+          name = "waybar-toggle";
+          runtimeInputs = [ pkgs.systemd ];
+          text = ''
+            if systemctl --user --quiet is-active waybar.service; then
+              systemctl --user stop waybar.service
+            else
+              systemctl --user start waybar.service
+            fi
+          '';
+        };
 
         cava-internal = pkgs.writeShellScriptBin "cava-internal" ''
           cava -p ~/.config/cava/config1 | sed -u 's/;//g;s/0/▁/g;s/1/▂/g;s/2/▃/g;s/3/▄/g;s/4/▅/g;s/5/▆/g;s/6/▇/g;s/7/█/g;'
         '';
-
-        myswaylock = pkgs.writeShellScriptBin "myswaylock" ''
-          swaylock  \
-                 --screenshots \
-                 --clock \
-                 --indicator \
-                 --indicator-radius 100 \
-                 --indicator-thickness 7 \
-                 --effect-blur 7x5 \
-                 --effect-vignette 0.5:0.5 \
-                 --ring-color 3b4252 \
-                 --key-hl-color 880033 \
-                 --line-color 00000000 \
-                 --inside-color 00000088 \
-                 --separator-color 00000000 \
-                 --grace 2 \
-                 --fade-in 0.3
-        '';
       in
       {
+        # Not home-manager's `programs.waybar`: its unit runs waybar with no
+        # arguments, which expects ~/.config/waybar/{config,style.css}. This
+        # repo keeps them under themes/catppuccin/ and picks the stylesheet
+        # from theme.waybarVariation, so the unit is written out here instead.
+        # cells/desktop/waybar.nix still installs plain nixpkgs waybar, for the
+        # binary-cache reason documented there.
+        systemd.user.services.waybar = {
+          Unit = {
+            Description = "Waybar";
+            PartOf = [ "graphical-session.target" ];
+            After = [ "graphical-session.target" ];
+            # Tray modules need somewhere to put icons.
+            Requires = [ "tray.target" ];
+          };
+          Service = {
+            ExecStart = "${pkgs.waybar}/bin/waybar -c ${waybarConfig} -s ${waybarStyle}";
+            ExecReload = "${pkgs.coreutils}/bin/kill -SIGUSR2 $MAINPID";
+            Restart = "on-failure";
+          };
+          Install.WantedBy = [ "graphical-session.target" ];
+        };
+
         home.packages = [
-          launch-waybar
           waybar-toggle
-          border_color
           cava-internal
-          myswaylock
         ];
       }
     )
