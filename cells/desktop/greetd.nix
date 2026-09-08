@@ -4,8 +4,9 @@ _: {
       { pkgs, ... }:
       {
         services = {
+          # No `dbus.packages = [ pkgs.gcr* ]` here: gnome-keyring.enable
+          # already registers gnome-keyring and gcr_3 itself.
           gnome.gnome-keyring.enable = true;
-          dbus.packages = [ pkgs.gcr ];
           greetd = {
             enable = true;
             settings = {
