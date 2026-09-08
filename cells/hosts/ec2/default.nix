@@ -63,6 +63,19 @@ in
   config.flake.packages.${hostCfg.system}.ec2-amazon = inputs.nixos-generators.nixosGenerate {
     system = hostCfg.system;
     format = "amazon";
-    modules = ec2Modules;
+    modules = ec2Modules ++ [
+      # The `amazon` format pulls in maintainers/scripts/ec2/amazon-image.nix,
+      # which pins virtualisation.diskSize to a fixed 4G with `mkOverride 1490`.
+      # Once the closure outgrows that, grub-install fails with "No space left
+      # on device" inside the image and the builder VM panics on it -- which
+      # surfaces only as "Virtual machine didn't produce an exit code".
+      #
+      # `nixosConfigurations.ec2` already resolves this option to "auto"; this
+      # just keeps the image build in step with it, so the size follows the
+      # closure instead of needing a bigger magic number each time it grows.
+      # Sizing tightly is fine here: boot.growPartition and
+      # fileSystems."/".autoResize expand the root onto the real EBS volume.
+      { virtualisation.diskSize = "auto"; }
+    ];
   };
 }
