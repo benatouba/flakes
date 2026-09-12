@@ -29,6 +29,58 @@ in
           '';
         };
 
+        # The waybar bluetooth menu used to call `rfkill unblock bluetooth`,
+        # which only clears a soft block. Nothing blocks the radio at boot, so
+        # "Turn on" was a no-op while the controller itself stayed unpowered:
+        # hardware.bluetooth.powerOnBoot = false writes Policy.AutoEnable =
+        # false, so bluetoothd never powers a controller on its own. Powering it
+        # is a bluez operation, hence bluetoothctl; rfkill stays in the picture
+        # because the ThinkPad's radio kill switch works through it.
+        bluetooth-power = pkgs.writeShellApplication {
+          name = "bluetooth-power";
+          runtimeInputs = with pkgs; [
+            bluez
+            util-linux
+            coreutils
+            gnused
+          ];
+          text = ''
+            powered() {
+              bluetoothctl show 2>/dev/null |
+                sed -n 's/^[[:space:]]*Powered:[[:space:]]*//p' |
+                head -n1 || true
+            }
+
+            case "''${1:-toggle}" in
+              on) want=yes ;;
+              off) want=no ;;
+              toggle) if [ "$(powered)" = yes ]; then want=no; else want=yes; fi ;;
+              *)
+                echo "usage: bluetooth-power [on|off|toggle]" >&2
+                exit 2
+                ;;
+            esac
+
+            if [ "$want" = yes ]; then
+              # Unblock first: bluez refuses to power a blocked controller, and
+              # it needs a moment to pick the controller back up afterwards.
+              rfkill unblock bluetooth
+              for _ in {1..10}; do
+                bluetoothctl power on >/dev/null 2>&1 || true
+                if [ "$(powered)" = yes ]; then exit 0; fi
+                sleep 0.2
+              done
+              echo "bluetooth-power: controller did not power on" >&2
+              exit 1
+            fi
+
+            # Power down before blocking, so connected devices see a clean
+            # disconnect instead of the radio vanishing under them.
+            bluetoothctl power off >/dev/null 2>&1 || true
+            rfkill block bluetooth
+          '';
+        };
+
         cava-internal = pkgs.writeShellScriptBin "cava-internal" ''
           cava -p ~/.config/cava/config1 | sed -u 's/;//g;s/0/▁/g;s/1/▂/g;s/2/▃/g;s/3/▄/g;s/4/▅/g;s/5/▆/g;s/6/▇/g;s/7/█/g;'
         '';
@@ -58,6 +110,7 @@ in
 
         home.packages = [
           waybar-toggle
+          bluetooth-power
           cava-internal
         ];
       }

@@ -188,15 +188,12 @@ button {
   color: @overlay0;
 }
 
-/* cpu/memory/disk live in a `group/stats` drawer: the leader stays put and the
-   other two slide out on hover. The container itself is transparent so the
-   three keep the pills they already had. */
+/* cpu/memory/disk share a plain `group/stats` container, not a drawer: a drawer
+   only renders its leader, which hid the memory and disk readouts behind a
+   hover. The container itself is transparent so the three keep the pills they
+   already had. */
 #stats {
   background: transparent;
-}
-
-#stats .stats-item {
-  transition: opacity 300ms ease-in-out;
 }
 
 /* Popup menus, so a click lands on something that matches the bar rather than

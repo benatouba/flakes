@@ -43,7 +43,7 @@ in
               default = "current";
               autoSetupRemote = true;
             };
-            pull.rebase = false;
+            pull.rebase = true;
             color.ui = true;
             fetch = {
               prune = true;
