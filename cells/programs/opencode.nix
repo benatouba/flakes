@@ -39,8 +39,8 @@ _: {
             ]
           ))
         ];
-        xdg.configFile."opencode/opencode.json" = {
-          source = ./opencode/opencode.json;
+        xdg.configFile."opencode/opencode.jsonc" = {
+          source = ./opencode/opencode.jsonc;
           force = true;
         };
 
@@ -50,7 +50,7 @@ _: {
         };
 
         home.activation.checkOpencodeConfigManaged = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-          opencode_config="${config.xdg.configHome}/opencode/opencode.json"
+          opencode_config="${config.xdg.configHome}/opencode/opencode.jsonc"
           opencode_dcp="${config.xdg.configHome}/opencode/dcp.jsonc"
 
           check_managed_file() {
@@ -77,32 +77,6 @@ _: {
           check_managed_file "$opencode_config"
           check_managed_file "$opencode_dcp"
         '';
-
-        home.activation.cleanupOpencodeLegacyDeps =
-          lib.hm.dag.entryAfter [ "checkOpencodeConfigManaged" ]
-            ''
-              opencode_config_dir="${config.xdg.configHome}/opencode"
-              backup_root="${config.xdg.stateHome}/opencode/legacy-config-backup"
-
-              for file in \
-                "$opencode_config_dir/node_modules" \
-                "$opencode_config_dir/package-lock.json" \
-                "$opencode_config_dir/bun.lock"
-              do
-                if [ ! -e "$file" ]; then
-                  continue
-                fi
-
-                mkdir -p "$backup_root"
-                target="$backup_root/$(basename "$file")"
-                if [ -e "$target" ]; then
-                  target="$target.$(date +%s)"
-                fi
-
-                mv "$file" "$target"
-                echo "[home-manager][opencode] moved legacy dependency state: $file -> $target"
-              done
-            '';
       }
     )
   ];
