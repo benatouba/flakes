@@ -14,4 +14,4 @@ set -euo pipefail
 systemctl --user restart waybar.service xsettingsd.service hypridle.service swaync.service
 
 # Not a restart: hyprpaper keeps running, this just asks it for a new image.
-systemctl --user start random-wallpaper.service
+wallpaper_random

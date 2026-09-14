@@ -26,6 +26,11 @@ in
             ""
           ];
           extraPackages = with pkgs; [
+            # copilot.lua's default is to download GitHub's glibc-linked
+            # native server, which cannot exec on NixOS.  The nvim config
+            # points `server.custom_server_filepath` at this one instead.
+            copilot-language-server
+
             nil
             nixd
             nixfmt

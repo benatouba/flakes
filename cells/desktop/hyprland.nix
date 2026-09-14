@@ -567,9 +567,10 @@ let
     hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd("hyprctl --batch \"keyword general:gaps_out 5;keyword general:gaps_in 3\""))
     hl.bind(mainMod .. " + G", hl.dsp.exec_cmd("hyprctl --batch \"keyword general:gaps_out 0;keyword general:gaps_in 0\""))
     hl.bind(mainMod .. " + backslash", hl.dsp.exec_cmd("hyprctl switchxkblayout all next"))
-    hl.bind("ALT + W", hl.dsp.exec_cmd("bash " .. scriptsDir .. "/random-wallpaper.sh"))
+    hl.bind("ALT + W", hl.dsp.exec_cmd("wallpaper_random"))
+    hl.bind("ALT + SHIFT + W", hl.dsp.exec_cmd("wallpaper_delete_current"))
     hl.bind("ALT + SHIFT + C", hl.dsp.exec_cmd("bash " .. scriptsDir .. "/toggle-charge.sh"))
-    hl.bind(mainMod .. " + ALT + L", hl.dsp.exec_cmd("hyprlock"))
+    hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("lock_screen"))
     hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("waybar-toggle"))
     hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | rofi -dmenu -theme cliphist_theme.rasi | cliphist decode | wl-copy"))
     hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("rofi-rbw -a copy -t password --clear-after 20"))
@@ -621,7 +622,7 @@ in
   # HM side
   config.my.branches.desktop.hmModules = [
     (
-      { pkgs, ... }:
+      { config, pkgs, ... }:
       let
         useLuaConfig = lib.versionAtLeast (lib.getVersion pkgs.hyprland) "0.55.0";
       in
@@ -686,35 +687,29 @@ in
           hyprpolkitagent.enable = true;
         };
 
-        # hyprpaper has to be up before anything asks it to set a wallpaper.
-        # This replaces `sleep 1 && random-wallpaper.sh`, which was guessing at
-        # how long the IPC socket takes to appear.
-        systemd.user.services.random-wallpaper = {
-          Unit = {
-            Description = "Pick a random wallpaper";
-            After = [ "hyprpaper.service" ];
-            PartOf = [ "graphical-session.target" ];
-          };
-          Service = {
-            Type = "oneshot";
-            ExecStart = "${pkgs.bash}/bin/bash %h/.config/hypr/scripts/random-wallpaper.sh";
-          };
-          Install.WantedBy = [ "graphical-session.target" ];
-        };
+        # Wallpaper scripts, hyprpaper.conf and the per-login pick live in
+        # scripts/wallpaper.nix.
 
         xdg.configFile."hypr/hypridle.conf".source = ./hyprland/hypridle.conf;
-        xdg.configFile."hypr/hyprpaper.conf".source = ./hyprland/hyprpaper.conf;
-        xdg.configFile."hypr/hyprlock.conf".source = ./hyprland/hyprlock.conf;
+        # hyprlock.conf reads its palette from these variables; see the note at
+        # the top of that file.  $wallpaper is the symlink lock_screen
+        # (scripts/wallpaper.nix) refreshes with a random pick before it
+        # execs hyprlock.
+        xdg.configFile."hypr/hyprlock.conf".text = ''
+          $primary = rgb(${theme.colors.${theme.accent}})
+          $on_primary = rgb(${theme.colors.base})
+          $error = rgb(${theme.colors.red})
+          $shadow = rgb(${theme.colors.crust})
+          $wallpaper = ${config.home.homeDirectory}/.cache/wallpaper/lock
+
+        ''
+        + builtins.readFile ./hyprland/hyprlock.conf;
         xdg.configFile."hypr/hyprlock/status.sh" = {
           source = ./hyprland/hyprlock/status.sh;
           executable = true;
         };
         xdg.configFile."hypr/scripts/refresh.sh" = {
           source = ./hyprland/scripts/refresh.sh;
-          executable = true;
-        };
-        xdg.configFile."hypr/scripts/random-wallpaper.sh" = {
-          source = ./hyprland/scripts/random-wallpaper.sh;
           executable = true;
         };
         xdg.configFile."hypr/scripts/toggle-charge.sh" = {

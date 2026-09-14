@@ -21,18 +21,7 @@ in
       "desktop"
       "printing"
     ];
-    nixosModules = [
-      (
-        { pkgs, ... }:
-        {
-          programs.steam = {
-            enable = true;
-            protontricks.enable = true;
-            extraCompatPackages = [ pkgs.proton-ge-bin ];
-          };
-        }
-      )
-    ];
+    nixosModules = [ ];
     hardwareModules = [
       inputs.nixos-hardware.nixosModules.lenovo-thinkpad-p14s-amd-gen2
     ];

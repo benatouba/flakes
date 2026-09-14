@@ -15,34 +15,9 @@ in
 
           local keymap = {
             {
-              key = "v",
-              mods = "LEADER",
-              action = action.SwitchToWorkspace({
-                spawn = {
-                  cwd = user_home .. "/.config/nvim/",
-                  args = { "nvim", user_home .. "/.config/nvim/" },
-                },
-              }),
-            },
-            {
-              key = "h",
-              mods = "LEADER",
-              action = action.SwitchToWorkspace({
-                spawn = {
-                  cwd = user_home .. "/.config/hypr/",
-                  args = { "nvim", user_home .. "/.config/hypr/hyprland.conf" },
-                },
-              }),
-            },
-            {
-              key = "w",
-              mods = "LEADER",
-              action = action.SwitchToWorkspace({
-                spawn = {
-                  cwd = user_home .. "/.config/wezterm/",
-                  args = { "nvim", user_home .. "/.config/wezterm/wezterm.lua" },
-                },
-              }),
+              key = 'w',
+              mods = 'CTRL|SHIFT',
+              action = wezterm.action.CloseCurrentPane { confirm = true },
             },
           }
 

@@ -9,7 +9,6 @@ _: {
           devenv
           gdal
           gimp
-          hugo
           libreoffice
           nodejs_latest
           obsidian

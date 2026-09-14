@@ -6,7 +6,7 @@ if [[ "$1" == "exit" ]]; then
 fi
 
 if [[ "$1" == "lock" ]]; then
-    hyprlock
+    lock_screen
 fi
 
 if [[ "$1" == "reboot" ]]; then
