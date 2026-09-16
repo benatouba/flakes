@@ -55,6 +55,13 @@
       url = "git+file:///home/ben/.local/secrets";
       flake = false;
     };
+    # Private repo: git+ssh (not github:) so Nix fetches it over the same SSH
+    # key gh/git already use, with no separate access-tokens entry needed in
+    # nix.conf.
+    project-hours = {
+      url = "git+ssh://git@github.com/benatouba/project-hours";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./cells);

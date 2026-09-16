@@ -800,6 +800,26 @@
         "type": "github"
       }
     },
+    "project-hours": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789579111,
+        "narHash": "sha256-xGHPGRZFV0TrpiAgc2WbsmE886tV6GCmjffwi1+XBNE=",
+        "ref": "refs/heads/main",
+        "rev": "63d67a216c66d47dfdaf9263369b06209df2c8f8",
+        "revCount": 2,
+        "type": "git",
+        "url": "ssh://git@github.com/benatouba/project-hours"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/benatouba/project-hours"
+      }
+    },
     "root": {
       "inputs": {
         "catppuccin": "catppuccin",
@@ -817,6 +837,7 @@
         "nixos-generators": "nixos-generators",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_4",
+        "project-hours": "project-hours",
         "sops-nix": "sops-nix"
       }
     },
