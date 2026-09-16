@@ -807,11 +807,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789579111,
-        "narHash": "sha256-xGHPGRZFV0TrpiAgc2WbsmE886tV6GCmjffwi1+XBNE=",
+        "lastModified": 1789583654,
+        "narHash": "sha256-q6jrAHOV37Ehazy7mGUgDIBTXQn0NLY5EisGcqdoDcM=",
         "ref": "refs/heads/main",
-        "rev": "63d67a216c66d47dfdaf9263369b06209df2c8f8",
-        "revCount": 2,
+        "rev": "9716954662ae35dccf9a824b2fb2b51fbc10fcb6",
+        "revCount": 3,
         "type": "git",
         "url": "ssh://git@github.com/benatouba/project-hours"
       },
