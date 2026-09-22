@@ -21,9 +21,20 @@
       "command": ["npx", "-y", "@playwright/mcp"],
       "enabled": false
     },
+    // Token-efficient agent browser (CLI-first; MCP is the optional layer).
+    // `core` = navigate/snapshot/interact/screenshot/eval, `debug` adds
+    // console/errors/tracing/a11y audit for broken frontends. Primary use
+    // is the CLI via Bash (`agent-browser open/snapshot -i/click @eN`),
+    // taught by ~/.claude/skills/agent-browser (zero schema overhead).
+    "agent-browser": {
+      "type": "local",
+      "command": ["agent-browser", "mcp", "--tools", "core,debug"],
+      "enabled": true
+    },
     "chrome-devtools": {
       "type": "local",
-      "command": ["npx", "-y", "chrome-devtools-mcp@latest"]
+      "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
+      "enabled": false
     }
   },
   "permission": {

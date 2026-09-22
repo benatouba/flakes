@@ -878,6 +878,7 @@ in
               mbsync = {
                 enable = true;
                 inherit (mbsyncTwoWay) create expunge;
+                extraConfig.account.AuthMechs = "LOGIN";
                 patterns = [
                   "*"
                   "![Gmail]*"

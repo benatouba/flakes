@@ -7,7 +7,7 @@ _: {
     (
       { pkgs, inputs, ... }:
       let
-        projectHours = inputs.project-hours.packages.${pkgs.system}.project-hours;
+        projectHours = inputs.project-hours.packages.${pkgs.stdenv.hostPlatform.system}.project-hours;
       in
       {
         services.activitywatch = {

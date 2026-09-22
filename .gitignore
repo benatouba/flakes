@@ -8,6 +8,9 @@ cells/programs/opencode/node_modules/
 **/CLAUDE.md
 **/AGENTS.md
 
+# Agent skill docs — local-only, may contain sensitive notes
+docs/agents/
+
 result
 result-*
 .ci-secrets/

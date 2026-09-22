@@ -65,7 +65,7 @@
 		}
 	},
 	"clock": {
-		"timezone": "Asia/Tehran",
+		"timezone": "Europe/Berlin",
 		"tooltip-format": "<tt><small>{calendar}</small></tt>",
 		"calendar": {
 			"mode": "year",
