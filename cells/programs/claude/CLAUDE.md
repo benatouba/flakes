@@ -18,6 +18,7 @@ Apply these conventions to every software project unless the repository’s own 
 - Do not rely on a globally installed Python package. Put Python version and dependencies under project management and make commands reproducible in the project environment.
 - Keep runtime, development, test, lint, type-checking, and optional dependencies explicit. Update the lock file whenever dependency resolution changes.
 - Prefer typed Python, explicit public interfaces, isolated side effects, structured/redacted logging, input validation, and focused automated tests.
+- Prefer more recent versions of Python if all dependencies allow it.
 
 ## JavaScript and TypeScript
 
@@ -27,6 +28,12 @@ Apply these conventions to every software project unless the repository’s own 
 - Declare the intended package-manager version via the repository’s established mechanism, preferably the `packageManager` field in `package.json`; enable and use Corepack where appropriate to honor that version.
 - Avoid mixing lock files or package managers. If an existing project uses a different manager, preserve it unless migrating intentionally with explicit scope and validation.
 - Use TypeScript where the repository supports it. Keep dependencies minimal, maintainable, license-compatible, and pinned through the lock file.
+
+## Git
+- Run project tests as pre-commit hooks, set up via `devenv.nix` and `prek`.
+- If tests are run on `git commit`, another run beforehand is not necessary.
+- Do not state that commits were done by a model or that AI or `Claude Code` were used.
+- Only push branches when they are complete. We need to save time on CI runs.
 
 ## Cross-language dependency rules
 

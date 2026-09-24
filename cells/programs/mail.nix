@@ -43,10 +43,10 @@ in
         # — after the first sync, check `ls ~/mail/outlook` and correct these here
         # if the server returned English names (Sent/Drafts/Deleted/Junk/Archive).
         outlookFolders = {
-          sent = "Gesendete Elemente";
-          drafts = "Entwürfe";
-          trash = "Gelöschte Elemente";
-          junk = "Junk-E-Mail";
+          sent = "Sent";
+          drafts = "Drafts";
+          trash = "Deleted";
+          junk = "Junk";
           archive = "Archiv";
         };
         outlookMailboxes = [

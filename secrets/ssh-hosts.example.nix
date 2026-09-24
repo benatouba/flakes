@@ -1,7 +1,7 @@
 {
-  tuKey = "~/.ssh/id_ed25519";
+  instKey = "~/.ssh/example";
 
-  tuProxy = {
+  instProxy = {
     hostname = "proxy.example.org";
     user = "user";
     port = 22;
@@ -13,20 +13,20 @@
       user = "git";
     };
 
-    statusAlganizeDisk = {
-      hostname = "ssh.frankfurt.render.com";
-      user = "srv-d6jespngi27c73d3tk1g";
+    projectCompanyDevice = {
+      hostname = "example.host.com";
+      user = "example-user";
     };
 
-    "tu-proxy" = {
+    "inst-proxy" = {
       hostname = "proxy.example.org";
       user = "user";
       port = 22;
     };
 
     esprimo = {
-      hostname = "192.168.188.10";
-      user = "ben";
+      hostname = "1.1.1.1";
+      user = "example";
       port = 22;
     };
   };
