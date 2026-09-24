@@ -5,11 +5,26 @@ _: {
   # NOT config.my.branches.desktop.hmModules: this is single-host, not shared.
   config.my.hosts.thinkpad.hmModules = [
     (
-      { pkgs, inputs, ... }:
+      {
+        pkgs,
+        inputs,
+        lib,
+        ...
+      }:
       let
         projectHours = inputs.project-hours.packages.${pkgs.stdenv.hostPlatform.system}.project-hours;
       in
       {
+        # The nix package ships _project-hours under
+        # share/zsh/site-functions; put the profile completions dir on
+        # fpath before compinit runs so the completion is live after every
+        # rebuild. Scoped here (thinkpad-only, like the rest of this file),
+        # not in the shared shell module. mkBefore guarantees this runs
+        # before the compinit block in cells/shell/zsh.nix.
+        programs.zsh.initContent = lib.mkBefore ''
+          fpath=(~/.nix-profile/share/zsh/site-functions $fpath)
+        '';
+
         services.activitywatch = {
           enable = true;
           package = pkgs.aw-server-rust;
