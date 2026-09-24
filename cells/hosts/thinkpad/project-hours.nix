@@ -66,6 +66,13 @@ _: {
           Install.WantedBy = [ "graphical-session.target" ];
         };
 
+        # The watcher unit above pins the project-hours store path, so every
+        # rebuild regenerates the unit — but Home Manager only restarts a
+        # changed user service in sdswitch mode. Without this, a rebuild
+        # relinks the unit while the stale watcher keeps running (observed
+        # 2026-09-24: unit relinked 21:47, process still the 00:47 build).
+        systemd.user.startServices = "sd-switch";
+
         home.packages = [ projectHours ];
 
         # Thinkpad-only: NOT added to the shared cells/persist/home.nix
