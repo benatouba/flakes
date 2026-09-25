@@ -171,6 +171,14 @@ in
           '';
         };
 
+        # home-manager's default neomutt sendmail (`msmtpq
+        # --read-envelope-from --read-recipients`) selects no msmtp account,
+        # so msmtp falls back to the primary account and every non-primary
+        # identity sends through the wrong SMTP relay. Pin each account to
+        # its own msmtp account explicitly (`-a` is forwarded by msmtpq and
+        # persisted per queued message).
+        msmtpSendmail = account: "msmtpq --account=${account} --read-envelope-from --read-recipients";
+
         # home-manager names each mbsync channel after its account, so the
         # account name is also the channel to pull.
         syncAndNotifyCmd =
@@ -892,6 +900,7 @@ in
               msmtp.enable = true;
               neomutt = {
                 enable = true;
+                sendMailCommand = msmtpSendmail "gmail";
                 extraMailboxes = [
                   "[Gmail]/Sent Mail"
                   "[Gmail]/Drafts"
@@ -922,6 +931,12 @@ in
               inherit (a.alganize) realName;
               inherit (a.alganize) userName;
               passwordCommand = catSecret "alganize";
+              folders = {
+                inbox = "Inbox";
+                sent = "Gesendet";
+                drafts = "Entwürfe";
+                trash = "Papierkorb";
+              };
               imap = {
                 host = a.alganize.imapHost;
                 port = 993;
@@ -944,6 +959,7 @@ in
               msmtp.enable = true;
               neomutt = {
                 enable = true;
+                sendMailCommand = msmtpSendmail "alganize";
                 extraMailboxes = [
                   "Gesendet"
                   "Entwürfe"
@@ -977,6 +993,12 @@ in
               inherit (a.alganize-kundenservice) realName;
               inherit (a.alganize-kundenservice) userName;
               passwordCommand = catSecret "alganize_kundenservice";
+              folders = {
+                inbox = "Inbox";
+                sent = "Gesendet";
+                drafts = "Entwürfe";
+                trash = "Papierkorb";
+              };
               imap = {
                 host = a.alganize-kundenservice.imapHost;
                 port = 993;
@@ -999,6 +1021,7 @@ in
               msmtp.enable = true;
               neomutt = {
                 enable = true;
+                sendMailCommand = msmtpSendmail "alganize-kundenservice";
                 extraMailboxes = [
                   "Gesendet"
                   "Entwürfe"
@@ -1063,6 +1086,7 @@ in
               };
               neomutt = {
                 enable = true;
+                sendMailCommand = msmtpSendmail "outlook";
                 extraMailboxes = outlookMailboxes;
               };
               aerc = {
