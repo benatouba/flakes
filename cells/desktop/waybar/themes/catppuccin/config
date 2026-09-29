@@ -4,26 +4,27 @@
 	"spacing": 4,
 	"modules-left": [
 		"hyprland/workspaces",
-		"hyprland/window"
+		"hyprland/window",
+		"clock"
 	],
 	"modules-center": [
-		"clock"
+		"custom/notification",
+		"idle_inhibitor",
+		"custom/nightlight"
 	],
 	"modules-right": [
 		"mpris",
-		"idle_inhibitor",
-		"custom/nightlight",
 		"group/stats",
 		"pulseaudio",
-		"pulseaudio#source",
 		"backlight",
 		"network",
 		"bluetooth",
+		"custom/phone",
 		"battery",
-		"custom/notification",
 		"hyprland/language",
 		"tray",
-		"custom/power"
+		"custom/power",
+		"pulseaudio#source"
 	],
 	"hyprland/workspaces": {
 		"on-click": "activate",
@@ -130,13 +131,13 @@
 		]
 	},
 	"cpu": {
-		"format": " {usage}%",
+		"format": " {usage}%",
 		"on-click": "wezterm start --always-new-process --class org.waybar.btop -- btop",
 		"tooltip": true,
 		"interval": 5
 	},
 	"memory": {
-		"format": " {}%",
+		"format": "󰍛 {}%",
 		"on-click": "wezterm start --always-new-process --class org.waybar.btop -- btop",
 		"tooltip-format": "{used:0.1f}G / {total:0.1f}G used",
 		"interval": 5
@@ -196,6 +197,18 @@
 			"on": "bluetooth-power on",
 			"off": "bluetooth-power off"
 		}
+	},
+	"custom/phone": {
+		"format": "{}",
+		"return-type": "json",
+		"interval": 10,
+		"exec": "bash ~/.config/waybar/scripts/kdeconnect.sh",
+		"exec-if": "which kdeconnect-cli",
+		"on-click": "kdeconnect-app",
+		"on-click-middle": "kdeconnect-cli -a --ring",
+		"on-click-right": "kdeconnect-cli -a --send-clipboard",
+		"tooltip": true,
+		"escape": true
 	},
 	"battery": {
 		"states": {

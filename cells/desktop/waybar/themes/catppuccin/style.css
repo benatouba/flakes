@@ -45,6 +45,7 @@ button {
 #disk,
 #network,
 #bluetooth,
+#custom-phone,
 #idle_inhibitor,
 #custom-notification,
 #language,
@@ -68,6 +69,7 @@ button {
 #disk:hover,
 #network:hover,
 #bluetooth:hover,
+#custom-phone:hover,
 #idle_inhibitor:hover,
 #custom-notification:hover,
 #language:hover,
@@ -125,6 +127,26 @@ button {
 
 #bluetooth.disabled,
 #bluetooth.off {
+  color: @overlay0;
+}
+
+#custom-phone {
+  color: @teal;
+}
+
+#custom-phone.charging {
+  color: @green;
+}
+
+#custom-phone.warning {
+  color: @yellow;
+}
+
+#custom-phone.critical {
+  color: @red;
+}
+
+#custom-phone.disconnected {
   color: @overlay0;
 }
 
