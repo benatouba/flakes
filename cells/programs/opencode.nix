@@ -25,19 +25,6 @@ _: {
           bun # runtime for opencode plugin dependency installs
           nil # Nix LSP server
           nodejs_latest # needed for JavaScript tools
-          # Python with RAG dependencies
-          (python3.withPackages (
-            ps: with ps; [
-              sentence-transformers # Embedding generation
-              torch # ML framework
-              transformers # Hugging Face transformers
-              qdrant-client # Vector database client
-              python-magic # File type detection
-              chardet # Character encoding detection
-              numpy # Numerical operations
-              requests # HTTP client
-            ]
-          ))
         ];
         xdg.configFile."opencode/opencode.jsonc" = {
           source = ./opencode/opencode.jsonc;

@@ -1,12 +1,8 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
-    "@simonwjackson/opencode-direnv",
-    "envsitter-guard@latest",
-    "@tarquinen/opencode-dcp@latest",
-    "@ramtinj95/opencode-tokenscope",
-    "opencode-plugin-openspec",
-    "opentmux"
+    "envsitter-guard@0.0.4",
+    "@tarquinen/opencode-dcp@3.2.0"
   ],
   "lsp": true,
   "mcp": {
@@ -21,7 +17,7 @@
       "command": ["npx", "-y", "@playwright/mcp"],
       "enabled": false
     },
-    // Token-efficient agent browser (CLI-first; MCP is the optional layer).
+    // Token-efficient agent browser (CLI-first; MCP is opt-in per project).
     // `core` = navigate/snapshot/interact/screenshot/eval, `debug` adds
     // console/errors/tracing/a11y audit for broken frontends. Primary use
     // is the CLI via Bash (`agent-browser open/snapshot -i/click @eN`),
@@ -29,6 +25,11 @@
     "agent-browser": {
       "type": "local",
       "command": ["agent-browser", "mcp", "--tools", "core,debug"],
+      "enabled": false
+    },
+    "jev": {
+      "type": "local",
+      "command": ["jev-mcp"],
       "enabled": true
     },
     "chrome-devtools": {
@@ -48,6 +49,11 @@
       "*": "ask",
       "/nix/store/**": "deny"
     },
+    "bash": {
+      "*": "ask"
+    },
+    // Hosted Jev calls may transmit their input externally; inspect each payload.
+    "jev_*": "ask",
     "external_directory": {
       "/nix/store/**": "allow",
       "~/.config/nix/**": "allow",
