@@ -79,47 +79,54 @@ in
           '';
         in
         {
-          assertions = [
-            {
-              assertion = cfg.hostname != "";
-              message = "The ddns branch requires my.ddns.hostname to be set to a deSEC dynDNS hostname.";
-            }
-          ];
-
-          users.users.ddclient = {
-            isSystemUser = true;
-            group = "ddclient";
-          };
-          users.groups.ddclient = { };
-
-          sops.secrets.desec_ddns_token = {
-            sopsFile = config.sops.defaultSopsFile;
-            owner = "ddclient";
-            mode = "0400";
+          # Selecting the ddns branch enables it; hosts may still mkForce false.
+          options.my.ddns.enable = lib.mkEnableOption "deSEC dynamic DNS updates" // {
+            default = true;
           };
 
-          systemd.services.ddclient = {
-            description = "Dynamic DNS client (deSEC)";
-            after = [ "network-online.target" ];
-            wants = [ "network-online.target" ];
-            serviceConfig = {
-              Type = "oneshot";
-              User = "ddclient";
-              Group = "ddclient";
-              StateDirectory = "ddclient";
-              RuntimeDirectory = "ddclient";
-              RuntimeDirectoryMode = "0700";
-              ExecStart = "${updateScript}";
+          config = lib.mkIf config.my.ddns.enable {
+            assertions = [
+              {
+                assertion = cfg.hostname != "";
+                message = "The ddns branch requires my.ddns.hostname to be set to a deSEC dynDNS hostname.";
+              }
+            ];
+
+            users.users.ddclient = {
+              isSystemUser = true;
+              group = "ddclient";
             };
-          };
+            users.groups.ddclient = { };
 
-          systemd.timers.ddclient = {
-            description = "Run ddclient periodically";
-            wantedBy = [ "timers.target" ];
-            timerConfig = {
-              OnBootSec = "2min";
-              OnUnitActiveSec = cfg.interval;
-              RandomizedDelaySec = "30s";
+            sops.secrets.desec_ddns_token = {
+              sopsFile = config.sops.defaultSopsFile;
+              owner = "ddclient";
+              mode = "0400";
+            };
+
+            systemd.services.ddclient = {
+              description = "Dynamic DNS client (deSEC)";
+              after = [ "network-online.target" ];
+              wants = [ "network-online.target" ];
+              serviceConfig = {
+                Type = "oneshot";
+                User = "ddclient";
+                Group = "ddclient";
+                StateDirectory = "ddclient";
+                RuntimeDirectory = "ddclient";
+                RuntimeDirectoryMode = "0700";
+                ExecStart = "${updateScript}";
+              };
+            };
+
+            systemd.timers.ddclient = {
+              description = "Run ddclient periodically";
+              wantedBy = [ "timers.target" ];
+              timerConfig = {
+                OnBootSec = "2min";
+                OnUnitActiveSec = cfg.interval;
+                RandomizedDelaySec = "30s";
+              };
             };
           };
         }

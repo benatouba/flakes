@@ -32,6 +32,10 @@ let
         ];
       }
     );
+    # Selecting the ddns branch is what enables it.
+    "ddns-selected-enables" = config.flake.nixosConfigurations.esprimo.config.my.ddns.enable;
+    "ddns-unselected-disabled" =
+      !(config.flake.nixosConfigurations.thinkpad.config.my.ddns.enable or false);
   };
   # Host seam: hosts select branches; inline `nixosModules` are limited to
   # a grandfathered count per host. New hosts get 0.
