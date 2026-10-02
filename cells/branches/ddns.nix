@@ -15,6 +15,11 @@ in
           ...
         }:
         let
+          # Unit, user, group and state dir share this name. Renamed from
+          # "ddclient"; the old /var/lib/ddclient state (cached IP) is orphaned and
+          # may be deleted. Roll back by reverting the commit; the first run after
+          # either direction re-pushes the IP.
+          svcName = "ddns-update";
           curl = "${pkgs.curl}/bin/curl";
 
           # deSEC deletes a record type when the corresponding parameter is sent
@@ -92,28 +97,28 @@ in
               }
             ];
 
-            users.users.ddns-update = {
+            users.users.${svcName} = {
               isSystemUser = true;
-              group = "ddns-update";
+              group = svcName;
             };
-            users.groups.ddns-update = { };
+            users.groups.${svcName} = { };
 
             sops.secrets.desec_ddns_token = {
               sopsFile = config.sops.defaultSopsFile;
-              owner = "ddns-update";
+              owner = svcName;
               mode = "0400";
             };
 
-            systemd.services.ddns-update = {
+            systemd.services.${svcName} = {
               description = "Dynamic DNS updater (deSEC)";
               after = [ "network-online.target" ];
               wants = [ "network-online.target" ];
               serviceConfig = {
                 Type = "oneshot";
-                User = "ddns-update";
-                Group = "ddns-update";
-                StateDirectory = "ddns-update";
-                RuntimeDirectory = "ddns-update";
+                User = svcName;
+                Group = svcName;
+                StateDirectory = svcName;
+                RuntimeDirectory = svcName;
                 RuntimeDirectoryMode = "0700";
                 ExecStart = "${updateScript}";
 
@@ -138,7 +143,7 @@ in
               };
             };
 
-            systemd.timers.ddns-update = {
+            systemd.timers.${svcName} = {
               description = "Run the deSEC DDNS update periodically";
               wantedBy = [ "timers.target" ];
               timerConfig = {
