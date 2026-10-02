@@ -12,12 +12,17 @@ Hosts select branches by name instead of importing feature files directly.
 - `personal`: private user configuration such as mail, SSH, rbw, and GPG agent.
 - `addons`: optional workflow helpers controlled by `my.profile.addons`.
 - `server`: headless server defaults.
-- `dns`: Pi-hole + Unbound DNS stack.
+- `dns`: Pi-hole + Unbound DNS stack (`my.dns.enable`, default true when selected).
+- `ddns`: deSEC dynamic DNS updater (`my.ddns.enable`, default true when selected; needs `secrets`).
 - `finance`: Beancount ledger automation, Fava UI, and Paperless-oriented finance ingestion.
 - `vpn`: NordVPN client services.
 - `paperless`: Paperless-ngx document management, PDF tools, sync, and local backup services.
 - `matrix`: Matrix homeserver services and bridges.
 - `wger`: Wger workout manager stack (PostgreSQL, Redis, web, nginx, celery, backups).
+
+A branch may declare `needs = [ "other" ]`; host resolution throws when a
+selected branch's needs are not also selected. Needs are not transitive and are
+not auto-selected. Description-only branches live in `catalog.nix`.
 
 Use `my.hosts.<name>.includeProfileBranches = false` for minimal hosts that should
 only use their explicitly listed branches.

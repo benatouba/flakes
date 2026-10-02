@@ -4,7 +4,7 @@ let
 in
 {
   config.my.branches.dns = {
-    description = "DNS stack: Pi-hole with Unbound upstream and Caddy front end.";
+    description = "Dendritic DNS branch for Pi-hole and Unbound services.";
     nixosModules = [
       (
         { config, lib, ... }:
