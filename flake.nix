@@ -55,12 +55,15 @@
       url = "git+file:///home/ben/.local/secrets";
       flake = false;
     };
-    # Private repo: git+ssh (not github:) so Nix fetches it over the same SSH
-    # key gh/git already use, with no separate access-tokens entry needed in
-    # nix.conf.
+    # git+ssh reuses existing SSH keys, no nix.conf tokens needed.
     project-hours = {
       url = "git+ssh://git@github.com/benatouba/project-hours";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # Branch-tracking; `nix flake update vercel-skills` pulls latest.
+    vercel-skills = {
+      url = "github:vercel-labs/skills";
+      flake = false;
     };
   };
 

@@ -1,8 +1,6 @@
 _: {
-  # Thinkpad-only wiring for the project-hours tool (see flakes issue
-  # "project-hours NixOS wiring" and the tool repo's
-  # docs/spec/01-project-hours-build.md). config.my.hosts.thinkpad.hmModules,
-  # NOT config.my.branches.desktop.hmModules: this is single-host, not shared.
+  # Thinkpad-only project-hours wiring (flakes issue "project-hours NixOS wiring",
+  # tool docs/spec/01-project-hours-build.md); not shared desktop branch.
   config.my.hosts.thinkpad.hmModules = [
     (
       {
@@ -15,12 +13,8 @@ _: {
         projectHours = inputs.project-hours.packages.${pkgs.stdenv.hostPlatform.system}.project-hours;
       in
       {
-        # The nix package ships _project-hours under
-        # share/zsh/site-functions; put the profile completions dir on
-        # fpath before compinit runs so the completion is live after every
-        # rebuild. Scoped here (thinkpad-only, like the rest of this file),
-        # not in the shared shell module. mkBefore guarantees this runs
-        # before the compinit block in cells/shell/zsh.nix.
+        # Completions live in share/zsh/site-functions; mkBefore puts them on fpath
+        # before compinit in cells/shell/zsh.nix. Thinkpad-only.
         programs.zsh.initContent = lib.mkBefore ''
           fpath=(~/.nix-profile/share/zsh/site-functions $fpath)
         '';
@@ -29,19 +23,8 @@ _: {
           enable = true;
           package = pkgs.aw-server-rust;
 
-          # awatcher (2e3s/awatcher) always tracks both idle and the active
-          # window in one binary -- there is no CLI flag to disable window
-          # tracking, unlike classic aw-watcher-afk/aw-watcher-window as two
-          # programs. The locked v1 decision is AFK-only, no window watcher
-          # (docs/spec/01-project-hours-build.md), so the catch-all filter
-          # below (xdg.configFile) drops every window app-id/title before it
-          # is ever sent to the server -- idle/AFK reporting is a separate
-          # code path in awatcher and is unaffected by it. Thresholds go via
-          # extraOptions rather than the generic watchers.*.settings file:
-          # that option writes to
-          # $XDG_CONFIG_HOME/activitywatch/awatcher/awatcher.toml, but
-          # awatcher itself only ever reads $XDG_CONFIG_HOME/awatcher/config.toml
-          # (see its README), so settings would silently do nothing here.
+          # AFK-only: awatcher has no no-window flag, so catch-all filter drops window data.
+          # Thresholds via extraOptions; watchers.*.settings writes a path awatcher never reads.
           watchers.awatcher = {
             package = pkgs.awatcher;
             extraOptions = [
@@ -53,10 +36,7 @@ _: {
           };
         };
 
-        # See the settings/extraOptions split explained above: this is
-        # awatcher's real config path, hand-written because the generic
-        # services.activitywatch.watchers.*.settings mechanism targets the
-        # wrong directory for this particular watcher.
+        # Real awatcher config path; generic watchers.*.settings targets the wrong dir.
         xdg.configFile."awatcher/config.toml".text = ''
           [[awatcher.filters]]
           match-app-id = ".*"
@@ -66,9 +46,8 @@ _: {
           Unit = {
             Description = "wezterm focused-pane cwd -> ActivityWatch heartbeat";
             PartOf = [ "graphical-session.target" ];
-            # Depend on ActivityWatch being up first so a cold boot doesn't
-            # crash-loop before aw-server-rust has a chance to start
-            # (ensure_bucket() in the watcher isn't itself retried).
+            # Start after ActivityWatch so cold boot doesn't crash-loop
+            # (ensure_bucket() isn't retried).
             After = [
               "graphical-session.target"
               "activitywatch.target"
@@ -81,17 +60,13 @@ _: {
           Install.WantedBy = [ "graphical-session.target" ];
         };
 
-        # The watcher unit above pins the project-hours store path, so every
-        # rebuild regenerates the unit — but Home Manager only restarts a
-        # changed user service in sdswitch mode. Without this, a rebuild
-        # relinks the unit while the stale watcher keeps running (observed
-        # 2026-09-24: unit relinked 21:47, process still the 00:47 build).
+        # Unit pins store path; without sd-switch a rebuild relinks while stale watcher runs
+        # (observed 2026-09-24). Requires sd-switch restart mode.
         systemd.user.startServices = "sd-switch";
 
         home.packages = [ projectHours ];
 
-        # Thinkpad-only: NOT added to the shared cells/persist/home.nix
-        # (persist branch), since no other host runs this tool.
+        # Thinkpad-only persist; no other host runs this tool.
         home.persistence."/persist".directories = [
           ".local/share/activitywatch"
           ".local/share/project-hours"

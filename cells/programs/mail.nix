@@ -12,10 +12,8 @@ let
   sopsFile = "${secretsRoot}/secrets.yaml";
   outlookClientIdSecret = "mail_outlook_client_id";
 
-  # Same probe as cells/shell/railway.nix: sops leaves mapping keys in plaintext,
-  # so the key can be checked without decrypting. Outlook cannot authenticate at
-  # all without OAuth2, so the whole account is gated on the client id being
-  # present rather than hard-failing activation until it is added.
+  # Like cells/shell/railway.nix: sops keys are plaintext, so check without decrypting.
+  # Outlook needs OAuth2, so gate the account on the client id instead of hard-failing.
   hasOutlookClientId =
     builtins.pathExists sopsFile
     && lib.hasInfix "${outlookClientIdSecret}:" (builtins.readFile sopsFile);
@@ -37,11 +35,8 @@ in
         tuBerlinMaildir = "tu-berlin-new";
         outlookMaildir = "outlook";
 
-        # Outlook.com reports *localized* IMAP folder names. These are the German
-        # names a live.de mailbox uses, consistent with the alganize account below.
-        # mbsync syncs with `Patterns *`, so the sync works whatever they are named
-        # — after the first sync, check `ls ~/mail/outlook` and correct these here
-        # if the server returned English names (Sent/Drafts/Deleted/Junk/Archive).
+        # Outlook.com localizes IMAP folder names (German here); after first sync check
+        # `ls ~/mail/outlook` and fix if the server returned English names.
         outlookFolders = {
           sent = "Sent";
           drafts = "Drafts";
@@ -61,79 +56,34 @@ in
         secret = name: config.sops.secrets."mail_${name}".path;
         catSecret = name: "${pkgs.coreutils}/bin/cat ${secret name}";
 
-        # Google presents app passwords as "xxxx xxxx xxxx xxxx", but the IMAP and
-        # SMTP servers expect the 16 characters with no spaces — pasted verbatim, the
-        # login just fails. This strips whitespace so the secret works either way.
-        #
-        # It has to be a script rather than a `cat ... | tr` pipeline: a string
-        # passwordCommand is split on spaces, and home-manager shell-escapes every
-        # element when generating imapnotify's config, which would turn the pipe into
-        # a literal argument. A single store path survives that intact.
+        # App passwords have spaces but servers want 16 chars; strip whitespace.
+        # Must be a script: string passwordCommand splits/escapes pipes, a store path survives.
         catSecretUnspaced =
           name:
           pkgs.writeShellScript "mail-secret-${name}" ''
             exec ${pkgs.coreutils}/bin/tr -d '[:space:]' < ${secret name}
           '';
 
-        # nixpkgs builds isync without the XOAUTH2 SASL plugin by default, which
-        # makes OAuth2 IMAP impossible. The override wraps mbsync with a SASL_PATH
-        # that includes cyrus-sasl-xoauth2. Required for Outlook.
+        # isync lacks XOAUTH2 by default; wrap mbsync with SASL_PATH incl. cyrus-sasl-xoauth2.
         isyncPackage = pkgs.isync.override { withCyrusSaslXoauth2 = true; };
 
-        # Microsoft issues a *new* refresh token on every refresh, so the token
-        # cannot live in sops: a git-tracked, build-time-encrypted file is not
-        # something a background sync can rewrite. oama keeps the rotating refresh
-        # token in gnome-keyring and mints short-lived access tokens on demand.
-        # Only the non-rotating client id comes from sops.
+        # Refresh tokens rotate on every use, so oama keeps them in gnome-keyring; only
+        # the static client id comes from sops.
         oamaAccess = email: "${pkgs.oama}/bin/oama access ${lib.escapeShellArg email}";
 
         mbsyncLockFile = "${config.xdg.cacheHome}/mbsync.lock";
         mbsyncPackage = pkgs.writeShellScriptBin "mbsync" ''
           exec ${pkgs.util-linux}/bin/flock -w 180 ${lib.escapeShellArg mbsyncLockFile} ${isyncPackage}/bin/mbsync "$@"
         '';
-        # Two-way sync. `Sync All`, isync's default, already carried both
-        # messages and flags in both directions; these two settings finish the
-        # job at the folder and deletion level.
-        #
-        # Create Both — a folder made on either side is created on the other.
-        # Previously `Create Near`, so a folder made here stayed here.
-        #
-        # Expunge Both — deletions become effective instead of being left as a
-        # \Deleted flag on the opposite copy, which is what isync's manual
-        # recommends once a setup is known good. Note what this hands over: `d`
-        # in neomutt plus the next sync permanently removes the server copy, and
-        # because the gmail channel syncs [Gmail]/All Mail, a delete there is a
-        # delete from every label at once. Set Expunge back to "none" to return
-        # to flag-only propagation.
+        # Create/Expunge Both: folders and deletions propagate; `d` + sync permanently
+        # deletes the server copy (in Gmail, via All Mail, from every label at once).
         mbsyncTwoWay = {
           create = "both";
           expunge = "both";
         };
 
-        # Notify only when a message actually arrived.
-        #
-        # goimapnotify's onNewMail hook — what home-manager's `onNotify` maps to
-        # — does not only fire for new mail. internal/imap/watch.go queues a
-        # synthetic SYNC event every time it connects to a mailbox ("issue fake
-        # event to trigger a first time sync"), and internal/runner/runner.go
-        # routes SYNC to that same hook. Every reconnect — a network blip, a
-        # resume from suspend, a restart of the unit, an OAuth refresh —
-        # therefore ran the old `mbsync && notify-send` pair, which announced
-        # "New mail received" whether or not anything had. With hundreds of
-        # already-unread messages sitting in an inbox that reads as a
-        # notification about mail that has been there for weeks.
-        #
-        # Genuine arrivals are a narrower thing than "the mailbox changed", so
-        # the decision comes from the maildir rather than from the event. isync
-        # encodes flags in the ":2,..." filename suffix and renames in place, so
-        # the part before that suffix is a stable per-message identity: reading,
-        # flagging or deleting a message — here or on the server — never makes
-        # it look new. Anything present after the sync that was not present
-        # before genuinely just arrived.
-        #
-        # Flag changes and deletions reach goimapnotify as separate events
-        # (onChangedMail, onDeletedMail). Both are left unset, so neither has
-        # ever notified and neither does now.
+        # goimapnotify sends SYNC on every reconnect, so diff maildir IDs (pre-`:2,` suffix)
+        # before/after sync and notify only on genuinely new messages.
         newMailNotify = pkgs.writeShellApplication {
           name = "mail-sync-notify";
           runtimeInputs = [
@@ -171,16 +121,11 @@ in
           '';
         };
 
-        # home-manager's default neomutt sendmail (`msmtpq
-        # --read-envelope-from --read-recipients`) selects no msmtp account,
-        # so msmtp falls back to the primary account and every non-primary
-        # identity sends through the wrong SMTP relay. Pin each account to
-        # its own msmtp account explicitly (`-a` is forwarded by msmtpq and
-        # persisted per queued message).
+        # Default sendmail picks no msmtp account (wrong relay); pin each with `-a`
+        # (forwarded by msmtpq, persisted per queued message).
         msmtpSendmail = account: "msmtpq --account=${account} --read-envelope-from --read-recipients";
 
-        # home-manager names each mbsync channel after its account, so the
-        # account name is also the channel to pull.
+        # mbsync channel names match account names.
         syncAndNotifyCmd =
           account: label:
           let
@@ -242,8 +187,7 @@ in
 
         xdg.configFile."oama/config.yaml" = lib.mkIf hasOutlookClientId {
           text = ''
-            # Generated by Home Manager. Rotating tokens live in gnome-keyring,
-            # which PAM unlocks at login so the mbsync timer refreshes unattended.
+            # Generated by Home Manager; rotating tokens live in gnome-keyring (PAM-unlocked).
             encryption:
                 tag: KEYRING
 
@@ -513,18 +457,8 @@ in
                 key = "U";
                 action = "<pipe-message>${pkgs.urlscan}/bin/urlscan<enter>";
               }
-              # Mark read. `M` takes the whole mailbox, Esc-M the thread under
-              # the cursor; `.` is neomutt's alias for the ~A "all messages"
-              # pattern, so the untag afterwards leaves nothing selected.
-              #
-              # <tag-prefix-cond> applies <clear-flag> to the tagged messages and
-              # abandons the rest of the macro when nothing matched, so `M` on an
-              # already-read mailbox cannot fall through to the current message.
-              #
-              # The trailing <sync-mailbox> writes the \Seen flags into the
-              # maildir there and then. Without it neomutt holds them until the
-              # mailbox is closed, and the next mbsync run would have nothing to
-              # push, so the mail would still look unread everywhere else.
+              # `.` = ~A all-messages; <tag-prefix-cond> skips when nothing matched.
+              # Trailing <sync-mailbox> writes \Seen now, or mbsync has nothing to push.
               {
                 map = [ "index" ];
                 key = "M";
@@ -791,8 +725,7 @@ in
             maildir-rank-addr
             urlscan
           ]
-          # Needed interactively for the one-time `oama authorize` device-code flow
-          # and for `oama show`/`renew` when debugging Outlook auth.
+          # For one-time `oama authorize` flow and `oama show`/`renew` debugging.
           ++ lib.optional hasOutlookClientId oama;
 
         accounts.email = {
@@ -985,9 +918,7 @@ in
               };
             };
 
-            # Same all-inkl/Kasserver mailbox type as alganize above, so the
-            # settings mirror it: IMAPS + smtps on port 465, German folder
-            # names, basic auth against the sops password.
+            # Same all-inkl/Kasserver type as alganize: mirrors its IMAPS/smtps/folders/auth.
             alganize-kundenservice = {
               inherit (a.alganize-kundenservice) address;
               inherit (a.alganize-kundenservice) realName;
@@ -1048,19 +979,15 @@ in
             };
           }
           // lib.optionalAttrs hasOutlookClientId {
-            # Outlook.com personal accounts lost basic auth (and app passwords) on
-            # 2024-09-16, so every leg here authenticates with an OAuth2 access
-            # token from oama instead of a password: mbsync via SASL XOAUTH2, msmtp
-            # via `auth xoauth2`, aerc via the smtp+xoauth2 scheme. neomutt needs no
-            # OAuth config of its own — it reads the maildir and sends via msmtp.
+            # Basic auth retired 2024-09-16; every leg uses oama OAuth2 (mbsync XOAUTH2,
+            # msmtp `auth xoauth2`, aerc smtp+xoauth2; neomutt just uses maildir/msmtp).
             outlook = {
               inherit (a.outlook) address;
               inherit (a.outlook) realName;
               inherit (a.outlook) userName;
               maildir.path = outlookMaildir;
               passwordCommand = oamaAccess a.outlook.address;
-              # inbox is left at the default "Inbox" so the local maildir matches
-              # the other three accounts.
+              # Inbox left default to match other accounts.
               folders = { inherit (outlookFolders) sent drafts trash; };
               imap = {
                 host = a.outlook.imapHost;
@@ -1076,8 +1003,7 @@ in
                 enable = true;
                 inherit (mbsyncTwoWay) create expunge;
                 extraConfig.account.AuthMechs = "XOAUTH2";
-                # Left broad so the sync succeeds regardless of how Microsoft
-                # localizes the folder names for this mailbox.
+                # Broad `*` so sync works regardless of localized folder names.
                 patterns = [ "*" ];
               };
               msmtp = {
@@ -1093,9 +1019,8 @@ in
                 enable = true;
                 extraAccounts = {
                   source = "maildir://~/mail/${outlookMaildir}";
-                  # No token_endpoint: aerc then treats the cred-cmd output as an
-                  # access token rather than a refresh token, which is what oama
-                  # hands out. oama owns the refresh, so aerc must not duplicate it.
+                  # No token_endpoint: cred-cmd output is an access token (oama owns refresh),
+                  # so aerc must not treat it as a refresh token.
                   outgoing = "smtp+xoauth2://${urlEncode a.outlook.userName}@${a.outlook.smtpHost}:587";
                   default = "INBOX";
                   outgoing-cred-cmd = oamaAccess a.outlook.address;

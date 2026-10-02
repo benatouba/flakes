@@ -262,10 +262,8 @@ in
             | ${pkgs.gzip}/bin/gzip -c > "$dumpFile"
           ${pkgs.coreutils}/bin/chmod 0600 "$dumpFile"
 
-          # Grandfather-father-son retention: the newest `daily` dumps, plus the
-          # newest dump of each of the last `weekly` ISO weeks and `monthly`
-          # months. The timestamp is parsed from the file name, so the list
-          # sorts newest-first lexicographically.
+          # GFS retention: newest daily dumps plus newest per weekly ISO week/month.
+          # Timestamps parsed from filenames, sorted newest-first.
           mapfile -t dumps < <(
             ${pkgs.findutils}/bin/find ${backupDir} -mindepth 1 -maxdepth 1 -type f -name 'wger-*.sql.gz' -printf '%f\n' \
               | ${pkgs.coreutils}/bin/sort -r
@@ -341,19 +339,7 @@ in
           cat > "$out/powersync.yaml" <<'YAML'
           # yaml-language-server: $schema=../schema/schema.json
 
-          # Note that this example uses YAML custom tags for environment variable substitution.
-          # Using `!env [variable name]` will substitute the value of the environment variable named
-          # [variable name].
-          #
-          # Only environment variables with names starting with `PS_` can be substituted.
-          #
-          # e.g. With the environment variable `export PS_STORAGE_MONGO_URI=mongodb://localhost:27017`
-          # and YAML code:
-          #  uri: !env PS_STORAGE_MONGO_URI
-          # The YAML will resolve to:
-          #  uri: mongodb://localhost:27017
-          #
-          # If using VS Code see the `.vscode/settings.json` definitions which define custom tags.
+          # !env substitutes PS_* vars; see upstream PowerSync docs.
 
           # migrations:
           #   # Migrations run automatically by default.
@@ -366,87 +352,55 @@ in
           telemetry:
             disable_telemetry_sharing: true
 
-            # Expose prometheus metrics on this port
             prometheus_port: 9090
 
-          # Settings for source database replication
+          # Source replication: only 1 connection supported for now.
           replication:
-            # Specify database connection details
-            # Note only 1 connection is currently supported
-            # Multiple connection support is on the roadmap
             connections:
               - type: postgresql
                 uri: !env PS_DATABASE_URI
 
-                # Or use individual params
-                # hostname: db # From the Docker Compose service name
-                # port: 5432
-                # database: postgres
-                # username: postgres
-                # password: mypassword
+                # Or use individual params; see upstream docs.
 
-                # SSL settings
-                sslmode: disable # 'verify-full' (default) or 'verify-ca' or 'disable'
-                # 'disable' is OK for local/private networks, not for public networks
+                sslmode: disable # verify-full/verify-ca/disable; disable for private nets only
 
 
-          # Connection settings for sync bucket storage
           storage:
             type: postgresql
             uri: !env PS_STORAGE_PG_URI
             sslmode: disable
 
-          # The port which the PowerSync API server will listen on
           port: !env PS_PORT
 
-          # Workaround for PSYNC_S2305 bug: PowerSync counts source rows instead of DISTINCT
-          # CTE results. Users with large nutrition logs (>1000 log items) can hit the limit
-          # even though the number of distinct ingredients is well below it.
-          # See https://github.com/powersync-ja/powersync-service/issues/682
-          #     https://github.com/wger-project/flutter/issues/1237
+          # PSYNC_S2305: counts source rows, not DISTINCT CTE results.
+          # See https://github.com/powersync-ja/powersync-service/issues/682 (wger flutter#1237)
           api:
             parameters:
               max_parameter_query_results: 2000
 
-          # Specify sync rules
           sync_rules:
             path: sync_rules.yaml
 
-          # Client (application end user) authentication settings
+          # Client auth settings
           client_auth:
             allow_local_jwks: true
             jwks_uri: !env PS_JWKS_URL
 
-            # JWKS audience
             audience: ["powersync"]
           YAML
 
           cat > "$out/sync_rules.yaml" <<'YAML'
-          # Note that changes to this file are not watched.
-          # The service needs to be restarted for changes to take effect.
+          # Changes require service restart (not watched).
 
-          # Warning: a user may have at most 1000 buckets, i.e. parameter-query results
-          # summed across all streams. This counts the *parameter* rows, not the data
-          # rows inside a bucket (a single bucket can hold any number of rows). For a
-          # stream with a `with:` CTE the count is the number of rows the CTE returns,
-          # so for `user_ingredients` below that is the number of distinct ingredients
-          # a user has ever referenced. Exceeding the limit is a hard error
-          # (PSYNC_S2305 "Too many parameter query results").
+          # Max 1000 buckets/user (counts parameter/CTE rows); exceeding is PSYNC_S2305 error.
           # See https://docs.powersync.com/sync/rules/parameter-queries
-          #
-          # Streams are split by update frequency (cold / medium / hot) so that
-          # bucket compaction can collapse the head of hot buckets without being
-          # blocked by long-lived rows from cold tables.
-          #
-          # For details, see the documentation:
-          # https://docs.powersync.com/sync/streams/overview
-          # https://docs.powersync.com/maintenance-ops/compacting-buckets
+          # Streams split cold/medium/hot for compaction; see upstream PowerSync docs.
 
           config:
             edition: 3
 
           streams:
-            # Global reference data, shared by all users, changes rarely enough
+            # Global reference data, shared by all users.
             core:
               auto_subscribe: true
               queries:
@@ -474,7 +428,7 @@ in
                 - SELECT * FROM core_userprofile WHERE CAST(user_id AS TEXT) = auth.user_id()
                 - SELECT * FROM gallery_image WHERE CAST(user_id AS TEXT) = auth.user_id()
 
-            # COLD but potentially large, only the per-user *filter set* changes when the user logs new foods
+            # COLD, large: per-user filter set changes on food logs.
             user_ingredients:
               auto_subscribe: true
               with:
@@ -499,15 +453,13 @@ in
                   SELECT nutrition_ingredientweightunit.* FROM nutrition_ingredientweightunit
                   WHERE nutrition_ingredientweightunit.ingredient_id IN user_ingredients
 
-            # MEDIUM. Edited e.g. when the user builds or edits their routine or nutrition plan,
-            # but not on every workout.
+            # MEDIUM: edited when building/editing routines or plans.
             user_planning:
               auto_subscribe: true
               queries:
                 # Routines (templates excluded)
                 - SELECT * FROM manager_routine WHERE CAST(user_id AS TEXT) = auth.user_id() AND is_template = FALSE
 
-                # Measurements
                 - SELECT * FROM measurements_category WHERE CAST(user_id AS TEXT) = auth.user_id()
                 - |
                   SELECT measurements_measurement.*
@@ -516,7 +468,7 @@ in
                     ON measurements_measurement.category_id = measurements_category.id
                   WHERE CAST(measurements_category.user_id AS TEXT) = auth.user_id()
 
-                # Nutrition plan structure (not the log items)
+                # Plan structure (not log items).
                 - SELECT * FROM nutrition_nutritionplan WHERE CAST(user_id AS TEXT) = auth.user_id()
                 - |
                   SELECT nutrition_meal.*
@@ -534,19 +486,15 @@ in
                   WHERE CAST(nutrition_nutritionplan.user_id AS TEXT) = auth.user_id()
 
 
-            # HOT. Generates  one or more new rows per workout / meal. Compaction has the
-            # biggest impact here, so it must stay isolated from the other streams above
+            # HOT: new rows per workout/meal; isolate for compaction.
             user_activity:
               auto_subscribe: true
               queries:
-                # Weight tracking
                 - SELECT uuid AS id, weight, date, user_id FROM weight_weightentry WHERE CAST(user_id AS TEXT) = auth.user_id()
 
-                # Workout sessions and per-set logs
                 - SELECT * FROM manager_workoutsession WHERE CAST(user_id AS TEXT) = auth.user_id()
                 - SELECT * FROM manager_workoutlog WHERE CAST(user_id AS TEXT) = auth.user_id()
 
-                # Nutrition log entries
                 - |
                   SELECT nutrition_logitem.*
                   FROM nutrition_logitem

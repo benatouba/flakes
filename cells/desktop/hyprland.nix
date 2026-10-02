@@ -1,6 +1,5 @@
-# NOTE: `inputs` is no longer an argument here — hyprpicker now comes from
-# nixpkgs. The two commented-out `inputs.*` lines below would need it added
-# back if they are ever re-enabled.
+# hyprpicker now comes from nixpkgs, so `inputs` is gone. Re-add it if the
+# commented-out `inputs.*` lines below are ever re-enabled.
 {
   config,
   lib,
@@ -38,10 +37,24 @@ let
 
   cursorEnvConf = "env = XCURSOR_SIZE, ${toString theme.cursor.size}";
 
+  legacyPluginConf = ''
+    plugin {
+      hyprtasking {
+        layout = grid
+        gap_size = 5
+        grid {
+          rows = 3
+          cols = 3
+        }
+      }
+    }
+  '';
+
   legacyHyprlandConfig = builtins.concatStringsSep "\n" (
     [
       themeConf
       cursorEnvConf
+      legacyPluginConf
     ]
     ++ map builtins.readFile [
       ./hyprland/monitors.conf
@@ -301,25 +314,8 @@ let
       ]
   );
 
-  # Almost everything that used to live here is now a systemd user unit bound to
-  # graphical-session.target, which home-manager's hyprland module already
-  # starts for us (it emits the dbus-update-activation-environment line and
-  # starts hyprland-session.target as the very first startup command). Units
-  # get restarted when they die; an exec-once does not.
-  #
-  # Removed rather than converted:
-  #
-  #   resetXdgPortal.sh   The file does not exist and never did in this repo,
-  #                       so this failed on every single login.
-  #   dbus-update-...     home-manager emits its own, earlier and with more
-  #                       variables (DISPLAY, HYPRLAND_INSTANCE_SIGNATURE,
-  #                       XDG_SESSION_TYPE too). Ours raced it.
-  #   restart pipewire    pipewire is socket-activated; restarting it on every
-  #                       login and every config reload is pure churn.
-  #
-  # Only what genuinely cannot be a unit yet is left. wezterm-mux-server
-  # self-daemonises, so a unit needs Type=forking or --no-daemonize; worth
-  # doing, but not in this change.
+  # Most former exec-once entries are now systemd user units (restart on failure,
+  # unlike exec-once); only self-daemonising wezterm-mux-server stays here.
   autostartLua = lib.concatStringsSep "\n" (
     map
       (command: ''
@@ -428,6 +424,19 @@ let
       },
     })
 
+    hl.config({
+      plugin = {
+        hyprtasking = {
+          layout = "grid",
+          gap_size = 5,
+          grid = {
+            rows = 3,
+            cols = 3,
+          },
+        },
+      },
+    })
+
     hl.curve("overshot", { type = "bezier", points = { { 0.13, 0.99 }, { 0.29, 1.1 } } })
     hl.animation({ leaf = "windows", enabled = true, speed = 4, bezier = "overshot", style = "slide" })
     hl.animation({ leaf = "windowsOut", enabled = true, speed = 5, bezier = "default", style = "popin 80%" })
@@ -492,7 +501,9 @@ let
     hl.bind(mainMod .. " + m", hl.dsp.focus({ workspace = "name:music" }))
     hl.bind(mainMod .. " + Return", hl.dsp.focus({ workspace = "name:terminal" }))
     hl.bind(mainMod .. " + S", hl.dsp.focus({ workspace = "name:stream" }))
-    hl.bind(mainMod .. " + Tab", hl.dsp.window.cycle_next())
+    hl.bind(mainMod .. " + Tab", function()
+      hl.plugin.hyprtasking.toggle("cursor")
+    end)
     hl.bind(mainMod .. " + SHIFT + Tab", hl.dsp.window.cycle_next({ next = false }))
     hl.bind(mainMod .. " + period", hl.dsp.focus({ workspace = "e+1" }))
     hl.bind(mainMod .. " + comma", hl.dsp.focus({ workspace = "e-1" }))
@@ -554,10 +565,8 @@ let
     hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
     hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
     hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
-    -- The capture toolkit in cells/scripts/capture.nix. The three SUPER/ALT
-    -- chords are Omarchy's own and were free here; they give hyprpicker and
-    -- wf-recorder -- both installed, neither previously called from anywhere --
-    -- their first keybinds. The descriptions show up in `hyprctl binds`.
+    -- Capture toolkit (cells/scripts/capture.nix); descriptions show in `hyprctl binds`.
+    -- SUPER/ALT chords wire up hyprpicker and wf-recorder for the first time.
     hl.bind("Print", hl.dsp.exec_cmd("capture-screenshot region"), { description = "Screenshot region" })
     hl.bind("SHIFT + Print", hl.dsp.exec_cmd("capture-screenshot display"), { description = "Screenshot display" })
     hl.bind("CTRL + Print", hl.dsp.exec_cmd("capture-screenshot window"), { description = "Screenshot window" })
@@ -580,7 +589,6 @@ let
   '';
 in
 {
-  # NixOS side
   config.my.branches.desktop.nixosModules = [
     (
       { pkgs, ... }:
@@ -619,7 +627,6 @@ in
     )
   ];
 
-  # HM side
   config.my.branches.desktop.hmModules = [
     (
       { config, pkgs, ... }:
@@ -636,20 +643,13 @@ in
           package = null;
           portalPackage = null;
           configType = if useLuaConfig then "lua" else "hyprlang";
-          plugins = [
-            # TODO: re-enable when hyprexpo is compatible with Hyprland 0.54.0
-            # inputs.hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}.hyprexpo
-          ];
+          # hyprtasking from nixpkgs (tracks nixpkgs Hyprland, so ABI matches).
+          plugins = [ pkgs.hyprlandPlugins.hyprtasking ];
           extraConfig = if useLuaConfig then hyprlandLua else legacyHyprlandConfig;
         };
 
-        # Supervised session components. Each of these modules writes its own
-        # config file only when `settings` is non-empty, so leaving settings
-        # alone keeps the xdg.configFile entries below authoritative and this
-        # is purely about getting a unit that restarts on failure.
-        #
-        # They default to WantedBy/PartOf/After on graphical-session.target,
-        # which hyprland-session.target binds to, so there is nothing to wire.
+        # Units restart on failure; empty `settings` keeps xdg.configFile authoritative.
+        # Already bound to graphical-session.target, so nothing to wire.
         services = {
           hypridle.enable = true;
           hyprpaper.enable = true;
@@ -663,38 +663,22 @@ in
           };
           cliphist = {
             enable = true;
-            # Emits both the text watcher and a second unit for images, which
-            # is what the two wl-paste exec-once lines used to do.
-            #
-            # One behavioural difference worth knowing: the module runs the
-            # first watcher as `wl-paste --watch`, where the old exec-once said
-            # `wl-paste --type text --watch`. Untyped, wl-paste reports the
-            # preferred type, so an image copy can be picked up by both
-            # watchers. cliphist's -max-dedupe-search handles the duplicate,
-            # and the module exposes no hook for wl-paste's own arguments, so
-            # this is left at the module default rather than pinned by
-            # overriding ExecStart with hardcoded store paths.
+            # Provides text + image watchers; untyped `wl-paste --watch` may double-report
+            # images, but cliphist dedupes it; no hook for wl-paste args, so keep default.
             allowImages = true;
           };
           network-manager-applet.enable = true;
 
-          # `systemctl --user start hyprpolkitagent` was in the autostart list,
-          # but the package was never installed and no such unit existed — so
-          # this session has been running with security.polkit.enable = true and
-          # no agent at all. Anything needing a privilege prompt had nothing to
-          # prompt with, including the `pkexec tlp chargeonce` behind the waybar
-          # battery menu's charge toggle.
+          # No agent was installed before, so privilege prompts (e.g. waybar charge
+          # toggle via `pkexec tlp chargeonce`) had nothing to prompt with.
           hyprpolkitagent.enable = true;
         };
 
-        # Wallpaper scripts, hyprpaper.conf and the per-login pick live in
-        # scripts/wallpaper.nix.
+        # Wallpaper lives in scripts/wallpaper.nix.
 
         xdg.configFile."hypr/hypridle.conf".source = ./hyprland/hypridle.conf;
-        # hyprlock.conf reads its palette from these variables; see the note at
-        # the top of that file.  $wallpaper is the symlink lock_screen
-        # (scripts/wallpaper.nix) refreshes with a random pick before it
-        # execs hyprlock.
+        # Palette vars for hyprlock.conf; $wallpaper is refreshed by lock_screen
+        # (scripts/wallpaper.nix) before execing hyprlock.
         xdg.configFile."hypr/hyprlock.conf".text = ''
           $primary = rgb(${theme.colors.${theme.accent}})
           $on_primary = rgb(${theme.colors.base})
@@ -722,10 +706,8 @@ in
         };
         xdg.configFile."hypr/assets/blank.png".source = ./hyprland/assets/blank.png;
 
-        # Waypaper
         xdg.configFile."waypaper/config.ini".source = ./waypaper/config.ini;
 
-        # Sidepad
         xdg.configFile."sidepad/sidepad" = {
           source = ./sidepad/sidepad;
           executable = true;

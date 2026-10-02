@@ -1,23 +1,6 @@
 _: {
-  # Token-efficient browser for AI agents (Claude Code, OpenCode).
-  #
-  # Why agent-browser: classic Chrome MCP servers burn ~13-18k tokens on tool
-  # schemas alone and re-dump full accessibility trees after every action
-  # (~50-114k tokens per 10-step flow). agent-browser instead exposes a CLI
-  # with compact `@eN` snapshot refs (~200-400 tokens per snapshot, ~7k per
-  # 10-step flow). Agents drive it via Bash, so zero MCP schema overhead.
-  # The bundled skill stub below teaches that workflow; the full versioned
-  # guide is served by the CLI itself (`agent-browser skills get core`).
-  #
-  # This module provides both layers, CLI-first:
-  # - CLI + skill (primary): `agent-browser` + pinned headless `chromium`
-  #   plus a shared skill at ~/.claude/skills/agent-browser, which OpenCode
-  #   also reads via its Claude-compat path. No per-session token cost.
-  # - MCP (optional): `agent-browser mcp --tools core,debug` registered in
-  #   opencode.jsonc and in Claude Code user scope. `core` covers
-  #   navigate/snapshot/interact/screenshot/eval; `debug` adds
-  #   console/errors/tracing/a11y audit for investigating broken frontends.
-  #   Enable per session, disable when not needed.
+  # Token-efficient browser CLI for agents; full guide via `agent-browser skills get core`.
+  # CLI + shared skill is primary; MCP (core,debug) optional per session.
   config.my.branches.desktop.hmModules = [
     (
       {
@@ -32,28 +15,24 @@ _: {
           chromium
         ];
 
-        # Point the agent browser at pinned NixOS chromium instead of letting
-        # it download Chrome from the network (impure, breaks sandbox).
-        # `--no-sandbox` is scoped to this headless agent browser only; the
-        # interactive Brave session is unaffected. Agent targets are local
-        # dev frontends, not untrusted browsing.
+        # Pinned NixOS chromium (no network download); --no-sandbox is headless agent-only.
+        # Targets are local dev frontends, not untrusted browsing.
         home.file.".agent-browser/config.json".text = builtins.toJSON {
           executablePath = "${pkgs.chromium}/bin/chromium";
           args = "--no-sandbox,--disable-gpu,--disable-dev-shm-usage";
         };
 
-        # Shared skill: Claude Code reads ~/.claude/skills, OpenCode reads
-        # the same path via its Claude-compat lookup, so one link serves
-        # both. Do NOT also link it under ~/.config/opencode/skills (dupes).
+        # One link serves Claude Code and OpenCode (Claude-compat path).
+        # Do NOT also link under ~/.config/opencode/skills (dupes).
         home.file.".claude/skills/agent-browser" = {
           source = "${pkgs.agent-browser}/skills/agent-browser";
           force = true;
         };
 
-        # Claude Code user-scope MCP lives in ~/.claude.json, which is
-        # CLI-owned state and must not be overwritten declaratively, so
-        # register idempotently via the supported `claude mcp add` path.
+        # ~/.claude.json is CLI-owned; register idempotently via `claude mcp add`.
+        # Activation PATH lacks the user profile, so prefix it or registration never fires.
         home.activation.registerAgentBrowserClaudeMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          export PATH="/etc/profiles/per-user/${config.home.username}/bin:$PATH"
           if command -v claude >/dev/null 2>&1; then
             if ! claude mcp list 2>/dev/null | grep -qE '(^|[^a-zA-Z0-9_-])agent-browser([^a-zA-Z0-9_-]|$)'; then
               claude mcp add agent-browser --scope user -- agent-browser mcp --tools core,debug >/dev/null 2>&1 || true

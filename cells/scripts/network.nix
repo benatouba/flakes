@@ -1,23 +1,5 @@
-# Share the current Wi-Fi as a QR code.
-#
-# Reachable from the waybar network menu ("Share Wi-Fi…"), and usable on its
-# own from a terminal. Read-only and unprivileged: it asks NetworkManager for
-# the active connection's secrets, which the owning user may already read.
-#
-# The awkward parts of building a WIFI: URI, all of which this handles, are
-# lifted from Omarchy's omarchy-network-qr:
-#
-#   * nmcli localises connection state names, so any parsing of them has to
-#     pin LC_ALL=C.
-#   * `--escape no` matters: the default escapes ":" and "\" in values, which
-#     are exactly the characters the URI format also escapes, so an SSID
-#     containing either would be double-escaped and scan wrong.
-#   * Enterprise networks (EAP / 802.1x) cannot be expressed as a password QR
-#     at all, so they are refused rather than silently producing a code that
-#     fails to join.
-#   * NetworkManager models WEP as key-mgmt "none" plus a wep-key rather than
-#     as its own key management, so a naive read sees "no security" and emits
-#     an open-network QR that silently fails.
+# Share active Wi-Fi as a QR code (waybar menu or terminal).
+# Handles LC_ALL pinning, --escape no, EAP refusal, and WEP key-mgmt.
 _: {
   config.my.branches.desktop.hmModules = [
     (
@@ -36,9 +18,7 @@ _: {
             interface="''${1:-}"
 
             if [ -z "$interface" ]; then
-              # Prefer whatever carries the default route, since that is the
-              # connection the user means by "the Wi-Fi". Fall back to the
-              # first connected wireless device.
+              # Prefer the default-route device; fall back to first connected wifi.
               route_device=$(ip route get 1.1.1.1 2>/dev/null \
                 | awk '{ for (i = 1; i <= NF; i++) if ($i == "dev") { print $(i + 1); exit } }')
 
@@ -83,7 +63,7 @@ _: {
                 ;;
             esac
 
-            # ";" "," ":" and "\" all terminate or escape fields in the URI.
+            # ";" "," ":" and "\" terminate or escape fields in the URI.
             escape_field() {
               local value="$1"
               value="''${value//\\/\\\\}"
@@ -118,12 +98,10 @@ _: {
               printf '  %s\n\n' "$password"
             fi
 
-            # Margin 4 is the quiet zone the spec asks for; without it a
-            # scanner sitting against a dark terminal background often fails.
+            # Margin 4 is the spec quiet zone; scanners fail without it.
             qrencode -t ANSIUTF8 --margin 4 -- "$payload"
 
-            # Launched from the waybar menu this owns its own terminal window,
-            # which would close the instant the QR was drawn.
+            # Own terminal window would close instantly; wait for a keypress.
             if [ -t 0 ] && [ -t 1 ]; then
               printf '\n  Press any key to close…'
               read -r -s -n1

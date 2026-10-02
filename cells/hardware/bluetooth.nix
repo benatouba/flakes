@@ -14,25 +14,17 @@ _: {
         };
         services.blueman.enable = true;
 
-        # powerOnBoot = false writes Policy.AutoEnable = false, so bluetoothd
-        # never powers the controller by itself.  That is right on battery, but
-        # wrong with the charger in: the bluetooth mouse has to be back the
-        # moment the machine is usable again.  Hence this unit, on the charger
-        # arriving and on resume.
-        #
-        # It only ever powers the controller *on*, and only on AC, so turning
-        # bluetooth off by hand on battery stays off.
+        # powerOnBoot=false never auto-powers; this unit restores BT on AC only.
+        # Manual off on battery stays off.
         systemd.services.bluetooth-power-on = {
           description = "Power on the bluetooth controller when running on AC";
-          # Ordered after the resume so the USB controller has re-enumerated;
-          # the retry loop below covers the firmware reload that follows.
+          # After resume so USB re-enumerates; retry covers firmware reload.
           after = [
             "bluetooth.service"
             "suspend.target"
           ];
           wants = [ "bluetooth.service" ];
-          # systemd.special(7): a unit that should run on resume orders itself
-          # After= suspend.target and installs itself WantedBy= it.
+          # Per systemd.special(7): resume units use After + WantedBy suspend.target.
           wantedBy = [ "suspend.target" ];
           serviceConfig = {
             Type = "oneshot";
@@ -70,8 +62,7 @@ _: {
               fi
 
               rfkill unblock bluetooth
-              # Up to ~10s: after a resume the RTL firmware reload has to finish
-              # before bluez will accept the controller.
+              # Retry ~10s for post-resume RTL firmware reload.
               i=0
               while [ "$i" -lt 20 ]; do
                 bluetoothctl power on >/dev/null 2>&1 || true
@@ -88,9 +79,8 @@ _: {
           };
         };
 
-        # KERNEL=="AC" is the ThinkPad's mains supply; machines without one
-        # simply never fire this.  The matching online=="0" rule for the panel
-        # backlight lives in the thinkpad host config.
+        # KERNEL=="AC" is the ThinkPad mains supply; other machines never fire.
+        # Panel-backlight off rule lives in the thinkpad host config.
         services.udev.extraRules = ''
           SUBSYSTEM=="power_supply", KERNEL=="AC", ATTR{online}=="1", RUN+="${pkgs.systemd}/bin/systemctl --no-block start bluetooth-power-on.service"
         '';

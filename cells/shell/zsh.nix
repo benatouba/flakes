@@ -55,7 +55,7 @@ _: {
               [[ -o login ]] && fastfetch
             '')
             ''
-              # Custom zsh modules
+              # Custom zsh modules from dotfiles
               [ -f ~/.zsh/export.zsh ] && source ~/.zsh/export.zsh
               [ -f ~/.zsh/settings.zsh ] && source ~/.zsh/settings.zsh
               [ -f ~/.zsh/functions.zsh ] && source ~/.zsh/functions.zsh
@@ -64,10 +64,10 @@ _: {
               [ -f ~/.zsh/bindings.zsh ] && source ~/.zsh/bindings.zsh
               [ -f ~/.zsh/alias.zsh ] && source ~/.zsh/alias.zsh
 
-              # Tokens (in nix-secrets repo, not in flakes)
+              # Tokens live in the nix-secrets repo, not in flakes
               [ -f ~/.local/secrets/tokens.zsh ] && source ~/.local/secrets/tokens.zsh
 
-              # Zoxide — replace cd with zoxide's smart cd
+              # Zoxide smart cd
               eval "$(zoxide init zsh --cmd cd)"
 
               # Case-sensitive completion
@@ -82,11 +82,10 @@ _: {
               zstyle ':omz:plugins:eza' 'dirs-first' yes
               zstyle ':omz:plugins:eza' 'git-status' yes
 
-              # pay-respects — correct previous command with F
+              # pay-respects: fix last command with F
               eval "$(pay-respects zsh --alias f)"
 
-              # direnv (optimized): refresh on startup + directory changes only.
-              # This avoids running `direnv export zsh` before every prompt.
+              # direnv: refresh on startup/chdir only, not every prompt.
               if (( $+commands[direnv] )); then
                 _direnv_chpwd_hook() {
                   eval "$(direnv export zsh)"
@@ -97,12 +96,9 @@ _: {
                 _direnv_chpwd_hook
               fi
 
-              # Starship prompt
               eval "$(starship init zsh)"
 
-              # Arrow keys stay native: prefix-search the local zsh history.
-              # Atuin records everything but binds nothing; Ctrl-R runs the
-              # fzf-over-atuin widget in ~/.zsh/fzf.zsh.
+              # Arrows prefix-search local history; Ctrl-R is fzf-over-atuin in fzf.zsh.
               autoload -U up-line-or-beginning-search down-line-or-beginning-search
               zle -N up-line-or-beginning-search
               zle -N down-line-or-beginning-search
@@ -120,7 +116,7 @@ _: {
           ];
         };
 
-        # Deploy custom zsh modules from flakes dotfiles
+        # Deploy dotfiles/zsh modules
         home.file.".zsh" = {
           source = ../../dotfiles/zsh;
           recursive = true;
@@ -153,7 +149,7 @@ _: {
           WEZTERM_SHELL_SKIP_USER_VARS = "1";
         };
 
-        # direnv + nix-direnv: auto-activate per-project dev shells
+        # direnv + nix-direnv: per-project dev shells
         programs.direnv = {
           enable = true;
           nix-direnv.enable = true;

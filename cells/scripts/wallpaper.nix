@@ -9,8 +9,7 @@ in
       { config, pkgs, ... }:
       let
         pool = "${config.home.homeDirectory}/pictures/wallpaper";
-        # Not persisted, and it does not need to be: hyprpaper's ExecStartPre
-        # repopulates it on every login.
+        # Not persisted: hyprpaper ExecStartPre repopulates it each login.
         stateDir = "${config.home.homeDirectory}/.cache/wallpaper";
         current = "${stateDir}/current";
         lock = "${stateDir}/lock";
@@ -23,10 +22,8 @@ in
           fi
         '';
 
-        # hyprpaper 0.8 dropped preload/unload/reload from its IPC; the only
-        # requests left are `wallpaper` and `listactive`.  The IPC part is
-        # skipped when hyprpaper is not reachable so this also works as its
-        # ExecStartPre, where only the symlink matters.
+        # hyprpaper 0.8 keeps only `wallpaper`/`listactive`; skips IPC when
+        # unreachable so this also works as its ExecStartPre.
         set_wallpaper = pkgs.writeShellScriptBin "set_wallpaper" ''
           IMG="$1"
           if [ -z "$IMG" ]; then
@@ -61,13 +58,16 @@ in
           ${set_wallpaper}/bin/set_wallpaper "${fallbackWallpaper}"
         '';
 
-        # Deletes the image behind the `current` symlink and moves on to a
-        # new random one - for weeding the pool from the keyboard.  The
-        # realpath check is the only guard: the symlink is user-writable, so
-        # never rm anything that does not resolve into the pool.
+        # Weeds the pool from the keyboard; only delete targets inside the pool.
         wallpaper_delete_current = pkgs.writeShellScriptBin "wallpaper_delete_current" ''
           set -eu
-          target=$(readlink -f ${current} 2>/dev/null || true)
+          # Prefer what hyprpaper actually displays (other tools may set the
+          # wallpaper without updating ${current}); output is "monitor: path".
+          target=$(hyprctl hyprpaper listactive 2>/dev/null | head -n1 | sed 's/^[^:]*: //' || true)
+          if [ -z "$target" ]; then
+              target=$(readlink -f ${current} 2>/dev/null || true)
+          fi
+          target=$(readlink -f -- "$target" 2>/dev/null || true)
           case "$target" in
               ${pool}/?*) ;;
               *)
@@ -76,7 +76,7 @@ in
                   ;;
           esac
           rm -f -- "$target" ${current}
-          # Do not leave the lock screen pointing at a file that is gone.
+          # Don't leave the lock screen pointing at a deleted file.
           if [ "$(readlink -f ${lock} 2>/dev/null || true)" = "$target" ]; then
               rm -f ${lock}
           fi
@@ -84,8 +84,7 @@ in
           exec ${wallpaper_random}/bin/wallpaper_random
         '';
 
-        # hyprlock reads its background path once at startup, so a fresh
-        # random pick per lock is just a symlink update before exec.
+        # hyprlock reads background once at startup; update symlink then exec.
         lock_screen = pkgs.writeShellScriptBin "lock_screen" ''
           mkdir -p ${stateDir}
           ${pick_random}
@@ -103,16 +102,10 @@ in
           lock_screen
         ];
 
-        # A new random pick on every login.  Doing it in ExecStartPre instead
-        # of a separate oneshot ordered After=hyprpaper.service avoids the
-        # ordering cycle the old random-wallpaper.service created with
-        # graphical-session.target (systemd dropped the job every login, so
-        # the wallpaper never changed).  It also needs no IPC: hyprpaper just
-        # reads the symlink when it starts.
+        # Random pick in ExecStartPre; avoids the old oneshot ordering cycle.
         systemd.user.services.hyprpaper.Service.ExecStartPre = "${wallpaper_random}/bin/wallpaper_random";
 
-        # The path is a symlink hyprpaper resolves at load time; monitor is
-        # left empty so it applies to every output, docked or not.
+        # Symlink resolved at load; empty monitor applies to every output.
         xdg.configFile."hypr/hyprpaper.conf".text = ''
           wallpaper {
               monitor =

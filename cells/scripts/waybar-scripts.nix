@@ -7,16 +7,12 @@ in
     (
       { pkgs, ... }:
       let
-        # Where launch-waybar used to compute these at runtime, they are now
-        # resolved once here and baked into the unit.
+        # Paths resolved once here and baked into the unit.
         waybarDir = "%h/.config/waybar/themes/catppuccin";
         waybarConfig = "${waybarDir}/config";
         waybarStyle = "${waybarDir}/${theme.waybarVariation}/style.css";
 
-        # Toggling the bar is now starting and stopping a unit, so the
-        # ~/.local/state/waybar/waybar-disabled sentinel is gone: systemd
-        # already knows whether waybar is running, and the old script had to
-        # keep the file and the process agreeing by hand.
+        # Toggle starts/stops the unit; systemd tracks state, no sentinel file.
         waybar-toggle = pkgs.writeShellApplication {
           name = "waybar-toggle";
           runtimeInputs = [ pkgs.systemd ];
@@ -29,13 +25,8 @@ in
           '';
         };
 
-        # The waybar bluetooth menu used to call `rfkill unblock bluetooth`,
-        # which only clears a soft block. Nothing blocks the radio at boot, so
-        # "Turn on" was a no-op while the controller itself stayed unpowered:
-        # hardware.bluetooth.powerOnBoot = false writes Policy.AutoEnable =
-        # false, so bluetoothd never powers a controller on its own. Powering it
-        # is a bluez operation, hence bluetoothctl; rfkill stays in the picture
-        # because the ThinkPad's radio kill switch works through it.
+        # powerOnBoot=false leaves the controller unpowered; needs bluetoothctl.
+        # rfkill stays for the ThinkPad radio kill switch.
         bluetooth-power = pkgs.writeShellApplication {
           name = "bluetooth-power";
           runtimeInputs = with pkgs; [
@@ -62,8 +53,7 @@ in
             esac
 
             if [ "$want" = yes ]; then
-              # Unblock first: bluez refuses to power a blocked controller, and
-              # it needs a moment to pick the controller back up afterwards.
+              # Unblock first; bluez needs a moment to pick the controller back up.
               rfkill unblock bluetooth
               for _ in {1..10}; do
                 bluetoothctl power on >/dev/null 2>&1 || true
@@ -74,8 +64,7 @@ in
               exit 1
             fi
 
-            # Power down before blocking, so connected devices see a clean
-            # disconnect instead of the radio vanishing under them.
+            # Power off before blocking for a clean device disconnect.
             bluetoothctl power off >/dev/null 2>&1 || true
             rfkill block bluetooth
           '';
@@ -86,12 +75,8 @@ in
         '';
       in
       {
-        # Not home-manager's `programs.waybar`: its unit runs waybar with no
-        # arguments, which expects ~/.config/waybar/{config,style.css}. This
-        # repo keeps them under themes/catppuccin/ and picks the stylesheet
-        # from theme.waybarVariation, so the unit is written out here instead.
-        # cells/desktop/waybar.nix still installs plain nixpkgs waybar, for the
-        # binary-cache reason documented there.
+        # Custom unit: HM programs.waybar can't use themes/catppuccin paths.
+        # Binary stays plain nixpkgs (cache reason, see desktop/waybar.nix).
         systemd.user.services.waybar = {
           Unit = {
             Description = "Waybar";

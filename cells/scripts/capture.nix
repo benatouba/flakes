@@ -1,36 +1,18 @@
-# Screen capture: screenshots, text extraction, colour picking and recording.
-#
-# Replaces the three `hyprshot` keybinds and the dead cells/scripts/screenshot.nix,
-# and gives `hyprpicker` and `wf-recorder` — both installed, neither previously
-# called from anywhere — their first call sites.
-#
-# Keybinds live in cells/desktop/hyprland.nix (the Print family).
-#
-# The shape follows cells/scripts/wallpaper.nix, except these use
-# writeShellApplication rather than writeShellScriptBin: it pins every binary
-# through runtimeInputs instead of inheriting whatever PATH the compositor
-# happens to have, and runs shellcheck at build time.
+# Screen capture: screenshots, OCR, colour picking, recording (Print keybinds in hyprland.nix).
+# writeShellApplication pins binaries via runtimeInputs and runs shellcheck at build time.
 _: {
   config.my.branches.desktop.hmModules = [
     (
       { pkgs, ... }:
       let
-        # One definition of where captures land, shared by every command below.
-        #
-        # This replaces the HYPRSHOT_DIR export in dotfiles/zsh/export.zsh, which
-        # only interactive zsh ever sourced — keybinds run under the compositor,
-        # which never saw it, so captures were landing in $HOME. The directory is
-        # also created by a tmpfiles rule in cells/desktop/environment.nix, but
-        # mkdir -p here keeps the commands usable on their own.
+        # Shared capture dir; mkdir keeps commands standalone (also a tmpfiles rule elsewhere).
+        # Replaces HYPRSHOT_DIR zsh export, which keybinds under the compositor never saw.
         captureDir = ''
           dir="''${XDG_PICTURES_DIR:-$HOME/pictures}/screenshots"
           mkdir -p "$dir"
         '';
 
-        # Freeze the screen behind the selection. Without this the content keeps
-        # updating while you drag, so you aim at one thing and capture another.
-        # hyprpicker's -r is literally "render (freeze) inactive displays"; -z
-        # drops the zoom lens, which is for colour picking rather than framing.
+        # Freeze so content doesn't shift while dragging (-r freezes, -z drops zoom lens).
         freezeScreen = ''
           freeze() {
             hyprpicker -r -z &
@@ -101,9 +83,7 @@ _: {
 
             wl-copy --type image/png < "$file"
 
-            # -A implies --wait, so this blocks until the toast is acted on or
-            # expires, and prints the chosen action's name. Annotation is offered
-            # rather than forced: most screenshots never need it.
+            # -A implies --wait; annotation offered, not forced.
             action=$(notify-send -a Screenshot -i "$file" \
               -A edit=Annotate -A open=Open \
               "Screenshot copied" "$(basename "$file")") || exit 0
@@ -125,9 +105,7 @@ _: {
             procps
             slurp
             (tesseract.override {
-              # The unscoped package carries every language's training data:
-              # 1104 MB of closure against 126 MB for these two. Measured.
-              # Matches input.kb_layout = "de,us" in cells/desktop/hyprland.nix.
+              # Unscoped = 1104 MB closure vs 126 MB here; matches kb_layout de,us in hyprland.nix.
               enableLanguages = [
                 "eng"
                 "deu"
@@ -142,9 +120,7 @@ _: {
             freeze
             geometry=$(slurp) || exit 0
 
-            # --oem 1 is the LSTM engine only, --psm 6 assumes one uniform block
-            # of text, and --dpi 300 is needed because grim writes no DPI hint,
-            # which otherwise makes tesseract guess badly on small selections.
+            # --oem 1 (LSTM), --psm 6 (uniform block); --dpi 300 as grim writes no DPI hint.
             text=$(grim -g "$geometry" - \
               | tesseract stdin stdout \
                   --oem 1 --psm 6 -l eng+deu --dpi 300 \
@@ -166,9 +142,7 @@ _: {
             hyprpicker
             libnotify
           ];
-          # hyprpicker copies (-a) and notifies (-n) by itself, so this exists
-          # only to give the binding one name alongside the others and to pin
-          # the output format.
+          # Wrapper only to name the binding and pin output format (-a/-n handled by hyprpicker).
           text = ''
             exec hyprpicker -a -n -f hex -l "$@"
           '';

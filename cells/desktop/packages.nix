@@ -24,14 +24,9 @@ _: {
 
         environment.systemPackages = with pkgs; [
           brightnessctl
-          # Terminal front-ends the waybar modules open, for the parts a GTK
-          # popup menu cannot do: enumerating bluetooth devices and
-          # per-application audio streams. See
-          # cells/desktop/waybar/themes/catppuccin/config.
+          # Terminal for waybar popups (bluetooth/audio); see waybar theme config.
           #
-          # Wi-Fi has no entry here on purpose: impala would be the obvious
-          # pick, but it drives iwd, and networking.nix pins NetworkManager to
-          # wpa_supplicant. nmtui comes with NetworkManager and works as-is.
+          # No wifi picker: impala needs iwd, but NetworkManager uses wpa_supplicant.
           bluetui
           wiremix
           cliphist
@@ -42,14 +37,11 @@ _: {
           hyprsunset
           imagemagick
           jq
-          # Region selection and annotation for cells/scripts/capture.nix.
-          # hyprshot used to vendor its own picker; the capture commands drive
-          # grim and slurp directly, so the picker has to be installed.
+          # Picker for capture.nix (drives grim/slurp directly).
           slurp
           satty
           libnotify
           kdePackages.kdeconnect-kde
-          nemo
           networkmanagerapplet
           playerctl
           rofi-rbw

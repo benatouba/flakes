@@ -9,17 +9,12 @@ _: {
           services.printing = {
             enable = true;
             drivers = [ pkgs.brlaser ];
-            # cups-browsed is the daemon behind the 2024 CUPS RCE chain
-            # (CVE-2024-47176 and friends): it takes printer announcements off
-            # the network and turns them into print queues.  systemd-analyze
-            # scores it 9.6/UNSAFE.  With one known local printer there is
-            # nothing to discover — add the Brother by its address instead.
+            # browsed off: behind 2024 CUPS RCE (CVE-2024-47176), auto-makes queues.
+            # Single known printer; add the Brother by address instead.
             browsed.enable = false;
             # Not sharing any printer from this laptop, so don't advertise.
             browsing = false;
-            # Bind the admin/IPP interface to loopback only.  Printing to a
-            # networked printer is outbound and unaffected; previously the
-            # nftables ruleset was the single thing keeping *:631 off the LAN.
+            # Loopback-only IPP; outbound printing unaffected, keeps :631 off LAN.
             listenAddresses = [ "localhost:631" ];
             allowFrom = [ "localhost" ];
           };
@@ -27,17 +22,13 @@ _: {
           services.avahi = {
             enable = true;
             nssmdns4 = true;
-            # Discovery only.  Publishing made the laptop announce itself over
-            # multicast on a timer, which kept the wifi radio out of power save
-            # on every network it joined; nothing here needs to be discoverable.
+            # No publishing: multicast announcements keep wifi out of power save.
             publish.enable = false;
-            # Would punch 5353 into the firewall on every interface; the
-            # per-interface rules below scope it to the dock links instead.
+            # Firewall scoped to dock links below instead of every interface.
             openFirewall = false;
           };
 
-          # mDNS inbound only on the wired dock links, not on every wifi
-          # network the laptop joins.
+          # mDNS inbound on wired dock links only, not on wifi.
           networking.firewall.interfaces = {
             enp2s0f0.allowedUDPPorts = [ 5353 ];
             enp5s0.allowedUDPPorts = [ 5353 ];

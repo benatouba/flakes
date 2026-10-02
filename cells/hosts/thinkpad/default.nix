@@ -41,23 +41,14 @@ in
       (
         { pkgs, ... }:
         {
-          # NOTE: the RTL8852AE previously needed
-          #   options rtw89_pci disable_aspm_l1=y disable_aspm_l1ss=y
-          #   options rtw89_core disable_ps_mode=y
-          # to stay stable.  Those were kernel 5.16-6.1 era workarounds and
-          # together cost ~1.5-2 W by pinning the PCIe link out of L1 and the
-          # radio out of power save.  Dropped on kernel 7.x — restore this
-          # block (and TLP's WIFI_PWR_ON_BAT="off") if the link misbehaves.
+          # RTL8852AE is stable without the old rtw89 ASPM/PS workarounds on kernel 7.x.
+          # Restore them (plus TLP WIFI_PWR_ON_BAT="off") if the link misbehaves.
 
           networking = {
             hostName = "thinkpad";
           };
 
-          # The disk is not encrypted, so anything paged out to the swap
-          # partition persists in the clear.  A random per-boot key closes that
-          # without repartitioning.  Safe here only because hibernation is
-          # already off (security.protectKernelImage forces nohibernate);
-          # re-enabling hibernate means undoing this first.
+          # Unencrypted disk: random per-boot swap key (hibernation must stay off).
           # by-partuuid is mandatory — the UUID is erased on every boot.
           swapDevices = lib.mkForce [
             {
@@ -66,20 +57,13 @@ in
             }
           ];
 
-          # No Wake-on-LAN here.  Two systemd.network.links used to set
-          # WakeOnLan=magic on the dock NICs, but TLP re-applies
-          # WOL_DISABLE="Y" on every power event and wins, so it never
-          # actually worked.  To genuinely want WoL on this machine, set
-          # WOL_DISABLE="N" in core/power.nix and restore the links.
+          # No WoL: TLP WOL_DISABLE="Y" overrides systemd .link settings.
+          # To enable, set WOL_DISABLE="N" in core/power.nix and restore the links.
 
-          # ethtool/wakeonlan went with the WoL links above; esprimo declares
-          # its own copies where they are actually used.
+          # ethtool/wakeonlan live in esprimo config where WoL is used.
 
-          # The eDP backlight is the largest single consumer on this machine:
-          # ~3-4 W of an ~11 W idle draw at 100%.  Cap it to 40% whenever the
-          # charger is pulled.  This only ever lowers brightness, so nudging it
-          # back up on battery sticks until the next unplug, and plugging in
-          # never overrides a level you chose by hand.
+          # eDP backlight dominates idle draw; cap at 40% on battery.
+          # Only ever lowers brightness, so manual raises stick until next unplug.
           systemd.services.battery-brightness-cap = {
             description = "Cap panel brightness when running on battery";
             serviceConfig = {
@@ -102,6 +86,8 @@ in
           home-manager = {
             useGlobalPkgs = true;
             useUserPackages = true;
+            # Back up (don't fail on) files HM takes over, e.g. mimeapps.list.
+            backupFileExtension = "backup";
             extraSpecialArgs = { inherit inputs; };
             users.${user}.imports =
               branches.hmModules

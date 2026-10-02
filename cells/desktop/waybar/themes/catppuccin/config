@@ -4,11 +4,12 @@
 	"spacing": 4,
 	"modules-left": [
 		"hyprland/workspaces",
-		"hyprland/window",
-		"clock"
+		"hyprland/window"
 	],
 	"modules-center": [
 		"custom/notification",
+		"custom/phone",
+		"clock",
 		"idle_inhibitor",
 		"custom/nightlight"
 	],
@@ -17,14 +18,13 @@
 		"group/stats",
 		"pulseaudio",
 		"backlight",
-		"network",
-		"bluetooth",
-		"custom/phone",
 		"battery",
+		"bluetooth",
 		"hyprland/language",
+		"pulseaudio#source",
+		"network",
 		"tray",
-		"custom/power",
-		"pulseaudio#source"
+		"custom/power"
 	],
 	"hyprland/workspaces": {
 		"on-click": "activate",

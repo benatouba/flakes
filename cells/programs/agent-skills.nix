@@ -1,17 +1,7 @@
 { inputs, ... }:
 {
-  # Pin Matt Pocock's agent skills and expose them at ~/.claude/skills, the
-  # personal-skills directory both Claude Code and OpenCode read. Linking the
-  # same names under ~/.agents/skills too would duplicate them in OpenCode.
-  #
-  # The set is derived from upstream's `.claude-plugin/plugin.json`, so it is
-  # exactly what `/plugin install mattpocock-skills` would install, and it
-  # follows upstream on `nix flake update` without editing a list here. Do not
-  # also install the plugin: the README warns that both leave every skill twice.
-  #
-  # Naming, for the grill family: `grilling` is the model-invocable interview
-  # primitive; `grill-me` and `grill-with-docs` are the user-typed commands
-  # that call it (the latter also calls `domain-modeling`).
+  # Skills at ~/.claude/skills from upstream plugin.json; tracks flake updates.
+  # No plugin install (duplicates); grill-* commands call the grilling primitive.
   config.my.branches.desktop.hmModules = [
     (
       { lib, ... }:
