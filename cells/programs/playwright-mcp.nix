@@ -1,5 +1,5 @@
 _: {
-  # Playwright MCP for agents; nixpkgs wrapper pins browsers, zero runtime downloads.
+  # Playwright MCP for agents; wrapper pins nixpkgs chromium, zero runtime downloads.
   config.my.branches.desktop.hmModules = [
     (
       {
@@ -9,8 +9,13 @@ _: {
         ...
       }:
       {
-        home.packages = with pkgs; [
-          playwright-mcp
+        # Use the system chromium (same as agent-browser) instead of playwright's bundled browsers.
+        home.packages = [
+          (pkgs.writeShellScriptBin "playwright-mcp" ''
+            exec ${pkgs.playwright-mcp}/bin/playwright-mcp \
+              --browser chromium \
+              --executable-path ${pkgs.chromium}/bin/chromium "$@"
+          '')
         ];
 
         # ~/.claude.json is CLI-owned; register idempotently via `claude mcp add`.
