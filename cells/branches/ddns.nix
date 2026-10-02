@@ -5,6 +5,7 @@ in
 {
   config.my.branches.ddns = {
     description = "Dynamic DNS updates via ddclient (deSEC).";
+    needs = [ "secrets" ];
     nixosModules = [
       (
         {
@@ -16,7 +17,9 @@ in
         let
           curl = "${pkgs.curl}/bin/curl";
 
-          # deSEC deletes a record on empty param; default AAAA to delete here.
+          # deSEC deletes a record type when the corresponding parameter is sent
+          # empty, and leaves it untouched when sent `preserve`. Deleting is the
+          # right default for AAAA here: see my.ddns.manageIpv6.
           ipv6Param = if cfg.manageIpv6 then "preserve" else "";
 
           updateScript = pkgs.writeShellScript "desec-ddns-update" ''
@@ -25,7 +28,8 @@ in
             hostname=${lib.escapeShellArg cfg.hostname}
             token=$(${pkgs.coreutils}/bin/cat ${config.sops.secrets.desec_ddns_token.path})
 
-            # Advisory only; deSEC falls back to source address, so never abort here.
+            # Advisory only. deSEC falls back to the connection source address
+            # when myipv4 is omitted, so a failure here must not abort the update.
             public_ip=$(${curl} -4 -sf --max-time 10 ${lib.escapeShellArg cfg.ipEchoUrl} 2>/dev/null || true)
             public_ip=$(${pkgs.coreutils}/bin/tr -d '[:space:]' <<<"$public_ip")
 
@@ -38,7 +42,8 @@ in
                    "letting deSEC use the connection source address" >&2
             fi
 
-            # Force IPv4, else omitting myipv4 over IPv6 deletes the A record.
+            # Force IPv4 so deSEC observes an IPv4 connection, otherwise omitting
+            # myipv4 over an IPv6 connection would delete the A record.
             body=$(${pkgs.coreutils}/bin/mktemp)
             trap '${pkgs.coreutils}/bin/rm -f "$body"' EXIT
 
@@ -55,7 +60,8 @@ in
 
             response=$(${pkgs.coreutils}/bin/tr -d '\r\n' <"$body")
 
-            # Always surface status+body; bare curl -sf hid failures for months.
+            # The old GoDaddy updater used `curl -sf` and died with a bare exit 22,
+            # which hid the reason for months. Always surface status and body.
             if [ "$status" != "200" ]; then
               echo "ERROR: deSEC returned HTTP $status: ''${response:-<empty body>}" >&2
               exit 1
