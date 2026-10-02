@@ -61,7 +61,7 @@ let
       !(((nixosOf "thinkpad") ? my) && (nixosOf "thinkpad").my ? matrix);
     "dns-selected-enables" = (nixosOf "esprimo").my.dns.enable;
     "dns-local-records-via-host-module" =
-      (nixosOf "esprimo").my.dns.localRecords ? "workout.benrlschmidt.de";
+      (nixosOf "esprimo").my.dns.localRecords ? ${myHostLib.identity.workoutDomain};
     "ddns-unselected-has-no-option" = !(((nixosOf "thinkpad") ? my) && (nixosOf "thinkpad").my ? ddns);
   };
 

@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, myHostLib, ... }:
 let
   inherit (lib) mkOption types;
 in
@@ -16,7 +16,7 @@ in
       };
       email = mkOption {
         type = types.str;
-        default = "benschmidt@live.de";
+        default = myHostLib.identity.email;
       };
       githubUser = mkOption {
         type = types.str;

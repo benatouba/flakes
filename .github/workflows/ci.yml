@@ -28,6 +28,7 @@ jobs:
           cp secrets/ssh-hosts.example.nix .ci-secrets/ssh-hosts.nix
           cp secrets/rbw.example.nix .ci-secrets/rbw.nix
           cp secrets/mail-accounts.example.nix .ci-secrets/mail-accounts.nix
+          cp secrets/identity.example.nix .ci-secrets/identity.nix
 
       - name: Build checks output
         run: |

@@ -18,7 +18,7 @@
               type = lib.types.attrsOf lib.types.str;
               default = { };
               example = {
-                "workout.benrlschmidt.de" = "192.168.188.197";
+                "app.example.org" = "192.168.1.10";
               };
               description = ''
                 Split-horizon A records served to LAN clients, as a mapping of fully

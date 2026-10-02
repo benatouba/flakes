@@ -48,7 +48,7 @@ in
   };
 
   config.my.matrix = {
-    domain = "matrix.benrlschmidt.de";
+    domain = myHostLib.identity.matrixDomain;
     enableTelegramBridge = false;
     enableWhatsappBridge = false;
     enableSignalBridge = false;

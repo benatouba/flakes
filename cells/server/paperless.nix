@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, myHostLib, ... }:
 let
   backupScratchDir = "/var/backup/paperless-office";
   borgRepo = "/var/backup/borg/paperless-office";
@@ -45,7 +45,7 @@ in
             PAPERLESS_CONSUMER_RECURSIVE = true;
             PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS = true;
             PAPERLESS_URL = "http://paperless.esprimo";
-            PAPERLESS_ALLOWED_HOSTS = "paperless.esprimo,esprimo,127.0.0.1,localhost,192.168.188.197";
+            PAPERLESS_ALLOWED_HOSTS = "paperless.esprimo,esprimo,127.0.0.1,localhost,${myHostLib.identity.lanIp}";
             PAPERLESS_CSRF_TRUSTED_ORIGINS = "http://paperless.esprimo,http://esprimo";
           };
 

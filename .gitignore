@@ -26,3 +26,6 @@ secrets/secrets.yaml
 /.pre-commit-config.yaml
 
 wger-ingredient-prune.sql
+
+# Local opencode project config
+opencode.json

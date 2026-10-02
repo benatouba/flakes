@@ -12,7 +12,8 @@ let
     hostName = "esprimo";
   };
 
-  sshKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHwt/9sYFxYhYB8kAeaOraASje7EqQusTCJtvvNVt+hx benschmidt@live.de";
+  inherit (myHostLib) identity;
+  sshKey = identity.sshPublicKey;
 in
 {
   config.my.hosts.esprimo = {
@@ -37,7 +38,7 @@ in
         {
           # LAN clients resolve the public name locally (split horizon). Set here,
           # not in the dns branch, because the record belongs to this host only.
-          my.dns.localRecords."workout.benrlschmidt.de" = "192.168.188.197";
+          my.dns.localRecords.${identity.workoutDomain} = identity.lanIp;
 
           networking = {
             hostName = "esprimo";
@@ -98,22 +99,22 @@ in
   };
 
   # workout CNAME on Netlify DNS (no dynamic API); moving part lives at deSEC.
-  config.my.ddns.hostname = "esprimo-benrlschmidt.dedyn.io";
+  config.my.ddns.hostname = identity.ddnsHostname;
 
   config.my.wger = {
     enable = true;
-    domain = "workout.benrlschmidt.de";
-    siteUrl = "https://workout.benrlschmidt.de";
+    domain = identity.workoutDomain;
+    siteUrl = "https://${identity.workoutDomain}";
     trustedOrigins = [
       "http://127.0.0.1:8310"
       "http://localhost:8310"
       "http://esprimo:8310"
-      "http://192.168.188.197:8310"
+      "http://${identity.lanIp}:8310"
     ];
     port = 8310;
     public = {
       enable = true;
-      domain = "workout.benrlschmidt.de";
+      domain = identity.workoutDomain;
     };
     registration = {
       allowRegistration = true;

@@ -46,7 +46,7 @@ in
           };
 
           users.users.${cfg.user.name}.openssh.authorizedKeys.keys = [
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHwt/9sYFxYhYB8kAeaOraASje7EqQusTCJtvvNVt+hx benschmidt@live.de"
+            myHostLib.identity.sshPublicKey
           ];
         }
       )

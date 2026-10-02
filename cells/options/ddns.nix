@@ -7,7 +7,7 @@ in
     hostname = mkOption {
       type = types.str;
       default = "";
-      example = "esprimo-benrlschmidt.dedyn.io";
+      example = "myhost-example.dedyn.io";
       description = ''
         The deSEC dynDNS hostname to keep pointed at this machine's public IPv4
         address, as registered at https://desec.io/. This is the name the

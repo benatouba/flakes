@@ -1,6 +1,14 @@
-{ lib, ... }:
+{ inputs, lib, ... }:
 let
   inherit (lib) mkOption types;
+
+  # Personal identifiers (email, domains, LAN IP, SSH key) live in the private
+  # nix-secrets repo as identity.nix; see secrets/identity.example.nix. Without
+  # it (CI, forks) anonymised placeholders are used so evaluation still works.
+  identityPath = "${toString inputs.nix-secrets}/identity.nix";
+  identityDefaults = import ../../secrets/identity.example.nix;
+  identity =
+    identityDefaults // lib.optionalAttrs (builtins.pathExists identityPath) (import identityPath);
 in
 {
   options.my.hosts = mkOption {
@@ -40,6 +48,8 @@ in
   };
 
   config._module.args.myHostLib = {
+    inherit identity;
+
     # `my.<branch>.enable` for NixOS-level branch modules: selecting the branch
     # enables it, hosts may still `mkForce false`.
     mkDefaultOnEnable = { lib, description }: lib.mkEnableOption description // { default = true; };
