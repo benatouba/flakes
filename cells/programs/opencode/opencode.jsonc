@@ -14,7 +14,7 @@
     },
     "playwright": {
       "type": "local",
-      "command": ["npx", "-y", "@playwright/mcp"],
+      "command": ["playwright-mcp"],
       "enabled": false
     },
     // Token-efficient agent browser (CLI-first; MCP is opt-in per project).
