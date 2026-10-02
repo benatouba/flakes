@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, myHostLib, ... }:
 let
   cfg = config.my.ddns;
 in
@@ -79,9 +79,9 @@ in
           '';
         in
         {
-          # Selecting the ddns branch enables it; hosts may still mkForce false.
-          options.my.ddns.enable = lib.mkEnableOption "deSEC dynamic DNS updates" // {
-            default = true;
+          options.my.ddns.enable = myHostLib.mkBranchEnable {
+            inherit lib;
+            description = "deSEC dynamic DNS updates";
           };
 
           config = lib.mkIf config.my.ddns.enable {
@@ -116,6 +116,25 @@ in
                 RuntimeDirectory = "ddclient";
                 RuntimeDirectoryMode = "0700";
                 ExecStart = "${updateScript}";
+
+                # Needs only outbound HTTPS, its own state dir and the sops token.
+                NoNewPrivileges = true;
+                PrivateTmp = true;
+                PrivateDevices = true;
+                ProtectSystem = "strict";
+                ProtectHome = true;
+                ProtectKernelTunables = true;
+                ProtectKernelModules = true;
+                ProtectControlGroups = true;
+                RestrictAddressFamilies = [
+                  "AF_INET"
+                  "AF_INET6"
+                  "AF_UNIX"
+                ];
+                RestrictNamespaces = true;
+                LockPersonality = true;
+                CapabilityBoundingSet = "";
+                SystemCallArchitectures = "native";
               };
             };
 

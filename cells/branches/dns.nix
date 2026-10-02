@@ -1,20 +1,43 @@
-{ config, ... }:
-let
-  cfg = config.my.dns;
-in
+{ myHostLib, ... }:
 {
   config.my.branches.dns = {
     description = "Dendritic DNS branch for Pi-hole and Unbound services.";
     nixosModules = [
       (
         { config, lib, ... }:
+        let
+          cfg = config.my.dns;
+        in
         {
-          # Selecting the dns branch enables it; hosts may still mkForce false.
-          options.my.dns.enable = lib.mkEnableOption "Pi-hole + Unbound DNS stack" // {
-            default = true;
+          options.my.dns = {
+            enable = myHostLib.mkBranchEnable {
+              inherit lib;
+              description = "Pi-hole + Unbound DNS stack";
+            };
+            localRecords = lib.mkOption {
+              type = lib.types.attrsOf lib.types.str;
+              default = { };
+              example = {
+                "workout.benrlschmidt.de" = "192.168.188.197";
+              };
+              description = ''
+                Split-horizon A records served to LAN clients, as a mapping of fully
+                qualified name to LAN address. These override whatever public DNS says
+                for the same name.
+
+                Use this for services that are published on a public domain but live on
+                this network. Without an override, LAN clients resolve the public
+                address and have to be bounced back inside by the router's NAT hairpin,
+                which also means a stale negative cache upstream can make a service that
+                is running perfectly well look unreachable from home. Pointing the name
+                straight at the LAN address removes both dependencies. TLS still
+                verifies, because the reverse proxy selects its certificate by SNI
+                rather than by the address the client connected to.
+              '';
+            };
           };
 
-          config = lib.mkIf config.my.dns.enable {
+          config = lib.mkIf cfg.enable {
             services.unbound = {
               enable = true;
               settings = {
