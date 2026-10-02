@@ -12,13 +12,13 @@ Hosts select branches by name instead of importing feature files directly.
 - `personal`: private user configuration such as mail, SSH, rbw, and GPG agent.
 - `addons`: optional workflow helpers controlled by `my.profile.addons`.
 - `server`: headless server defaults.
-- `dns`: Pi-hole + Unbound DNS stack (`my.dns.enable`, default true when selected).
-- `ddns`: deSEC dynamic DNS updater (`my.ddns.enable`, default true when selected; needs `secrets`).
-- `finance`: Beancount ledger automation, Fava UI, and Paperless-oriented finance ingestion.
+- `dns`: Pi-hole + Unbound DNS stack (`my.dns.enable`, default true when selected; `my.dns.localRecords` sets split-horizon records). Opens 53/tcp, 53/udp and 80/tcp globally; LAN scoping is tracked in #10.
+- `ddns`: deSEC dynamic DNS updater using a curl script, not the upstream ddclient (`my.ddns.enable`, default true when selected; needs `secrets`).
+- `finance`: Beancount ledger automation, Fava UI, and Paperless-oriented finance ingestion (needs `paperless`).
 - `vpn`: NordVPN client services.
-- `paperless`: Paperless-ngx document management, PDF tools, sync, and local backup services.
+- `paperless`: Paperless-ngx document management, PDF tools, sync, and local backup services (needs `secrets`).
 - `matrix`: Matrix homeserver services and bridges.
-- `wger`: Wger workout manager stack (PostgreSQL, Redis, web, nginx, celery, backups).
+- `wger`: Wger workout manager stack (PostgreSQL, Redis, web, nginx, celery, backups; needs `secrets`).
 
 A branch may declare `needs = [ "other" ]`; host resolution throws when a
 selected branch's needs are not also selected. Needs are not transitive and are

@@ -42,7 +42,7 @@ in
   config._module.args.myHostLib = {
     # `my.<branch>.enable` for NixOS-level branch modules: selecting the branch
     # enables it, hosts may still `mkForce false`.
-    mkBranchEnable = { lib, description }: lib.mkEnableOption description // { default = true; };
+    mkDefaultOnEnable = { lib, description }: lib.mkEnableOption description // { default = true; };
 
     resolveBranches =
       {

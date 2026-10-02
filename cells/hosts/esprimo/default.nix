@@ -35,7 +35,8 @@ in
           ...
         }:
         {
-          # LAN clients resolve the public name locally (split horizon).
+          # LAN clients resolve the public name locally (split horizon). Set here,
+          # not in the dns branch, because the record belongs to this host only.
           my.dns.localRecords."workout.benrlschmidt.de" = "192.168.188.197";
 
           networking = {

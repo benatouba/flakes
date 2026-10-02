@@ -10,7 +10,7 @@
         in
         {
           options.my.dns = {
-            enable = myHostLib.mkBranchEnable {
+            enable = myHostLib.mkDefaultOnEnable {
               inherit lib;
               description = "Pi-hole + Unbound DNS stack";
             };

@@ -4,7 +4,7 @@ let
 in
 {
   config.my.branches.ddns = {
-    description = "Dynamic DNS updates via ddclient (deSEC).";
+    description = "Dynamic DNS updates via a curl script (deSEC).";
     needs = [ "secrets" ];
     nixosModules = [
       (
@@ -79,7 +79,7 @@ in
           '';
         in
         {
-          options.my.ddns.enable = myHostLib.mkBranchEnable {
+          options.my.ddns.enable = myHostLib.mkDefaultOnEnable {
             inherit lib;
             description = "deSEC dynamic DNS updates";
           };
@@ -92,28 +92,28 @@ in
               }
             ];
 
-            users.users.ddclient = {
+            users.users.ddns-update = {
               isSystemUser = true;
-              group = "ddclient";
+              group = "ddns-update";
             };
-            users.groups.ddclient = { };
+            users.groups.ddns-update = { };
 
             sops.secrets.desec_ddns_token = {
               sopsFile = config.sops.defaultSopsFile;
-              owner = "ddclient";
+              owner = "ddns-update";
               mode = "0400";
             };
 
-            systemd.services.ddclient = {
-              description = "Dynamic DNS client (deSEC)";
+            systemd.services.ddns-update = {
+              description = "Dynamic DNS updater (deSEC)";
               after = [ "network-online.target" ];
               wants = [ "network-online.target" ];
               serviceConfig = {
                 Type = "oneshot";
-                User = "ddclient";
-                Group = "ddclient";
-                StateDirectory = "ddclient";
-                RuntimeDirectory = "ddclient";
+                User = "ddns-update";
+                Group = "ddns-update";
+                StateDirectory = "ddns-update";
+                RuntimeDirectory = "ddns-update";
                 RuntimeDirectoryMode = "0700";
                 ExecStart = "${updateScript}";
 
@@ -138,8 +138,8 @@ in
               };
             };
 
-            systemd.timers.ddclient = {
-              description = "Run ddclient periodically";
+            systemd.timers.ddns-update = {
+              description = "Run the deSEC DDNS update periodically";
               wantedBy = [ "timers.target" ];
               timerConfig = {
                 OnBootSec = "2min";

@@ -10,6 +10,8 @@ let
   cfg = config.my;
   nixosOf = host: config.flake.nixosConfigurations.${host}.config;
 
+  failing = cases: lib.attrNames (lib.filterAttrs (_: ok: !ok) cases);
+
   # --- needs validation -----------------------------------------------------
   resolve =
     hostCfg:
@@ -61,20 +63,19 @@ let
   };
 
   # --- host seam ---------------------------------------------------------------
-  # Hosts select branches. Inline modules on a host are bypasses of the
-  # seam; each one is listed here by what it is, so swapping one bypass for
-  # another changes the list and fails review. New hosts get none.
+  # Hosts select branches. Inline modules on a host are bypasses of the seam.
+  # Inline modules have no identity Nix can compare, so the grandfathered
+  # bypasses are pinned by count per host; the comment says which they are.
+  # A new host gets none. A swapped bypass is caught in review, not here.
   # TODO: shrink each entry by moving its content into a branch.
   grandfathered = {
     nixosModules = {
-      esprimo = [ "hostname, nameservers, WoL link, finance wiring (move to branches)" ];
-      ec2 = [ "amazon-image import, root/user keys, cloud-init (move to an ec2 branch)" ];
-      rpi-pihole = [ "hostname, fileSystems, authorized keys (retired host; do not extend)" ];
+      esprimo = 1; # hostname, nameservers, WoL link, dns localRecords, finance wiring
+      ec2 = 1; # amazon-image import, keys, cloud-init (move to an ec2 branch)
+      rpi-pihole = 1; # hostname, fileSystems, keys (do not extend)
     };
     hmModules = {
-      thinkpad = [
-        "inline home-manager module in the thinkpad host (move to a desktop/personal branch)"
-      ];
+      thinkpad = 1; # inline home-manager module (move to a desktop/personal branch)
     };
   };
   unknownAllowlistHosts = lib.filter (h: !(cfg.hosts ? ${h})) (
@@ -86,28 +87,41 @@ let
       lib.mapAttrsToList (
         name: hostCfg:
         let
-          allowed = grandfathered.${kind}.${name} or [ ];
+          allowed = grandfathered.${kind}.${name} or 0;
+          actual = builtins.length hostCfg.${kind};
         in
-        lib.optional (builtins.length hostCfg.${kind} != builtins.length allowed)
-          "${name}: ${
-            toString (builtins.length hostCfg.${kind})
-          } inline ${kind}, allowlist lists ${toString (builtins.length allowed)}"
+        lib.optional (
+          actual != allowed
+        ) "${name}: ${toString actual} inline ${kind}, allowed ${toString allowed}"
       ) cfg.hosts
     );
   # Direct feature imports: host files must not reach into other cells by
-  # relative path (`../...`). Host-local files (`./_hardware.nix`) are fine.
+  # relative path (`../...`). Scanned line by line, ignoring comment lines,
+  # because `.` in builtins.match does not cross newlines.
+  importsParent =
+    src:
+    lib.any (
+      line:
+      !(lib.hasPrefix "#" (lib.trim line)) && builtins.match ".*[ \\[(]\\.\\./[A-Za-z_.].*" line != null
+    ) (lib.splitString "\n" src);
+  scannerCases = {
+    "scanner-flags-list-import" = importsParent "{\n  imports = [ ../../server/x.nix ];\n}";
+    "scanner-flags-multiline-import" = importsParent "{\n  imports = [\n    ../server/x.nix\n  ];\n}";
+    "scanner-ignores-comments" = !(importsParent "# see ../server/x.nix\n{ }");
+    "scanner-allows-local-files" = !(importsParent "{ imports = [ ./hw.nix ]; }");
+  };
   hostDirs = lib.attrNames (lib.filterAttrs (_: t: t == "directory") (builtins.readDir ../hosts));
   directImports = lib.concatMap (
     h:
-    let
-      src = builtins.readFile (../hosts + "/${h}/default.nix");
-    in
-    lib.optional (builtins.match ".*[ \\[(]\\.\\./[A-Za-z_].*" src != null) "${h}: imports by ../ path"
+    lib.optional (importsParent (
+      builtins.readFile (../hosts + "/${h}/default.nix")
+    )) "${h}: imports by ../ path"
   ) hostDirs;
   seamViolations =
     map (h: "allowlist names unknown host ${h}") unknownAllowlistHosts
     ++ countViolations "nixosModules"
     ++ countViolations "hmModules"
+    ++ failing scannerCases
     ++ directImports;
 
   mkCheck =
@@ -118,7 +132,6 @@ let
       else
         "echo ${lib.escapeShellArg "failed: ${lib.concatStringsSep ", " failed}"}; exit 1"
     );
-  failing = cases: lib.attrNames (lib.filterAttrs (_: ok: !ok) cases);
 in
 {
   config.perSystem =
