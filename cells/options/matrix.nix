@@ -4,12 +4,6 @@ let
 in
 {
   options.my.matrix = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable self-hosted Matrix stack on server hosts.";
-    };
-
     domain = mkOption {
       type = types.str;
       default = "matrix.example.com";

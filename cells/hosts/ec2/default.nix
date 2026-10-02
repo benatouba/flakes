@@ -48,7 +48,6 @@ in
   };
 
   config.my.matrix = {
-    enable = true;
     domain = "matrix.benrlschmidt.de";
     enableTelegramBridge = false;
     enableWhatsappBridge = false;

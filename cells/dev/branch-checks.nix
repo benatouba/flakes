@@ -56,6 +56,9 @@ let
   # --- branch enable wiring (selecting a branch enables it) --------------------
   enableCases = {
     "ddns-selected-enables" = (nixosOf "esprimo").my.ddns.enable;
+    "matrix-selected-enables" = (nixosOf "ec2").my.matrix.enable;
+    "matrix-unselected-has-no-option" =
+      !(((nixosOf "thinkpad") ? my) && (nixosOf "thinkpad").my ? matrix);
     "dns-selected-enables" = (nixosOf "esprimo").my.dns.enable;
     "dns-local-records-via-host-module" =
       (nixosOf "esprimo").my.dns.localRecords ? "workout.benrlschmidt.de";
