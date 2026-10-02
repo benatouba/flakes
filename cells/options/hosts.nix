@@ -54,9 +54,23 @@ in
         unknownBranches = builtins.filter (
           name: !(builtins.elem name knownBranchNames)
         ) selectedBranchNames;
+        missingNeeds = lib.concatMap (
+          name:
+          map (need: {
+            branch = name;
+            inherit need;
+          }) (builtins.filter (need: !(builtins.elem need selectedBranchNames)) cfg.branches.${name}.needs)
+        ) selectedBranchNames;
         selectedBranches =
           if unknownBranches != [ ] then
             throw ("Unknown branch names for ${hostName}: " + lib.concatStringsSep ", " unknownBranches)
+          else if missingNeeds != [ ] then
+            throw (
+              lib.concatMapStringsSep "\n" (
+                m:
+                "Host ${hostName} selects branch '${m.branch}' which needs branch '${m.need}', but it is not selected."
+              ) missingNeeds
+            )
           else
             map (name: cfg.branches.${name}) selectedBranchNames;
       in

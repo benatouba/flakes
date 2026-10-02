@@ -63,6 +63,11 @@ in
               type = types.str;
               default = "";
             };
+            needs = mkOption {
+              type = types.listOf types.str;
+              default = [ ];
+              description = "Branch names that must also be selected by any host selecting this branch.";
+            };
             nixosModules = mkOption {
               type = types.listOf types.deferredModule;
               default = [ ];
