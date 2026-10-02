@@ -34,6 +34,7 @@ let
     );
     # Selecting the ddns branch is what enables it.
     "ddns-selected-enables" = config.flake.nixosConfigurations.esprimo.config.my.ddns.enable;
+    "dns-selected-enables" = config.flake.nixosConfigurations.rpi-pihole.config.my.dns.enable;
     "ddns-unselected-disabled" =
       !(config.flake.nixosConfigurations.thinkpad.config.my.ddns.enable or false);
   };
