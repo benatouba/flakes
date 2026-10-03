@@ -8,11 +8,27 @@ _: {
         pkgs,
         ...
       }:
+      let
+        # Both nixpkgs wrappers reference the bundled browser set. Replace the
+        # test CLI's default as well as MCP's default to remove it from the
+        # runtime closure; the outer wrapper always supplies system Chromium.
+        browserlessTest = pkgs.playwright-test.overrideAttrs (old: {
+          installPhase =
+            lib.replaceStrings [ "${pkgs.playwright-driver.browsers}" ] [ "${pkgs.emptyDirectory}" ]
+              old.installPhase;
+        });
+        browserlessMcp = pkgs.playwright-mcp.override {
+          playwright-test = browserlessTest;
+          playwright-driver = pkgs.playwright-driver // {
+            browsers = pkgs.emptyDirectory;
+          };
+        };
+      in
       {
         # Use the system chromium (same as agent-browser) instead of playwright's bundled browsers.
         home.packages = [
           (pkgs.writeShellScriptBin "playwright-mcp" ''
-            exec ${pkgs.playwright-mcp}/bin/playwright-mcp \
+            exec ${browserlessMcp}/bin/playwright-mcp \
               --browser chromium \
               --executable-path ${pkgs.chromium}/bin/chromium "$@"
           '')

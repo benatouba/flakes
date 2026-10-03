@@ -57,6 +57,9 @@ let
   enableCases = {
     "ddns-selected-enables" = (nixosOf "esprimo").my.ddns.enable;
     "matrix-selected-enables" = (nixosOf "ec2").my.matrix.enable;
+    "paperless-selected-enables" = (nixosOf "esprimo").my.paperless.enable;
+    "paperless-unselected-has-no-option" =
+      !(((nixosOf "thinkpad") ? my) && (nixosOf "thinkpad").my ? paperless);
     "matrix-unselected-has-no-option" =
       !(((nixosOf "thinkpad") ? my) && (nixosOf "thinkpad").my ? matrix);
     "dns-selected-enables" = (nixosOf "esprimo").my.dns.enable;

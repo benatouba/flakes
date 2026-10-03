@@ -262,9 +262,9 @@ in
           };
         };
 
-        services.borgbackup.jobs.paperless-office.paths = lib.mkIf config.services.paperless.enable (
-          lib.mkAfter [ dataDir ]
-        );
+        services.borgbackup.jobs = lib.mkIf config.services.paperless.enable {
+          paperless-office.paths = lib.mkAfter [ dataDir ];
+        };
 
         services.caddy = {
           enable = true;
