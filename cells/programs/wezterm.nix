@@ -25,7 +25,8 @@ in
           config.set_environment_variables = {
             COLORTERM = "truecolor",
           }
-          config.term = "wezterm"
+          -- Use a terminal type available on remote hosts without extra terminfo.
+          config.term = "xterm-256color"
           config.window_decorations = "NONE"
           config.use_resize_increments = true
           config.adjust_window_size_when_changing_font_size = false

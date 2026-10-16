@@ -29,3 +29,6 @@ wger-ingredient-prune.sql
 
 # Local opencode project config
 opencode.json
+
+# auto-generated files
+.playwright-mcp/

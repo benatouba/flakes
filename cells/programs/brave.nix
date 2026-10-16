@@ -32,6 +32,7 @@ _: {
             { id = "mnjggcdmjocbbbhaepdhchncahnbgone"; } # Sponsorblock
             { id = "bhlhnicpbhignbdhedgjhgdocnmhomnp"; } # Colorzilla
             { id = "pjjgklgkfeoeiebjogplpnibpfnffkng"; } # Undistracted
+            { id = "fcoeoabgfenejglbffodgkkbkcdhcgfn"; } # claude-in-chrome
           ];
         };
       }
