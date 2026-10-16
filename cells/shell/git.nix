@@ -127,6 +127,8 @@ in
             "mergetool \"nvim_mergetool\"".cmd =
               "nvim -c \"packadd nvim.difftool\" -c \"DiffTool $LOCAL $REMOTE\"";
             credential.helper = "cache --timeout=3600";
+            # GitLab token from the Bitwarden vault (rbw entry named after the host).
+            credential."https://gitlab.klima.tu-berlin.de".helper = "rbw";
             "filter \"lfs\"" = {
               clean = "git-lfs clean -- %f";
               smudge = "git-lfs smudge -- %f";

@@ -24,6 +24,9 @@ _: {
           ".local/share/mpd"
           ".config/Bitwarden"
           ".local/share/keyrings"
+          # rbw device ID, API-key registration and encrypted vault cache; without
+          # it every boot is a "new device" for Bitwarden.
+          ".local/share/rbw"
           ".config/obsidian"
           ".config/obs-studio"
           ".claude"
