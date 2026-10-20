@@ -10,7 +10,18 @@ _: {
         ...
       }:
       let
-        projectHours = inputs.project-hours.packages.${pkgs.stdenv.hostPlatform.system}.project-hours;
+        projectHours =
+          inputs.project-hours.packages.${pkgs.stdenv.hostPlatform.system}.project-hours.overrideAttrs
+            (_: {
+              # The current Python wrapper hook preserves array elements verbatim;
+              # the pinned upstream package puts all four arguments in one string.
+              makeWrapperArgs = [
+                "--prefix"
+                "PATH"
+                ":"
+                (lib.makeBinPath [ pkgs.git ])
+              ];
+            });
       in
       {
         # Completions live in share/zsh/site-functions; mkBefore puts them on fpath
