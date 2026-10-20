@@ -83,6 +83,9 @@
           [
             git
             neovim
+            # Real OAuth-adapter routing smoke test (synthetic credentials).
+            bun
+            opencode
 
             actionlint
             attic-client
