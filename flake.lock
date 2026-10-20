@@ -685,11 +685,11 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1792491566,
-        "narHash": "sha256-yQGhhowcJrUg1A/PvgsCVFpJSxDJN6e0ISfHKncA6Pw=",
+        "lastModified": 1792493596,
+        "narHash": "sha256-rZft7F5V0dczBo672oXZor94vXIJve0nKmIxMihj/EI=",
         "ref": "refs/heads/main",
-        "rev": "da7d36461a76f7d538888020e20170bcd630d00e",
-        "revCount": 39,
+        "rev": "23efa4a66ce86419edc13d6ee1b1d8f0f16e7666",
+        "revCount": 41,
         "type": "git",
         "url": "file:///home/ben/.local/secrets"
       },
