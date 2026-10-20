@@ -127,6 +127,30 @@ in
         # (forwarded by msmtpq, persisted per queued message).
         msmtpSendmail = account: "msmtpq --account=${account} --read-envelope-from --read-recipients";
 
+        msmtpQueueDir = "${config.xdg.dataHome}/msmtp/queue";
+        flushMsmtpQueue = pkgs.writeShellApplication {
+          name = "msmtp-queue-flush";
+          runtimeInputs = [
+            pkgs.coreutils
+            pkgs.findutils
+            pkgs.libnotify
+            pkgs.msmtp
+          ];
+          text = ''
+            queued() { find ${lib.escapeShellArg msmtpQueueDir} -maxdepth 1 -name '*.mail' -type f | grep -c . || true; }
+
+            [ "$(queued)" -gt 0 ] || exit 0
+            msmtpq --q-mgmt -r || true
+
+            left=$(queued)
+            [ "$left" -gt 0 ] || exit 0
+            notify-send -a Mail -u critical -i mail-send \
+              -h string:x-canonical-private-synchronous:msmtp-queue \
+              "Outgoing mail not sent" "$left message(s) stuck in the msmtp queue"
+            exit 1
+          '';
+        };
+
         # mbsync channel names match account names.
         syncAndNotifyCmd =
           account: label:
@@ -692,6 +716,31 @@ in
           Unit.Description = "Refresh the correspondence address book";
           Timer = {
             OnStartupSec = "1m";
+            OnUnitActiveSec = "5m";
+          };
+          Install.WantedBy = [ "timers.target" ];
+        };
+
+        # msmtpq queues instead of failing when a send does not go through, and
+        # nothing else retries. Flush the queue and notify while mail is stuck.
+        systemd.user.services.msmtp-queue-flush = {
+          Unit = {
+            Description = "Flush the msmtp send queue and notify about stuck mail";
+            After = [ "network-online.target" ];
+          };
+          Service = {
+            Type = "oneshot";
+            Environment = [
+              "MSMTPQ_Q=${msmtpQueueDir}"
+              "MSMTPQ_LOG=${config.xdg.dataHome}/msmtp/queue.log"
+            ];
+            ExecStart = "${flushMsmtpQueue}/bin/msmtp-queue-flush";
+          };
+        };
+        systemd.user.timers.msmtp-queue-flush = {
+          Unit.Description = "Retry queued outgoing mail";
+          Timer = {
+            OnStartupSec = "2m";
             OnUnitActiveSec = "5m";
           };
           Install.WantedBy = [ "timers.target" ];
