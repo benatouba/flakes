@@ -32,6 +32,8 @@ in
         hasMailAccounts = builtins.pathExists mailAccountsPath;
         accts = if hasMailAccounts then import mailAccountsPath else { };
         a = accts;
+        hasBtu = a ? b-tu;
+        btuMaildir = "b-tu";
         tuBerlinMaildir = "tu-berlin-new";
         outlookMaildir = "outlook";
 
@@ -133,24 +135,56 @@ in
             inbox = "${maildir.absPath}/${folders.inbox}";
           in
           "${newMailNotify}/bin/mail-sync-notify ${lib.escapeShellArg account} ${lib.escapeShellArg label} ${lib.escapeShellArg inbox}";
-        queryAddresses = pkgs.writeShellScript "query-addresses" ''
-          query="$1"
-          [ -z "$query" ] && exit 1
-
-          tsv="''${XDG_CACHE_HOME:-$HOME/.cache}/maildir-rank-addr/addressbook.tsv"
-
-          # Search local history across all accounts (TSV is pre-sorted by rank)
-          all=""
-          if [ -f "$tsv" ]; then
-            all=$(${pkgs.gawk}/bin/awk -F'\t' -v q="''${query}" '
-              tolower($1) ~ tolower(q) || tolower($2) ~ tolower(q) { print $1 "\t" $2 }
-            ' "$tsv")
-          fi
-
-          count=$(echo "$all" | ${pkgs.gawk}/bin/awk 'NF' | wc -l)
-          echo "$count addresses found for ''${query}"
-          echo "$all" | ${pkgs.gawk}/bin/awk 'NF'
-        '';
+        addressBookPath = "${config.xdg.stateHome}/maildir-rank-addr/addressbook.tsv";
+        updateAddressBook = pkgs.writeShellApplication {
+          name = "mail-addressbook-update";
+          runtimeInputs = [
+            pkgs.coreutils
+            pkgs.util-linux
+            pkgs.maildir-rank-addr
+          ];
+          text = ''
+            umask 077
+            state="''${XDG_STATE_HOME:-$HOME/.local/state}/maildir-rank-addr"
+            mkdir -p "$state"
+            exec 9>"$state/update.lock"
+            flock 9
+            tmp=$(mktemp "$state/addressbook.XXXXXX")
+            trap 'rm -f "$tmp"' EXIT
+            maildir-rank-addr \
+              --config "''${XDG_CONFIG_HOME:-$HOME/.config}/maildir-rank-addr/config.toml" \
+              --outputpath "$tmp"
+            mv -f "$tmp" "$state/addressbook.tsv"
+          '';
+        };
+        queryAddresses = pkgs.writeShellApplication {
+          name = "mail-address-query";
+          runtimeInputs = [ pkgs.gawk ];
+          text = ''
+            mutt=false
+            if [ "''${1:-}" = --mutt ]; then
+              mutt=true
+              shift
+            fi
+            export MAIL_ADDRESS_QUERY="''${1:-}"
+            tsv="''${XDG_STATE_HOME:-$HOME/.local/state}/maildir-rank-addr/addressbook.tsv"
+            matches=""
+            if [ -r "$tsv" ]; then
+              matches=$(awk -F '\t' '
+                NF >= 2 && index(tolower($1 "\t" $2), tolower(ENVIRON["MAIL_ADDRESS_QUERY"])) {
+                  print $1 "\t" $2
+                }
+              ' "$tsv")
+            fi
+            # NeoMutt requires a status line; aerc expects address/name rows only.
+            if "$mutt"; then
+              printf '%s\n' 'Address book matches'
+            fi
+            if [ -n "$matches" ]; then
+              printf '%s\n' "$matches"
+            fi
+          '';
+        };
       in
       {
         assertions = [
@@ -179,6 +213,9 @@ in
             mail_gmail = { };
             mail_alganize = { };
             mail_alganize_kundenservice = { };
+          }
+          // lib.optionalAttrs hasBtu {
+            mail_btu = { };
           }
           // lib.optionalAttrs hasOutlookClientId {
             ${outlookClientIdSecret} = { };
@@ -223,7 +260,7 @@ in
               mailcap_path = "${config.xdg.configHome}/neomutt/mailcap";
               color_directcolor = "yes";
               attach_save_dir = "~/downloads";
-              query_command = "\"${queryAddresses} '%s'\"";
+              query_command = "\"${queryAddresses}/bin/mail-address-query --mutt '%s'\"";
               use_threads = "threads";
             };
             extraConfig = ''
@@ -470,6 +507,11 @@ in
                 action = "<tag-thread><tag-prefix-cond><clear-flag>N<untag-pattern>.<enter><sync-mailbox>";
               }
             ]
+            ++ lib.optional hasBtu {
+              map = [ "index" ];
+              key = "gb";
+              action = "<change-folder>~/mail/${btuMaildir}/Inbox<enter>";
+            }
             ++ lib.optional hasOutlookClientId {
               map = [ "index" ];
               key = "go";
@@ -510,7 +552,7 @@ in
                 editor = "nvim";
                 header-layout = "To|From,Subject";
                 reply-to-self = false;
-                address-book-cmd = "${queryAddresses} '%s'";
+                address-book-cmd = "${queryAddresses}/bin/mail-address-query '%s'";
               };
               filters = {
                 "text/plain" = "colorize";
@@ -561,6 +603,9 @@ in
                 gm = ":cf gmail/INBOX<Enter>";
                 ga = ":cf alganize/INBOX<Enter>";
                 gk = ":cf alganize-kundenservice/INBOX<Enter>";
+              }
+              // lib.optionalAttrs hasBtu {
+                gb = ":cf ${btuMaildir}/INBOX<Enter>";
               }
               // lib.optionalAttrs hasOutlookClientId {
                 go = ":cf ${outlookMaildir}/INBOX<Enter>";
@@ -631,13 +676,31 @@ in
           enable = true;
           package = mbsyncPackage;
           frequency = "*:0/5";
-          postExec = "${pkgs.maildir-rank-addr}/bin/maildir-rank-addr";
+          postExec = "${updateAddressBook}/bin/mail-addressbook-update";
+        };
+
+        # Refresh even when one remote mailbox prevents mbsync from completing.
+        # Local headers only; state is private and already covered by .local/state persistence.
+        systemd.user.services.mail-addressbook = {
+          Unit.Description = "Index local correspondence for mail address completion";
+          Service = {
+            Type = "oneshot";
+            ExecStart = "${updateAddressBook}/bin/mail-addressbook-update";
+          };
+        };
+        systemd.user.timers.mail-addressbook = {
+          Unit.Description = "Refresh the correspondence address book";
+          Timer = {
+            OnStartupSec = "1m";
+            OnUnitActiveSec = "5m";
+          };
+          Install.WantedBy = [ "timers.target" ];
         };
 
         xdg.configFile."maildir-rank-addr/config.toml".text =
           let
             home = config.home.homeDirectory;
-            toTomlList = xs: "[${lib.concatMapStringsSep ", " (x: ''"${x}"'') xs}]";
+            toTomlList = xs: "[${lib.concatMapStringsSep ", " builtins.toJSON xs}]";
             addresses = [
               a.tu-berlin.address
             ]
@@ -647,6 +710,7 @@ in
               a.alganize.address
               a.alganize-kundenservice.address
             ]
+            ++ lib.optionals hasBtu ([ a.b-tu.address ] ++ (a.b-tu.aliases or [ ]))
             ++ lib.optional hasOutlookClientId a.outlook.address;
             maildirs = [
               "${home}/mail/${tuBerlinMaildir}"
@@ -654,11 +718,13 @@ in
               "${home}/mail/alganize"
               "${home}/mail/alganize-kundenservice"
             ]
+            ++ lib.optional hasBtu "${home}/mail/${btuMaildir}"
             ++ lib.optional hasOutlookClientId "${home}/mail/${outlookMaildir}";
           in
           ''
             maildir = ${toTomlList maildirs}
             addresses = ${toTomlList addresses}
+            outputpath = ${builtins.toJSON addressBookPath}
           '';
 
         xdg.configFile."aerc/stylesets/${theme.slug}".text = ''
@@ -723,6 +789,8 @@ in
           [
             lynx
             maildir-rank-addr
+            updateAddressBook
+            queryAddresses
             urlscan
           ]
           # For one-time `oama authorize` flow and `oama show`/`renew` debugging.
@@ -975,6 +1043,66 @@ in
                 enable = true;
                 boxes = [ "INBOX" ];
                 onNotify = syncAndNotifyCmd "alganize-kundenservice" "Alganize Kundenservice";
+              };
+            };
+          }
+          // lib.optionalAttrs hasBtu {
+            b-tu = {
+              inherit (a.b-tu) address realName userName;
+              aliases = a.b-tu.aliases or [ ];
+              maildir.path = btuMaildir;
+              # Only INBOX is confirmed. These are local compose/trash folders,
+              # excluded from sync until BTU's server folders have been discovered.
+              folders = {
+                inbox = "Inbox";
+                sent = "Sent";
+                drafts = "Drafts";
+                trash = "Trash";
+              };
+              passwordCommand = catSecret "btu";
+              signature = lib.mkIf (a.b-tu ? signature) {
+                text = a.b-tu.signature;
+                showSignature = "append";
+              };
+              imap = {
+                host = a.b-tu.imapHost;
+                port = 993;
+                tls.enable = true;
+              };
+              smtp = {
+                host = a.b-tu.smtpHost;
+                port = 587;
+                tls.enable = true;
+                tls.useStartTls = true;
+              };
+              mbsync = {
+                enable = true;
+                inherit (mbsyncTwoWay) create expunge;
+                patterns = [ "INBOX" ];
+              };
+              msmtp.enable = true;
+              neomutt = {
+                enable = true;
+                sendMailCommand = msmtpSendmail "b-tu";
+              };
+              aerc = {
+                enable = true;
+                extraAccounts = {
+                  source = "maildir://~/mail/${btuMaildir}";
+                  outgoing = "smtp+starttls://${urlEncode a.b-tu.userName}@${a.b-tu.smtpHost}:587";
+                  default = "INBOX";
+                  outgoing-cred-cmd = catSecret "btu";
+                  copy-to = "Sent";
+                  folders-sort = "INBOX,Sent,Drafts,Trash";
+                }
+                // lib.optionalAttrs (a.b-tu ? signature) {
+                  signature-file = "${pkgs.writeText "b-tu-signature.txt" a.b-tu.signature}";
+                };
+              };
+              imapnotify = {
+                enable = true;
+                boxes = [ "INBOX" ];
+                onNotify = syncAndNotifyCmd "b-tu" "BTU";
               };
             };
           }

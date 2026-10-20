@@ -9,6 +9,30 @@
     smtpHost = "smtp.example.org";
   };
 
+  # Optional: enabled only when b-tu metadata exists; password is SOPS mail_btu.
+  # Server folders are not yet mapped; initially only INBOX is downloaded.
+  b-tu = {
+    address = "you@example.org";
+    aliases = [ ];
+    realName = "Your Name";
+    userName = "your-btu-login";
+    imapHost = "mailin.b-tu.de";
+    smtpHost = "mailout.b-tu.de";
+    signature = ''
+      Dr. Your Name
+
+      Wissenschaftlicher Mitarbeiter | Postdoctoral Researcher
+      Fachgebiet Atmosphärische Prozesse | Chair of Atmospheric Processes
+
+      Fakultät 2
+      Brandenburgische Technische Universität Cottbus-Senftenberg
+      Burger Chaussee 2, D-03044 Cottbus, Germany
+
+      you@example.org
+      https://www.b-tu.de/fg-meteorologie
+    '';
+  };
+
   gmail = {
     address = "you@gmail.com";
     realName = "Your Name";
