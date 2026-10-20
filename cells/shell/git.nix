@@ -1,6 +1,7 @@
-{ config, ... }:
+{ config, inputs, ... }:
 let
   u = config.my.user;
+  gitlabPath = "${toString inputs.nix-secrets}/gitlab.nix";
 in
 {
   config.my.branches.base.hmModules = [
@@ -127,8 +128,6 @@ in
             "mergetool \"nvim_mergetool\"".cmd =
               "nvim -c \"packadd nvim.difftool\" -c \"DiffTool $LOCAL $REMOTE\"";
             credential.helper = "cache --timeout=3600";
-            # GitLab token from the Bitwarden vault (rbw entry named after the host).
-            credential."https://gitlab.klima.tu-berlin.de".helper = "rbw";
             "filter \"lfs\"" = {
               clean = "git-lfs clean -- %f";
               smudge = "git-lfs smudge -- %f";
@@ -183,6 +182,84 @@ in
           delta
         ];
       }
+    )
+  ];
+
+  config.my.branches.personal.hmModules = [
+    (
+      {
+        config,
+        lib,
+        pkgs,
+        ...
+      }:
+      let
+        hasGitlabConfig = builtins.pathExists gitlabPath;
+        gitlab = if hasGitlabConfig then import gitlabPath else { };
+        gitlabHost = gitlab.host;
+        gitlabCredentialHelper = pkgs.writeShellScript "git-credential-private-gitlab" ''
+          if [ "''${1:-}" = get ]; then
+            token=$(${pkgs.rbw}/bin/rbw get ${lib.escapeShellArg gitlab.tokenEntry}) || exit 1
+            printf 'username=%s\npassword=%s\n' ${lib.escapeShellArg gitlab.userName} "$token"
+          fi
+        '';
+        glabConfig = (pkgs.formats.yaml { }).generate "glab-config.yml" {
+          host = gitlabHost;
+          git_protocol = "https";
+          check_update = false;
+          telemetry = false;
+          hosts.${gitlabHost} = {
+            user = gitlab.userName;
+            git_protocol = "https";
+            api_protocol = "https";
+            api_host = gitlabHost;
+            custom_headers = [
+              {
+                name = "PRIVATE-TOKEN";
+                valueFromCommand = "${pkgs.rbw}/bin/rbw get ${lib.escapeShellArg gitlab.tokenEntry}";
+              }
+            ];
+          };
+        };
+      in
+      lib.mkMerge [
+        {
+          home.packages = [ pkgs.glab ];
+          warnings = lib.optional (!hasGitlabConfig) ''
+            GitLab integration needs gitlab.nix in the private nix-secrets input
+            with host, userName, and tokenEntry (see secrets/gitlab.example.nix).
+            Add the private metadata and update the nix-secrets input to enable it.
+          '';
+        }
+        (lib.mkIf hasGitlabConfig {
+
+          # The instance is HTTPS-only, including when a copied remote uses SSH.
+          programs.git.settings = {
+            url."https://${gitlabHost}/".insteadOf = [
+              "git@${gitlabHost}:"
+              "ssh://git@${gitlabHost}/"
+            ];
+            credential."https://${gitlabHost}" = {
+              username = gitlab.userName;
+              helper = [
+                ""
+                "${gitlabCredentialHelper}"
+              ];
+            };
+          };
+
+          # Private metadata comes from nix-secrets; it enters the local Nix store.
+          # glab reads the existing rbw
+          # entry at API-client creation, without exporting the token to the shell.
+          # See secrets/gitlab.example.nix for the private metadata shape.
+          # glab requires mode 0600 even for token-free config, so a normal HM
+          # symlink to a world-readable store file is rejected by its parser.
+          home.activation.glabConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            run ${pkgs.coreutils}/bin/install -D -m 600 ${glabConfig} \
+              ${lib.escapeShellArg "${config.xdg.configHome}/glab-cli/config.yml"}
+          '';
+        })
+      ]
     )
   ];
 }
