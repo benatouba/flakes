@@ -4,51 +4,6 @@
     "envsitter-guard@0.0.4"
   ],
   "lsp": true,
-  // Sleev manages context; retain tool output instead of pruning it locally.
-  // "compaction": {
-  //   "prune": false
-  // },
-  // "provider": {
-  //   // ChatGPT/Codex OAuth uses OpenCode's openai provider. Keep the gateway
-  //   // URL free of /v1 so the OAuth plugin does not rewrite it back to ChatGPT.
-  //   "openai": {
-  //     "options": {
-  //       "baseURL": "http://127.0.0.1:17321",
-  //       "headers": {
-  //         "sleev-provider": "codex",
-  //         "sleev-harness": "opencode"
-  //       }
-  //     }
-  //   },
-  //   "anthropic": {
-  //     "options": {
-  //       "baseURL": "http://127.0.0.1:17321",
-  //       "headers": {
-  //         "sleev-provider": "anthropic",
-  //         "sleev-harness": "opencode"
-  //       }
-  //     }
-  //   },
-  //   "github-copilot": {
-  //     "options": {
-  //       "baseURL": "http://127.0.0.1:17321",
-  //       "headers": {
-  //         "sleev-provider": "copilot",
-  //         "sleev-harness": "opencode"
-  //       }
-  //     }
-  //   },
-  //   // OpenCode Zen's provider ID is opencode (distinct from OpenCode Go).
-  //   "opencode": {
-  //     "options": {
-  //       "baseURL": "http://127.0.0.1:17321",
-  //       "headers": {
-  //         "sleev-provider": "opencode",
-  //         "sleev-harness": "opencode"
-  //       }
-  //     }
-  //   }
-  // },
   "mcp": {
     "vuetify-mcp": {
       "type": "remote",
