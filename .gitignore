@@ -32,3 +32,5 @@ opencode.json
 
 # auto-generated files
 .playwright-mcp/
+
+docs/
