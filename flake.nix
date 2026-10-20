@@ -16,6 +16,11 @@
 
     import-tree.url = "github:vic/import-tree";
 
+    granola = {
+      url = "github:howird/granola-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     neovim-nightly = {
       url = "github:nix-community/neovim-nightly-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
