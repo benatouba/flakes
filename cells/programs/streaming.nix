@@ -4,7 +4,16 @@ _: {
       { config, pkgs, ... }:
       {
         # Virtual camera (v4l2loopback)
-        boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
+        boot.extraModulePackages = [
+          (config.boot.kernelPackages.v4l2loopback.overrideAttrs (old: {
+            # This nixpkgs revision installs depmod indexes for the external module.
+            # They collide with the kernel's modules.builtin* indexes at merge time;
+            # NixOS regenerates the combined indexes in system.modulesTree.
+            postInstall = (old.postInstall or "") + ''
+              rm -f "$out/lib/modules/${config.boot.kernelPackages.kernel.modDirVersion}"/modules.*
+            '';
+          }))
+        ];
         boot.kernelModules = [ "v4l2loopback" ];
         boot.extraModprobeConfig = ''
           options v4l2loopback devices=1 video_nr=10 card_label="OBS Virtual Camera" exclusive_caps=1
