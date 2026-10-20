@@ -10,7 +10,7 @@
   };
 
   # Optional: enabled only when b-tu metadata exists; password is SOPS mail_btu.
-  # Server folders are not yet mapped; initially only INBOX is downloaded.
+  # INBOX and Sent are synced.
   b-tu = {
     address = "you@example.org";
     aliases = [ ];

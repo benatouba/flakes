@@ -1051,8 +1051,8 @@ in
               inherit (a.b-tu) address realName userName;
               aliases = a.b-tu.aliases or [ ];
               maildir.path = btuMaildir;
-              # Only INBOX is confirmed. These are local compose/trash folders,
-              # excluded from sync until BTU's server folders have been discovered.
+              # The server only has INBOX and Sent (checked with `Patterns *`).
+              # Drafts and Trash are local-only until the server provides them.
               folders = {
                 inbox = "Inbox";
                 sent = "Sent";
@@ -1078,7 +1078,10 @@ in
               mbsync = {
                 enable = true;
                 inherit (mbsyncTwoWay) create expunge;
-                patterns = [ "INBOX" ];
+                patterns = [
+                  "INBOX"
+                  "Sent"
+                ];
               };
               msmtp.enable = true;
               neomutt = {
