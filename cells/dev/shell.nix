@@ -61,6 +61,13 @@
             actionlint.enable = true;
             end-of-file-fixer.enable = true;
             trim-trailing-whitespace.enable = true;
+            mail-tools = {
+              enable = true;
+              name = "Mail tool behavior and type checks";
+              entry = "${pkgs.mail-tools.check}/bin/check-mail-tools";
+              files = "^(pkgs/mail-tools/|cells/programs/mail\\.nix|cells/dev/mail-checks\\.nix)";
+              pass_filenames = false;
+            };
           };
         };
       };
@@ -103,6 +110,12 @@
             nurl
             nvd
             shellcheck
+            # Offline mail-tool tests and type checking, also run by pre-commit.
+            python3
+            python3Packages.mypy
+            mail-tools
+            neomutt
+            notmuch
             shfmt
             statix
             vscode-json-languageserver

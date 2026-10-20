@@ -36,6 +36,12 @@ in
         btuMaildir = "b-tu";
         tuBerlinMaildir = "tu-berlin-new";
         outlookMaildir = "outlook";
+        savedSearches = builtins.fromJSON (builtins.readFile ../../pkgs/mail-tools/searches.json);
+        mailAddresses = lib.unique (
+          lib.concatMap (account: [ account.address ] ++ account.aliases) (
+            lib.filter (account: account.enable) (lib.attrValues config.accounts.email.accounts)
+          )
+        );
 
         # Outlook.com localizes IMAP folder names (German here); after first sync check
         # `ls ~/mail/outlook` and fix if the server returned English names.
@@ -55,6 +61,7 @@ in
         ];
 
         urlEncode = builtins.replaceStrings [ "@" "\\" ] [ "%40" "%5C" ];
+        neomuttRouting = import ../../pkgs/mail-tools/neomutt-routing.nix { inherit lib; };
         secret = name: config.sops.secrets."mail_${name}".path;
         catSecret = name: "${pkgs.coreutils}/bin/cat ${secret name}";
 
@@ -109,8 +116,11 @@ in
             before=$(ids)
             mbsync --pull-new --quiet "$channel:INBOX"
             after=$(ids)
+            ${pkgs.mail-tools}/bin/mail-index || printf 'Mail search index refresh failed\n' >&2
 
-            arrived=$(comm -13 <(printf '%s\n' "$before") <(printf '%s\n' "$after") | grep -c . || true)
+            # imapnotify has a restricted PATH. Use only declared tools and
+            # discard printf's empty-inbox placeholder before counting.
+            arrived=$(comm -13 <(printf '%s\n' "$before") <(printf '%s\n' "$after") | sed '/^$/d' | wc -l)
             [ "$arrived" -gt 0 ] || exit 0
 
             if [ "$arrived" -eq 1 ]; then
@@ -126,6 +136,58 @@ in
         # Default sendmail picks no msmtp account (wrong relay); pin each with `-a`
         # (forwarded by msmtpq, persisted per queued message).
         msmtpSendmail = account: "msmtpq --account=${account} --read-envelope-from --read-recipients";
+
+        # %D uses these descriptions: the selectable Inbox is the account heading,
+        # followed by indented folders in registration order.
+        neomuttAccount =
+          account: settings:
+          settings
+          // {
+            mailboxName = "${account} · Inbox";
+            extraMailboxes = map (mailbox: {
+              inherit mailbox;
+              name = "  ${mailbox}";
+            }) (settings.extraMailboxes or [ ]);
+          };
+
+        # aerc's :cf takes an account name, not a Maildir path. Keep g free
+        # as a prefix for these chords in both the list and message viewer.
+        aercAccountKeys =
+          prefix:
+          lib.mapAttrs (_: account: "${prefix}:cf -a ${account} Inbox<Enter>") (
+            {
+              gi = "tu-berlin";
+              gm = "gmail";
+              ga = "alganize";
+              gk = "alganize-kundenservice";
+            }
+            // lib.optionalAttrs hasBtu { gb = "b-tu"; }
+            // lib.optionalAttrs hasOutlookClientId { go = "outlook"; }
+          );
+
+        urlPicker = "${pkgs.urlscan}/bin/urlscan --dedupe --whitespace-off --nohelp --single --run-safe '${pkgs.xdg-utils}/bin/xdg-open {}'";
+        urlscanColor = name: foreground: background: [
+          name
+          "white"
+          "black"
+          ""
+          "#${foreground}"
+          "#${background}"
+        ];
+
+        # Mailcap supports exact MIME types and major/*, not subtype globs
+        # such as application/vnd.openxmlformats-officedocument.*.
+        mailcapEntry =
+          mime: extension: command:
+          "${mime}; ${command} %s; nametemplate=%s.${extension}";
+        desktopAttachment = mime: extension: mailcapEntry mime extension "${pkgs.xdg-utils}/bin/xdg-open";
+        officeAttachment =
+          mime: extension: mailcapEntry mime extension "${pkgs.libreoffice}/bin/libreoffice --view";
+        textAttachment =
+          mime: extension: "${mailcapEntry mime extension "${pkgs.coreutils}/bin/cat"}; copiousoutput";
+        archiveAttachment =
+          mime: extension:
+          "${mailcapEntry mime extension "${pkgs.libarchive}/bin/bsdtar -tf"}; copiousoutput";
 
         msmtpQueueDir = "${config.xdg.dataHome}/msmtp/queue";
         flushMsmtpQueue = pkgs.writeShellApplication {
@@ -209,6 +271,13 @@ in
             fi
           '';
         };
+        refreshMailIndexes = pkgs.writeShellApplication {
+          name = "mail-indexes-update";
+          text = ''
+            ${pkgs.mail-tools}/bin/mail-index || printf 'Mail search index refresh failed\n' >&2
+            exec ${updateAddressBook}/bin/mail-addressbook-update
+          '';
+        };
       in
       {
         assertions = [
@@ -263,6 +332,33 @@ in
         };
 
         programs = {
+          khal = {
+            enable = true;
+            package = pkgs.mail-tools.calendar;
+            locale = {
+              timeformat = "%H:%M";
+              dateformat = "%Y-%m-%d";
+              longdateformat = "%Y-%m-%d";
+              datetimeformat = "%Y-%m-%d %H:%M";
+              longdatetimeformat = "%Y-%m-%d %H:%M";
+            };
+          };
+          notmuch = {
+            enable = true;
+            settings = {
+              user = {
+                name = a.tu-berlin.realName;
+                primary_email = a.tu-berlin.address;
+                other_email = lib.remove a.tu-berlin.address mailAddresses;
+              };
+              new.tags = [ ];
+              maildir.synchronize_flags = true;
+              search.exclude_tags = [
+                "deleted"
+                "spam"
+              ];
+            };
+          };
           neomutt = {
             enable = true;
             package = pkgs.symlinkJoin {
@@ -277,7 +373,7 @@ in
             sort = "reverse-date";
             sidebar = {
               enable = true;
-              width = 30;
+              width = 40;
             };
             settings = {
               mail_check_stats = "yes";
@@ -286,8 +382,15 @@ in
               attach_save_dir = "~/downloads";
               query_command = "\"${queryAddresses}/bin/mail-address-query --mutt '%s'\"";
               use_threads = "threads";
+              nm_default_uri = ''"notmuch://${config.accounts.email.maildirBasePath}"'';
+              nm_exclude_tags = ''"deleted,spam"'';
+              reverse_name = "yes";
             };
             extraConfig = ''
+              unalternative_order *
+              alternative_order text/plain text/html
+              auto_view text/html
+
               # Theme: ${theme.slug}
               color normal        #${c.text}     #${c.base}
               color error         #${c.red}      #${c.base}
@@ -339,7 +442,20 @@ in
               color compose security_sign     #${c.blue}  #${c.base}
               color compose security_both     #${c.green} #${c.base}
               color compose security_none     #${c.red}   #${c.base}
-            '';
+            ''
+            + lib.concatStrings (
+              lib.mapAttrsToList (name: query: ''
+                virtual-mailboxes "Search · ${name}" "notmuch://${config.accounts.email.maildirBasePath}?query=${lib.escapeURL query}"
+              '') savedSearches
+            )
+            # A reply from a cross-account search must use that identity's
+            # sendmail command and Sent folder, not the last browsed account.
+            + neomuttRouting {
+              accounts = lib.filterAttrs (
+                _: account: account.enable && account.neomutt.enable
+              ) config.accounts.email.accounts;
+              configDirectory = "${config.xdg.configHome}/neomutt";
+            };
             binds = [
               {
                 map = [
@@ -483,8 +599,42 @@ in
                 key = "\\t";
                 action = "complete-query";
               }
+              {
+                map = [
+                  "index"
+                  "pager"
+                ];
+                key = "\\\\";
+                action = "vfolder-from-query";
+              }
             ];
             macros = [
+              {
+                map = [ "compose" ];
+                key = "A";
+                action = ''<enter-command>source \"${pkgs.mail-tools}/bin/mail-attach-picker --neomutt |\"<enter><refresh>'';
+              }
+              {
+                map = [ "attach" ];
+                key = "I";
+                action = "<enter-command>set pipe_decode<enter><pipe-entry>${pkgs.mail-tools}/bin/mail-calendar-import<enter><enter-command>unset pipe_decode<enter>";
+              }
+              {
+                map = [
+                  "index"
+                  "pager"
+                ];
+                key = "gU";
+                action = "<change-folder>notmuch://${config.accounts.email.maildirBasePath}?query=tag%3Aunread<enter>";
+              }
+              {
+                map = [
+                  "index"
+                  "pager"
+                ];
+                key = "gF";
+                action = "<change-folder>notmuch://${config.accounts.email.maildirBasePath}?query=tag%3Aflagged<enter>";
+              }
               {
                 map = [ "index" ];
                 key = "O";
@@ -516,7 +666,25 @@ in
                   "index"
                 ];
                 key = "U";
-                action = "<pipe-message>${pkgs.urlscan}/bin/urlscan<enter>";
+                # Avoid the extra "press any key" after urlscan exits, without
+                # hiding diagnostics from unrelated shell/pipe commands.
+                action = "<enter-command>unset wait_key<enter><pipe-message>${urlPicker}<enter><enter-command>set wait_key<enter>";
+              }
+              {
+                map = [
+                  "index"
+                  "pager"
+                ];
+                key = "]f";
+                action = "<sidebar-next><sidebar-open>";
+              }
+              {
+                map = [
+                  "index"
+                  "pager"
+                ];
+                key = "[f";
+                action = "<sidebar-prev><sidebar-open>";
               }
               # `.` = ~A all-messages; <tag-prefix-cond> skips when nothing matched.
               # Trailing <sync-mailbox> writes \Seen now, or mbsync has nothing to push.
@@ -580,7 +748,7 @@ in
               };
               filters = {
                 "text/plain" = "colorize";
-                "text/html" = "html | colorize";
+                "text/html" = "${pkgs.mail-tools}/bin/mail-html | colorize";
                 "text/calendar" = "calendar";
                 "message/delivery-status" = "colorize";
                 "message/rfc822" = "colorize";
@@ -601,11 +769,15 @@ in
                 "<C-u>" = ":prev 50%<Enter>";
                 "<C-f>" = ":next 100%<Enter>";
                 "<C-b>" = ":prev 100%<Enter>";
-                g = ":select 0<Enter>";
+                gg = ":select 0<Enter>";
                 G = ":select -1<Enter>";
                 l = ":view<Enter>";
                 h = ":cf ..<Enter>";
                 "<Enter>" = ":view<Enter>";
+                "<C-j>" = ":next-folder<Enter>";
+                "<C-k>" = ":prev-folder<Enter>";
+                "\\]f" = ":next-folder<Enter>";
+                "\\[f" = ":prev-folder<Enter>";
                 d = ":move Trash<Enter>";
                 D = ":delete<Enter>";
                 A = ":archive flat<Enter>";
@@ -623,17 +795,8 @@ in
                 t = ":toggle-threads<Enter>";
                 O = ":check-mail<Enter>";
                 v = ":mark -v<Enter>";
-                gi = ":cf ${tuBerlinMaildir}/INBOX<Enter>";
-                gm = ":cf gmail/INBOX<Enter>";
-                ga = ":cf alganize/INBOX<Enter>";
-                gk = ":cf alganize-kundenservice/INBOX<Enter>";
               }
-              // lib.optionalAttrs hasBtu {
-                gb = ":cf ${btuMaildir}/INBOX<Enter>";
-              }
-              // lib.optionalAttrs hasOutlookClientId {
-                go = ":cf ${outlookMaildir}/INBOX<Enter>";
-              };
+              // aercAccountKeys "";
               "messages:folder=Trash" = {
                 d = ":delete<Enter>";
               };
@@ -647,7 +810,11 @@ in
                 "<C-u>" = ":prev 50%<Enter>";
                 "<C-f>" = ":next 100%<Enter>";
                 "<C-b>" = ":prev 100%<Enter>";
-                g = ":toggle-key-passthrough<Enter>";
+                "<C-g>" = ":toggle-key-passthrough<Enter>";
+                "<C-j>" = ":close<Enter>:next-folder<Enter>";
+                "<C-k>" = ":close<Enter>:prev-folder<Enter>";
+                "\\]f" = ":close<Enter>:next-folder<Enter>";
+                "\\[f" = ":close<Enter>:prev-folder<Enter>";
                 J = ":next-part<Enter>";
                 K = ":prev-part<Enter>";
                 r = ":reply<Enter>";
@@ -659,13 +826,18 @@ in
                 "|" = ":pipe<space>";
                 S = ":save<space>";
                 o = ":open<Enter>";
-              };
+                I = ":pipe ${pkgs.mail-tools}/bin/mail-calendar-import<Enter>";
+              }
+              // aercAccountKeys ":close<Enter>";
               "view::passthrough" = {
-                g = ":toggle-key-passthrough<Enter>";
+                "$noinherit" = true;
+                "$ex" = "<C-x>";
+                "<C-g>" = ":toggle-key-passthrough<Enter>";
               };
               compose = {
+                "$noinherit" = true;
+                "$ex" = "<C-x>";
                 "<C-q>" = ":abort<Enter>";
-                "<C-s>" = ":send<Enter>";
                 "<C-a>" = ":attach<space>";
                 "<C-j>" = ":next-field<Enter>";
                 "<C-k>" = ":prev-field<Enter>";
@@ -674,13 +846,17 @@ in
                 "<S-Tab>" = ":prev-field<Enter>";
               };
               "compose::editor" = {
+                # Reserve Ctrl+x for aerc commands; ':' and normal Vim keys
+                # must reach Neovim rather than aerc's Ex command line.
+                "$noinherit" = true;
+                "$ex" = "<C-x>";
                 "<C-q>" = ":abort<Enter>";
-                "<C-s>" = ":send<Enter>";
                 "<C-a>" = ":attach<space>";
               };
               "compose::review" = {
                 q = ":abort<Enter>";
                 y = ":send<Enter>";
+                "<C-s>" = ":send<Enter>";
                 a = ":attach<space>";
                 d = ":detach<space>";
                 e = ":edit<Enter>";
@@ -690,6 +866,8 @@ in
                 h = ":prev-tab<Enter>";
               };
               terminal = {
+                "$noinherit" = true;
+                "$ex" = "<C-x>";
                 "<C-q>" = ":close<Enter>";
               };
             };
@@ -700,7 +878,7 @@ in
           enable = true;
           package = mbsyncPackage;
           frequency = "*:0/5";
-          postExec = "${updateAddressBook}/bin/mail-addressbook-update";
+          postExec = "${refreshMailIndexes}/bin/mail-indexes-update";
         };
 
         # Refresh even when one remote mailbox prevents mbsync from completing.
@@ -709,7 +887,7 @@ in
           Unit.Description = "Index local correspondence for mail address completion";
           Service = {
             Type = "oneshot";
-            ExecStart = "${updateAddressBook}/bin/mail-addressbook-update";
+            ExecStart = "${refreshMailIndexes}/bin/mail-indexes-update";
           };
         };
         systemd.user.timers.mail-addressbook = {
@@ -781,6 +959,10 @@ in
           *.normal=true
           default.fg=#${c.text}
           default.bg=#${c.base}
+          *.selected.fg=#${c.base}
+          *.selected.bg=#${c.blue}
+          *.selected.bold=true
+          *.selected.reverse=false
           error.fg=#${c.red}
           error.bold=true
           warning.fg=#${c.peach}
@@ -822,16 +1004,69 @@ in
           border.fg=#${c.surface1}
         '';
 
-        xdg.configFile."neomutt/mailcap".text = ''
-          text/html; xdg-open %s ; nametemplate=%s.html
-          text/html; lynx -assume_charset=%{charset} -display_charset=utf-8 -dump %s; nametemplate=%s.html; copiousoutput
-          application/pdf; xdg-open %s
-          image/*; xdg-open %s
-          application/msword; xdg-open %s
-          application/vnd.openxmlformats-officedocument.*; xdg-open %s
-          application/vnd.ms-excel; xdg-open %s
-          application/vnd.oasis.opendocument.*; xdg-open %s
-        '';
+        # Thirty common formats, plus MIME aliases and generic text/image/media
+        # handlers. Archives are listed, not extracted; calendar/contact files
+        # are previewed without importing or responding to invitations.
+        xdg.configFile."neomutt/mailcap".text = lib.concatLines [
+          (desktopAttachment "text/html" "html")
+          "text/html; ${pkgs.mail-tools}/bin/mail-html --charset=%{charset} %s; nametemplate=%s.html; copiousoutput"
+          (desktopAttachment "application/pdf" "pdf")
+          (textAttachment "text/plain" "txt")
+          (officeAttachment "application/msword" "doc")
+          (officeAttachment "application/vnd.openxmlformats-officedocument.wordprocessingml.document" "docx")
+          (officeAttachment "application/vnd.ms-excel" "xls")
+          (officeAttachment "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" "xlsx")
+          (officeAttachment "application/vnd.ms-powerpoint" "ppt")
+          (officeAttachment "application/vnd.openxmlformats-officedocument.presentationml.presentation" "pptx")
+          (officeAttachment "application/vnd.oasis.opendocument.text" "odt")
+          (officeAttachment "application/vnd.oasis.opendocument.spreadsheet" "ods")
+          (officeAttachment "application/vnd.oasis.opendocument.presentation" "odp")
+          (officeAttachment "application/rtf" "rtf")
+          (officeAttachment "text/rtf" "rtf")
+          (officeAttachment "text/csv" "csv")
+          (textAttachment "application/json" "json")
+          (textAttachment "application/xml" "xml")
+          "text/calendar; ${pkgs.aerc}/libexec/aerc/filters/calendar < %s; nametemplate=%s.ics; copiousoutput"
+          "application/ics; ${pkgs.aerc}/libexec/aerc/filters/calendar < %s; nametemplate=%s.ics; copiousoutput"
+          (textAttachment "text/vcard" "vcf")
+          (textAttachment "text/x-vcard" "vcf")
+          (textAttachment "message/rfc822" "eml")
+          (desktopAttachment "image/jpeg" "jpg")
+          (desktopAttachment "image/png" "png")
+          (desktopAttachment "image/gif" "gif")
+          (desktopAttachment "image/webp" "webp")
+          (desktopAttachment "image/svg+xml" "svg")
+          (desktopAttachment "image/tiff" "tiff")
+          (archiveAttachment "application/zip" "zip")
+          (archiveAttachment "application/x-7z-compressed" "7z")
+          (archiveAttachment "application/vnd.rar" "rar")
+          (archiveAttachment "application/x-rar-compressed" "rar")
+          (archiveAttachment "application/x-tar" "tar")
+          "application/gzip; ${pkgs.gzip}/bin/gzip -l %s; nametemplate=%s.gz; copiousoutput"
+          "application/x-gzip; ${pkgs.gzip}/bin/gzip -l %s; nametemplate=%s.gz; copiousoutput"
+          (textAttachment "text/*" "txt")
+          "image/*; ${pkgs.xdg-utils}/bin/xdg-open %s"
+          "audio/*; ${pkgs.xdg-utils}/bin/xdg-open %s"
+          "video/*; ${pkgs.xdg-utils}/bin/xdg-open %s"
+        ];
+
+        xdg.configFile."urlscan/config.json".text = builtins.toJSON {
+          palettes.${theme.slug} = [
+            (urlscanColor "header" c.text c.mantle)
+            (urlscanColor "footer" c.subtext0 c.mantle)
+            (urlscanColor "search" c.base c.yellow)
+            (urlscanColor "msgtext" c.subtext0 c.base)
+            (urlscanColor "msgtext:ellipses" c.overlay0 c.base)
+            (urlscanColor "urlref:number:braces" c.overlay0 c.base)
+            (urlscanColor "urlref:number" c.yellow c.base)
+            (urlscanColor "urlref:url" c.blue c.base)
+            (urlscanColor "url:sel" c.text c.surface0)
+          ];
+          keys = {
+            h = "quit";
+            l = "open_url";
+          };
+        };
 
         home.packages =
           with pkgs;
@@ -840,6 +1075,7 @@ in
             maildir-rank-addr
             updateAddressBook
             queryAddresses
+            mail-tools
             urlscan
           ]
           # For one-time `oama authorize` flow and `oama show`/`renew` debugging.
@@ -890,7 +1126,7 @@ in
                 ];
               };
               msmtp.enable = true;
-              neomutt = {
+              neomutt = neomuttAccount "tu-berlin" {
                 enable = true;
                 extraMailboxes = [
                   "Sent Items"
@@ -903,7 +1139,8 @@ in
                 enable = true;
                 extraAccounts = {
                   source = "maildir://~/mail/${tuBerlinMaildir}";
-                  outgoing = "smtp+starttls://${urlEncode a.tu-berlin.userName}@${a.tu-berlin.smtpHost}:587";
+                  # aerc's smtp scheme uses STARTTLS; +suffix selects authentication.
+                  outgoing = "smtp://${urlEncode a.tu-berlin.userName}@${a.tu-berlin.smtpHost}:587";
                   default = "INBOX";
                   aliases = builtins.head a.tu-berlin.aliases;
                   outgoing-cred-cmd = catSecret "tu_berlin";
@@ -948,7 +1185,7 @@ in
                 ];
               };
               msmtp.enable = true;
-              neomutt = {
+              neomutt = neomuttAccount "gmail" {
                 enable = true;
                 sendMailCommand = msmtpSendmail "gmail";
                 extraMailboxes = [
@@ -1007,7 +1244,7 @@ in
                 ];
               };
               msmtp.enable = true;
-              neomutt = {
+              neomutt = neomuttAccount "alganize" {
                 enable = true;
                 sendMailCommand = msmtpSendmail "alganize";
                 extraMailboxes = [
@@ -1067,7 +1304,7 @@ in
                 ];
               };
               msmtp.enable = true;
-              neomutt = {
+              neomutt = neomuttAccount "alganize-kundenservice" {
                 enable = true;
                 sendMailCommand = msmtpSendmail "alganize-kundenservice";
                 extraMailboxes = [
@@ -1133,15 +1370,16 @@ in
                 ];
               };
               msmtp.enable = true;
-              neomutt = {
+              neomutt = neomuttAccount "b-tu" {
                 enable = true;
                 sendMailCommand = msmtpSendmail "b-tu";
+                extraMailboxes = [ "Sent" ];
               };
               aerc = {
                 enable = true;
                 extraAccounts = {
                   source = "maildir://~/mail/${btuMaildir}";
-                  outgoing = "smtp+starttls://${urlEncode a.b-tu.userName}@${a.b-tu.smtpHost}:587";
+                  outgoing = "smtp://${urlEncode a.b-tu.userName}@${a.b-tu.smtpHost}:587";
                   default = "INBOX";
                   outgoing-cred-cmd = catSecret "btu";
                   copy-to = "Sent";
@@ -1190,7 +1428,7 @@ in
                 enable = true;
                 extraConfig.auth = "xoauth2";
               };
-              neomutt = {
+              neomutt = neomuttAccount "outlook" {
                 enable = true;
                 sendMailCommand = msmtpSendmail "outlook";
                 extraMailboxes = outlookMailboxes;
@@ -1215,6 +1453,16 @@ in
                 extraConfig.xoAuth2 = true;
               };
             };
+          };
+        };
+        accounts.calendar = {
+          # Standard vdir .ics files; a future vdirsyncer connection can use
+          # this same storage. .local/state is already persistent on thinkpad.
+          basePath = "${config.xdg.stateHome}/calendars";
+          accounts.local = {
+            primary = true;
+            khal.enable = true;
+            local.type = "filesystem";
           };
         };
       }

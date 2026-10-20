@@ -1,0 +1,6 @@
+{
+  "Unread": "tag:unread",
+  "Flagged": "tag:flagged",
+  "Attachments": "tag:attachment",
+  "All mail": "*"
+}
