@@ -372,7 +372,7 @@ in
               mail_check_stats = "yes";
               mailcap_path = "${config.xdg.configHome}/neomutt/mailcap";
               color_directcolor = "yes";
-              attach_save_dir = "~/downloads";
+              attach_save_dir = "~/documents";
               query_command = "\"${queryAddresses}/bin/mail-address-query --mutt '%s'\"";
               use_threads = "threads";
               nm_default_uri = ''"notmuch://${config.accounts.email.maildirBasePath}"'';
@@ -604,6 +604,11 @@ in
             macros = [
               {
                 map = [ "compose" ];
+                key = "a";
+                action = "<attach-file>~/documents/";
+              }
+              {
+                map = [ "compose" ];
                 key = "A";
                 action = ''<enter-command>source \"${pkgs.mail-tools}/bin/mail-attach-picker --neomutt |\"<enter><refresh>'';
               }
@@ -715,7 +720,7 @@ in
             extraConfig = {
               general = {
                 unsafe-accounts-conf = true;
-                default-save-path = "~/downloads";
+                default-save-path = "~/documents";
               };
               ui = {
                 index-columns = "date<20,name<25,flags>4,subject<*";
@@ -831,7 +836,7 @@ in
                 "$noinherit" = true;
                 "$ex" = "<C-x>";
                 "<C-q>" = ":abort<Enter>";
-                "<C-a>" = ":attach<space>";
+                "<C-a>" = ":attach ~/documents/";
                 "<C-j>" = ":next-field<Enter>";
                 "<C-k>" = ":prev-field<Enter>";
                 "<C-l>" = ":switch-account<space>";
@@ -844,13 +849,13 @@ in
                 "$noinherit" = true;
                 "$ex" = "<C-x>";
                 "<C-q>" = ":abort<Enter>";
-                "<C-a>" = ":attach<space>";
+                "<C-a>" = ":attach ~/documents/";
               };
               "compose::review" = {
                 q = ":abort<Enter>";
                 y = ":send<Enter>";
                 "<C-s>" = ":send<Enter>";
-                a = ":attach<space>";
+                a = ":attach ~/documents/";
                 d = ":detach<space>";
                 e = ":edit<Enter>";
                 j = ":next-field<Enter>";

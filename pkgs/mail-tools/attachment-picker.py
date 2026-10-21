@@ -28,7 +28,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--chooser", default="yazi", help="Yazi executable")
     parser.add_argument("--neomutt", action="store_true", help="Emit commands for NeoMutt source")
-    parser.add_argument("directory", nargs="?", default=str(Path.home() / "downloads"))
+    parser.add_argument("directory", nargs="?", default=str(Path.home() / "documents"))
     args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix="mail-attach-") as temporary, contextlib.ExitStack() as stack:
         chosen = Path(temporary) / "selected"

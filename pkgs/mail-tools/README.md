@@ -6,9 +6,10 @@ msmtp queue; aerc currently sends directly through SMTP.
 
 ## Attach files
 
-In NeoMutt's compose screen, **`A`** opens Yazi in `~/downloads`. Navigate with
+In NeoMutt's compose screen, **`A`** opens Yazi in `~/documents`. Navigate with
 `h/j/k/l`, select multiple files with Space, and press Enter to return the selection.
-Quit Yazi with `q` to cancel. Lowercase **`a`** keeps the manual filename prompt.
+Quit Yazi with `q` to cancel. Lowercase **`a`** keeps the manual filename prompt,
+prefilled with `~/documents/`. Both clients save attachments to `~/documents` by default.
 
 The picker preserves spaces and punctuation in filenames and passes selections
 as literal attachment names, not commands. Its temporary selection file is private
