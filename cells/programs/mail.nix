@@ -361,14 +361,7 @@ in
           };
           neomutt = {
             enable = true;
-            package = pkgs.symlinkJoin {
-              name = "neomutt-truecolor";
-              paths = [ pkgs.neomutt ];
-              nativeBuildInputs = [ pkgs.makeWrapper ];
-              postBuild = ''
-                wrapProgram $out/bin/neomutt --set TERM xterm-direct
-              '';
-            };
+            package = pkgs.mail-tools.neomutt;
             vimKeys = true;
             sort = "reverse-date";
             sidebar = {

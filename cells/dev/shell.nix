@@ -114,7 +114,7 @@
             python3
             python3Packages.mypy
             mail-tools
-            neomutt
+            mail-tools.neomutt
             notmuch
             shfmt
             statix

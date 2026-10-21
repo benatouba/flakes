@@ -66,6 +66,50 @@ class MailSearchTest(unittest.TestCase):
                 self.assertEqual(int(self.command("notmuch", "count", searches[name])), count)
         self.assertEqual(self.command("notmuch", "count", "subject:quasar"), "2")
 
+    def test_neomutt_hex_colors_from_256color_terminal(self):
+        rc = self.root / "colors.rc"
+        rc.write_text(
+            f'set folder="{self.mail}"\n'
+            'set quit=yes\n'
+            'set color_directcolor=yes\n'
+            'color normal #cdd6f4 #1e1e2e\n'
+            'push <quit>\n'
+        )
+        master, slave = pty.openpty()
+        fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 24, 80, 0, 0))
+
+        def session():
+            os.setsid()
+            fcntl.ioctl(0, termios.TIOCSCTTY, 0)
+
+        process = subprocess.Popen(
+            ["neomutt", "-n", "-F", str(rc), "-f", str(self.mail / "account-one/Inbox")],
+            stdin=slave, stdout=slave, stderr=slave, preexec_fn=session,
+            env=dict(self.env, TERM="xterm-256color", COLORTERM="truecolor"),
+        )
+        os.close(slave)
+        screen = bytearray()
+        try:
+            deadline = time.monotonic() + 5
+            while time.monotonic() < deadline:
+                if not select.select([master], [], [], 0.1)[0]:
+                    continue
+                try:
+                    data = os.read(master, 65536)
+                except OSError:
+                    break
+                if not data:
+                    break
+                screen.extend(data)
+            self.assertNotIn(b"color not supported by term", screen)
+            self.assertNotIn(b"source: errors", screen)
+            self.assertEqual(process.wait(timeout=1), 0)
+        finally:
+            if process.poll() is None:
+                process.kill()
+                process.wait()
+            os.close(master)
+
     def test_reply_from_search_selects_the_recipient_account(self):
         self.write_message("account-two/Inbox", "5", "S", "Cross-account reply",
                            recipient="alias+b@example.invalid")

@@ -18,6 +18,16 @@ let
   # The pinned Sphinx hook reads a scalar, so a list builds only HTML and
   # leaves khal's declared man output missing. Preserve both documentation outputs.
   calendarPackage = pkgs.khal.overrideAttrs { sphinxBuilders = "html man"; };
+  # Share the wrapper with the dev shell so its PATH cannot shadow the
+  # Home Manager package with a binary that rejects the hex-color theme.
+  neomuttPackage = pkgs.symlinkJoin {
+    name = "neomutt-truecolor";
+    paths = [ pkgs.neomutt ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/neomutt --set TERM xterm-direct
+    '';
+  };
   picker = pkgs.writeShellApplication {
     name = "mail-attach-picker";
     runtimeInputs = [ pkgs.yazi ];
@@ -67,7 +77,7 @@ let
       pkgs.python3
       pkgs.python3Packages.mypy
       tools
-      pkgs.neomutt
+      neomuttPackage
       pkgs.notmuch
     ];
     text = ''
@@ -94,6 +104,7 @@ let
       html
     ];
     passthru.calendar = calendarPackage;
+    passthru.neomutt = neomuttPackage;
     passthru.check = check;
   };
 in
