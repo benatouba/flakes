@@ -1,125 +1,132 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": [
-    "envsitter-guard@0.0.4"
+
+  "plugins": [
+    // Requires a V2-compatible release; renaming this key does not port the plugin.
+    "envsitter-guard@latest",
   ],
   "lsp": true,
   "mcp": {
-    "vuetify-mcp": {
-      "type": "remote",
-      "url": "https://mcp.vuetifyjs.com/mcp",
-      "enabled": true,
-      "timeout": 5000
+    "servers": {
+      "vuetify-mcp": {
+        "type": "remote",
+        "url": "https://mcp.vuetifyjs.com/mcp",
+        "disabled": false,
+        "timeout": {
+          "catalog": 5000,
+          "execution": 5000,
+        },
+      },
+      "playwright": {
+        "type": "local",
+        "command": ["playwright-mcp"],
+        "disabled": true,
+      },
+
+      "agent-browser": {
+        "type": "local",
+        "command": ["agent-browser", "mcp", "--tools", "core,debug"],
+        "disabled": true,
+      },
+
+      "jev": {
+        "type": "local",
+        "command": ["jev-mcp"],
+        "disabled": false,
+      },
+
+      "chrome-devtools": {
+        "type": "local",
+        "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
+        "disabled": true,
+      },
     },
-    "playwright": {
-      "type": "local",
-      "command": ["playwright-mcp"],
-      "enabled": false
-    },
-    // Token-efficient agent browser (CLI-first; MCP is opt-in per project).
-    // `core` = navigate/snapshot/interact/screenshot/eval, `debug` adds
-    // console/errors/tracing/a11y audit for broken frontends. Primary use
-    // is the CLI via Bash (`agent-browser open/snapshot -i/click @eN`),
-    // taught by ~/.claude/skills/agent-browser (zero schema overhead).
-    "agent-browser": {
-      "type": "local",
-      "command": ["agent-browser", "mcp", "--tools", "core,debug"],
-      "enabled": false
-    },
-    "jev": {
-      "type": "local",
-      "command": ["jev-mcp"],
-      "enabled": true
-    },
-    "chrome-devtools": {
-      "type": "local",
-      "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
-      "enabled": false
-    }
   },
-  "permission": {
-    "skill": {
-      "*": "allow",
-    },
-    "read": {
-      "*": "allow"
-    },
-    // Read-only discovery tools: safe to run without prompting.
-    "glob": {
-      "*": "allow"
-    },
-    "grep": {
-      "*": "allow"
-    },
-    "edit": {
-      "*": "ask",
-      "/nix/store/**": "deny"
-    },
-    "bash": {
-      "*": "ask",
-      // Version control and forge.
-      "git *": "allow",
-      "gh *": "allow",
-      "jj *": "allow",
-      // Nix / dev environment inspection (read-only status, eval, search).
-      "nix *": "allow",
-      "devenv *": "allow",
-      "direnv *": "allow",
-      "just *": "allow",
-      // Shell introspection and coreutils (no writes, no deletes).
-      "which *": "allow",
-      "command *": "allow",
-      "type *": "allow",
-      "pwd *": "allow",
-      "ls *": "allow",
-      "cat *": "allow",
-      "head *": "allow",
-      "tail *": "allow",
-      "wc *": "allow",
-      "tree *": "allow",
-      "file *": "allow",
-      "stat *": "allow",
-      "realpath *": "allow",
-      "readlink *": "allow",
-      "echo *": "allow",
-      "printf *": "allow",
-      "diff *": "allow",
-      // Search, filter, and structured-data inspection.
-      "grep *": "allow",
-      "rg *": "allow",
-      "fd *": "allow",
-      "find *": "allow",
-      "jq *": "allow",
-      "yq *": "allow",
-      "perl *": "allow",
-      "awk *": "allow",
-      "sed *": "allow",
-      // Headless editor checks and formatters/linters.
-      "nvim *": "allow",
-      "vim *": "allow",
-      "stylua *": "allow",
-      "alejandra *": "allow",
-      "nixfmt *": "allow",
-      "statix *": "allow",
-      "deadnix *": "allow",
-      "shellcheck *": "allow",
-      "shfmt *": "allow",
-      // Explicitly keep destructive / privilege-escalating commands on ask.
-      // Covered by "*": "ask" above: rm *, sudo *, chmod *, chown *,
-      // curl *|sh, wget *|sh, mkfs *, dd *.
-    },
-    // Hosted Jev calls may transmit their input externally; inspect each payload.
-    "jev_*": "ask",
-    "external_directory": {
-      "/nix/store/**": "allow",
-      "~/.config/nix/**": "allow",
-      "~/.cache/nix/**": "allow",
-      // Directories allowlisted from live agent sessions: project checkouts,
-      // Neovim plugin sources, agent skills, and scratch space.
-      "~/projects/**": "allow",
-      "~/.local/share/nvim/**": "allow",
-      "~/.claude/skills/**": "allow",
-      "/tmp/**": "allow"
-    }
-  }
+
+  "permissions": [
+    // Skills and read-only discovery tools.
+    { "action": "skill", "resource": "*", "effect": "allow" },
+    { "action": "read", "resource": "*", "effect": "allow" },
+    { "action": "glob", "resource": "*", "effect": "allow" },
+    { "action": "grep", "resource": "*", "effect": "allow" },
+
+    // Ask before edits; disallow edits through these tools in the Nix store.
+    { "action": "edit", "resource": "*", "effect": "ask" },
+    { "action": "edit", "resource": "/nix/store/**", "effect": "deny" },
+
+    // Shell commands ask by default, with the original exceptions below.
+    { "action": "shell", "resource": "*", "effect": "ask" },
+
+    // Version control and forge.
+    { "action": "shell", "resource": "git *", "effect": "allow" },
+    { "action": "shell", "resource": "gh *", "effect": "allow" },
+    { "action": "shell", "resource": "jj *", "effect": "allow" },
+
+    // Nix and development environments.
+    // These broad allowances include more than read-only inspection.
+    { "action": "shell", "resource": "nix *", "effect": "allow" },
+    { "action": "shell", "resource": "devenv *", "effect": "allow" },
+    { "action": "shell", "resource": "direnv *", "effect": "allow" },
+    { "action": "shell", "resource": "just *", "effect": "allow" },
+
+    // Shell introspection and coreutils.
+    { "action": "shell", "resource": "which *", "effect": "allow" },
+    { "action": "shell", "resource": "command *", "effect": "allow" },
+    { "action": "shell", "resource": "type *", "effect": "allow" },
+    { "action": "shell", "resource": "pwd *", "effect": "allow" },
+    { "action": "shell", "resource": "ls *", "effect": "allow" },
+    { "action": "shell", "resource": "cat *", "effect": "allow" },
+    { "action": "shell", "resource": "head *", "effect": "allow" },
+    { "action": "shell", "resource": "tail *", "effect": "allow" },
+    { "action": "shell", "resource": "wc *", "effect": "allow" },
+    { "action": "shell", "resource": "tree *", "effect": "allow" },
+    { "action": "shell", "resource": "file *", "effect": "allow" },
+    { "action": "shell", "resource": "stat *", "effect": "allow" },
+    { "action": "shell", "resource": "realpath *", "effect": "allow" },
+    { "action": "shell", "resource": "readlink *", "effect": "allow" },
+    { "action": "shell", "resource": "echo *", "effect": "allow" },
+    { "action": "shell", "resource": "printf *", "effect": "allow" },
+    { "action": "shell", "resource": "diff *", "effect": "allow" },
+
+    // Search, filtering, and structured-data inspection.
+    { "action": "shell", "resource": "grep *", "effect": "allow" },
+    { "action": "shell", "resource": "rg *", "effect": "allow" },
+    { "action": "shell", "resource": "fd *", "effect": "allow" },
+    { "action": "shell", "resource": "find *", "effect": "allow" },
+    { "action": "shell", "resource": "jq *", "effect": "allow" },
+    { "action": "shell", "resource": "yq *", "effect": "allow" },
+    { "action": "shell", "resource": "perl *", "effect": "allow" },
+    { "action": "shell", "resource": "awk *", "effect": "allow" },
+    { "action": "shell", "resource": "sed *", "effect": "allow" },
+
+    // Editors, formatters, and linters.
+    { "action": "shell", "resource": "nvim *", "effect": "allow" },
+    { "action": "shell", "resource": "vim *", "effect": "allow" },
+    { "action": "shell", "resource": "stylua *", "effect": "allow" },
+    { "action": "shell", "resource": "alejandra *", "effect": "allow" },
+    { "action": "shell", "resource": "nixfmt *", "effect": "allow" },
+    { "action": "shell", "resource": "statix *", "effect": "allow" },
+    { "action": "shell", "resource": "deadnix *", "effect": "allow" },
+    { "action": "shell", "resource": "shellcheck *", "effect": "allow" },
+    { "action": "shell", "resource": "shfmt *", "effect": "allow" },
+
+    // Hosted Jev calls may transmit their input externally.
+    // Ask for each tool invocation so its payload can be reviewed.
+    { "action": "jev_*", "resource": "*", "effect": "ask" },
+
+    // Preserve V1's default prompt for access outside the project.
+    // V2 otherwise allows external_directory access by default.
+    { "action": "external_directory", "resource": "*", "effect": "ask" },
+
+    // Trusted external directories.
+    { "action": "external_directory", "resource": "/nix/store/**", "effect": "allow" },
+    { "action": "external_directory", "resource": "~/.config/nix/**", "effect": "allow" },
+    { "action": "external_directory", "resource": "~/.cache/nix/**", "effect": "allow" },
+
+    // Project checkouts, Neovim plugin sources, skills, and scratch space.
+    { "action": "external_directory", "resource": "~/projects/**", "effect": "allow" },
+    { "action": "external_directory", "resource": "~/.local/share/nvim/**", "effect": "allow" },
+    { "action": "external_directory", "resource": "~/.claude/skills/**", "effect": "allow" },
+    { "action": "external_directory", "resource": "/tmp/**", "effect": "allow" },
+  ],
 }
