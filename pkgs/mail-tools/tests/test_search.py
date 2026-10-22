@@ -83,7 +83,9 @@ class MailSearchTest(unittest.TestCase):
             fcntl.ioctl(0, termios.TIOCSCTTY, 0)
 
         process = subprocess.Popen(
-            ["neomutt", "-n", "-F", str(rc), "-f", str(self.mail / "account-one/Inbox")],
+            ["bash", "-O", "expand_aliases", "-c",
+             "alias neomutt='TERM=xterm-direct neomutt'\nneomutt \"$@\"",
+             "neomutt", "-n", "-F", str(rc), "-f", str(self.mail / "account-one/Inbox")],
             stdin=slave, stdout=slave, stderr=slave, preexec_fn=session,
             env=dict(self.env, TERM="xterm-256color", COLORTERM="truecolor"),
         )

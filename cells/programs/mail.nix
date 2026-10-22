@@ -361,7 +361,6 @@ in
           };
           neomutt = {
             enable = true;
-            package = pkgs.mail-tools.neomutt;
             vimKeys = true;
             sort = "reverse-date";
             sidebar = {
@@ -1065,6 +1064,12 @@ in
             l = "open_url";
           };
         };
+
+        # Temporary ncurses direct-color workaround for WezTerm/xterm-256color.
+        # Retest frequently, especially after NeoMutt, ncurses or WezTerm updates:
+        # run `env TERM=wezterm neomutt` and `env TERM=xterm-256color neomutt`
+        # (env bypasses this alias). Remove it when the hex theme works without it.
+        home.shellAliases.neomutt = "TERM=xterm-direct neomutt";
 
         home.packages =
           with pkgs;
