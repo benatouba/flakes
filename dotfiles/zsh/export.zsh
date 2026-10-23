@@ -16,9 +16,6 @@ export XDG_CACHE_HOME="$HOME/.cache"
 export TIME_STYLE="iso"
 export TEXMFHOME="$HOME/.local/share/texmf"
 
-# pnpm
-export PNPM_HOME="${HOME}/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
+# Drop the legacy pnpm setup directory, including when inherited from an old
+# session. Home Manager manages PNPM_HOME and adds PNPM_HOME/bin for global tools.
+path=("${(@)path:#${HOME}/.local/share/pnpm}")

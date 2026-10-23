@@ -23,7 +23,7 @@ _: {
             enable = true;
             nssmdns4 = true;
             # No publishing: multicast announcements keep wifi out of power save.
-            publish.enable = false;
+            settings.publish."disable-publishing" = true;
             # Firewall scoped to dock links below instead of every interface.
             openFirewall = false;
           };
