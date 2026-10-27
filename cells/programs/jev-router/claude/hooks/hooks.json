@@ -1,0 +1,12 @@
+{
+  "modules": ["./register.js"],
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "*",
+      "hooks": [{ "type": "command", "command": "@control@ --tool-hook", "timeout": 8, "onFailure": "block" }]
+    }],
+    "UserPromptSubmit": [{
+      "hooks": [{ "type": "command", "command": "@control@ --prompt-hook", "timeout": 8 }]
+    }]
+  }
+}
