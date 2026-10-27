@@ -32,7 +32,6 @@ _: {
             "splash"
           ];
           consoleLogLevel = 0;
-          initrd.verbose = false;
         };
 
         services.journald.settings.Journal = {
