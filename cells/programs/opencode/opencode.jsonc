@@ -2,7 +2,6 @@
   "$schema": "https://opencode.ai/config.json",
 
   "plugins": [
-    @jevRouterPlugin@
     // Requires a V2-compatible release; renaming this key does not port the plugin.
     "envsitter-guard@latest",
     "@tarquinen/opencode-dcp@latest",

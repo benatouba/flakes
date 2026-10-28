@@ -9,16 +9,6 @@ _: {
       }:
       let
         jevMcp = config.my.jev.package or null;
-        jevRouter = config.my.jev.router or null;
-        jevControl = config.my.jev.control or null;
-        routerPlugin = pkgs.runCommand "opencode-jev-router" { } ''
-          mkdir -p $out
-          cp ${./jev-router/opencode-package.json} $out/package.json
-          cp ${./jev-router}/controls.mjs ${./jev-router}/decision.mjs ${./jev-router}/router.mjs ${./jev-router}/cache-policy.mjs $out/
-          substitute ${./jev-router/opencode.mjs} $out/index.mjs \
-            --replace-fail '@router@' '${if jevRouter != null then lib.getExe jevRouter else "disabled"}' \
-            --replace-fail '@control@' '${if jevControl != null then lib.getExe jevControl else "disabled"}'
-        '';
         wrappedOpencode = pkgs.symlinkJoin {
           name = "opencode-wrapped";
           paths = [ pkgs.opencode ];
@@ -42,9 +32,6 @@ _: {
           # Do not depend on the shared OpenCode service's PATH. The personal
           # branch exposes the wrapper only when its SOPS key is configured.
           source = pkgs.replaceVars ./opencode/opencode.jsonc {
-            jevRouterPlugin = lib.optionalString (jevRouter != null) ''
-              ${builtins.toJSON (toString routerPlugin)},
-            '';
             jevMcpServer = lib.optionalString (jevMcp != null) ''
               "jev": ${
                 builtins.toJSON {
