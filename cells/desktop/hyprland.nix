@@ -37,24 +37,10 @@ let
 
   cursorEnvConf = "env = XCURSOR_SIZE, ${toString theme.cursor.size}";
 
-  legacyPluginConf = ''
-    plugin {
-      hyprtasking {
-        layout = grid
-        gap_size = 5
-        grid {
-          rows = 3
-          cols = 3
-        }
-      }
-    }
-  '';
-
   legacyHyprlandConfig = builtins.concatStringsSep "\n" (
     [
       themeConf
       cursorEnvConf
-      legacyPluginConf
     ]
     ++ map builtins.readFile [
       ./hyprland/monitors.conf
@@ -424,19 +410,6 @@ let
       },
     })
 
-    hl.config({
-      plugin = {
-        hyprtasking = {
-          layout = "grid",
-          gap_size = 5,
-          grid = {
-            rows = 3,
-            cols = 3,
-          },
-        },
-      },
-    })
-
     hl.curve("overshot", { type = "bezier", points = { { 0.13, 0.99 }, { 0.29, 1.1 } } })
     hl.animation({ leaf = "windows", enabled = true, speed = 4, bezier = "overshot", style = "slide" })
     hl.animation({ leaf = "windowsOut", enabled = true, speed = 5, bezier = "default", style = "popin 80%" })
@@ -501,9 +474,6 @@ let
     hl.bind(mainMod .. " + m", hl.dsp.focus({ workspace = "name:music" }))
     hl.bind(mainMod .. " + Return", hl.dsp.focus({ workspace = "name:terminal" }))
     hl.bind(mainMod .. " + S", hl.dsp.focus({ workspace = "name:stream" }))
-    hl.bind(mainMod .. " + Tab", function()
-      hl.plugin.hyprtasking.toggle("cursor")
-    end)
     hl.bind(mainMod .. " + SHIFT + Tab", hl.dsp.window.cycle_next({ next = false }))
     hl.bind(mainMod .. " + period", hl.dsp.focus({ workspace = "e+1" }))
     hl.bind(mainMod .. " + comma", hl.dsp.focus({ workspace = "e-1" }))
@@ -643,8 +613,6 @@ in
           package = null;
           portalPackage = null;
           configType = if useLuaConfig then "lua" else "hyprlang";
-          # hyprtasking from nixpkgs (tracks nixpkgs Hyprland, so ABI matches).
-          plugins = [ pkgs.hyprlandPlugins.hyprtasking ];
           extraConfig = if useLuaConfig then hyprlandLua else legacyHyprlandConfig;
         };
 
@@ -653,6 +621,29 @@ in
         services = {
           hypridle.enable = true;
           hyprpaper.enable = true;
+          hyprshell = {
+            enable = true;
+            settings = {
+              version = 4;
+              windows = {
+                scale = 8.5;
+                items_per_row = 3;
+                overview = {
+                  # Hyprshell registers Super+Tab itself; no compositor plugin is needed.
+                  key = "Tab";
+                  modifier = "super";
+                  filter_by = [ ];
+                  # Include named and special workspaces on every monitor.
+                  exclude_workspaces = "";
+                  launcher = {
+                    show_when_empty = false;
+                    # Keep rofi as the launcher: no history, web search or shell actions.
+                    plugins = { };
+                  };
+                };
+              };
+            };
+          };
           hyprsunset = {
             enable = true;
             # Was `hyprsunset -t 5200` as an exec-once.
