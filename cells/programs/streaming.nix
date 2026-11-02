@@ -78,8 +78,14 @@ _: {
               hl.workspace_rule({
                 workspace = "name:stream",
                 monitor = "eDP-1",
-                on_created_empty = "obs",
               })
+
+              -- Replaces the deprecated `on_created_empty` workspace-rule field.
+              hl.on("workspace.created", function(ws)
+                if ws.is_empty and not ws.special and ws.id == nil and ws.addressable_name == "stream" then
+                  hl.exec_cmd("obs", { workspace = "name:stream" })
+                end
+              end)
 
               hl.bind("SUPER + s", hl.dsp.focus({ workspace = "name:stream" }))
               hl.bind("SUPER + SHIFT + s", hl.dsp.window.move({ workspace = "name:stream" }))

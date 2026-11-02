@@ -238,67 +238,103 @@ let
       ]
   );
 
-  workspaceLua = lib.concatStringsSep "\n" (
-    map
-      (
-        workspace:
-        luaCall "workspace_rule" (
-          [ (luaKv "workspace" workspace.workspace) ]
-          ++ lib.optionals (workspace ? monitor) [ (luaKv "monitor" workspace.monitor) ]
-          ++ lib.optionals (workspace ? default) [ (luaKv "default" workspace.default) ]
-          ++ lib.optionals (workspace ? persistent) [ (luaKv "persistent" workspace.persistent) ]
-          ++ lib.optionals (workspace ? on_created_empty) [
-            (luaKv "on_created_empty" workspace.on_created_empty)
-          ]
-        )
+  workspaceRulesLua = lib.concatStringsSep "\n" (
+    map (
+      workspace:
+      luaCall "workspace_rule" (
+        [ (luaKv "workspace" workspace.workspace) ]
+        ++ lib.optionals (workspace ? monitor) [ (luaKv "monitor" workspace.monitor) ]
+        ++ lib.optionals (workspace ? default) [ (luaKv "default" workspace.default) ]
+        ++ lib.optionals (workspace ? persistent) [ (luaKv "persistent" workspace.persistent) ]
       )
-      [
-        {
-          workspace = "1";
-          monitor = "eDP-1";
-          persistent = true;
-        }
-        {
-          workspace = "2";
-          monitor = "DP-1";
-          persistent = true;
-        }
-        {
-          workspace = "name:web";
-          monitor = "DP-1";
-          default = true;
-          persistent = true;
-          on_created_empty = "brave";
-        }
-        {
-          workspace = "name:terminal";
-          monitor = "DP-1";
-          persistent = true;
-          on_created_empty = "wezterm connect unix";
-        }
-        {
-          workspace = "name:email";
-          monitor = "eDP-1";
-          persistent = true;
-          on_created_empty = "thunderbird";
-        }
-        {
-          workspace = "name:music";
-          monitor = "DP-1";
-          persistent = true;
-          on_created_empty = "spotify";
-        }
-        {
-          workspace = "name:coding";
-          monitor = "DP-1";
-          on_created_empty = "wezterm";
-        }
-        {
-          workspace = "special";
-          on_created_empty = "wezterm connect unix";
-        }
-      ]
+    ) workspaces
   );
+
+  # The `on_created_empty` workspace-rule field is deprecated since the Lua
+  # config; launch from a `workspace.created` handler instead. The selector
+  # mirrors Hyprland's Workspace::selector(): "special:<name>" for special
+  # workspaces, the numeric id for numbered ones, "name:<name>" otherwise.
+  onCreatedEmptyLua =
+    let
+      entries = builtins.filter (workspace: workspace ? on_created_empty) workspaces;
+      # The bare `special` workspace is addressed as "special:special".
+      selectorOf = workspace: if workspace == "special" then "special:special" else workspace;
+    in
+    ''
+      local on_created_empty = {
+      ${lib.concatMapStringsSep "\n" (
+        workspace:
+        "  [${luaString (selectorOf workspace.workspace)}] = ${luaString workspace.on_created_empty},"
+      ) entries}
+      }
+
+      hl.on("workspace.created", function(ws)
+        if not ws.is_empty then
+          return
+        end
+        local selector
+        if ws.special then
+          selector = ws.addressable_name
+        elseif ws.id ~= nil then
+          selector = tostring(ws.id)
+        else
+          selector = "name:" .. ws.addressable_name
+        end
+        local cmd = on_created_empty[selector]
+        if cmd then
+          hl.exec_cmd(cmd, { workspace = selector })
+        end
+      end)
+    '';
+
+  workspaceLua = workspaceRulesLua + "\n\n" + onCreatedEmptyLua;
+
+  workspaces = [
+    {
+      workspace = "1";
+      monitor = "eDP-1";
+      persistent = true;
+    }
+    {
+      workspace = "2";
+      monitor = "DP-1";
+      persistent = true;
+    }
+    {
+      workspace = "name:web";
+      monitor = "DP-1";
+      default = true;
+      persistent = true;
+      on_created_empty = "brave";
+    }
+    {
+      workspace = "name:terminal";
+      monitor = "DP-1";
+      persistent = true;
+      on_created_empty = "wezterm connect unix";
+    }
+    {
+      workspace = "name:email";
+      monitor = "eDP-1";
+      persistent = true;
+      on_created_empty = "thunderbird";
+    }
+    {
+      workspace = "name:music";
+      monitor = "DP-1";
+      persistent = true;
+      on_created_empty = "spotify";
+    }
+    {
+      workspace = "name:coding";
+      monitor = "DP-1";
+      on_created_empty = "wezterm";
+    }
+    {
+      workspace = "special";
+      on_created_empty = "wezterm connect unix";
+    }
+  ];
 
   # Most former exec-once entries are now systemd user units (restart on failure,
   # unlike exec-once); only self-daemonising wezterm-mux-server stays here.
