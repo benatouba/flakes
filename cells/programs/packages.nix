@@ -10,6 +10,12 @@ _: {
           gdal
           gimp
           libreoffice
+          # Spell-check dictionaries; the LibreOffice wrapper picks them up from
+          # share/hunspell in the profile via DICPATH.
+          hunspellDicts.de_DE
+          hunspellDicts.en_GB-ize # Oxford spelling (-ize)
+          hunspellDicts.en_US
+          hunspellDicts.es_ANY
           nodejs_latest
           obsidian
           ripgrep-all
