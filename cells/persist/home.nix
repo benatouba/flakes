@@ -46,6 +46,9 @@ _: {
           "mail"
           ".config/gtk-3.0"
           ".config/gtk-4.0"
+          # LibreOffice user profile (registrymodifications.xcu); without it,
+          # preferences such as "Show tips on startup" reset on every boot.
+          ".config/libreoffice"
           ".local/share/atuin"
           ".local/share/nix-index"
           ".local/share/opencode"
