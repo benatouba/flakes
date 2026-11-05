@@ -440,6 +440,10 @@ let
       xwayland = {
         force_zero_scaling = true,
       },
+      render = {
+        -- Automatic fullscreen HDR makes Brave video too bright on the 8-bit output.
+        cm_auto_hdr = 0,
+      },
       binds = {
         workspace_back_and_forth = 1,
         allow_workspace_cycles = 1,
