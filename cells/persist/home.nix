@@ -1,6 +1,6 @@
 _: {
   config.my.branches.persist.hmModules = [
-    {
+    ({ config, lib, ... }: {
       home.persistence."/persist" = {
         directories = [
           "projects"
@@ -52,12 +52,23 @@ _: {
           ".local/share/atuin"
           ".local/share/nix-index"
           ".local/share/opencode"
+        ]
+        ++ lib.optionals config.programs.qutebrowser.enable [
+          # Local profile only: cookies, site storage, history and explicit
+          # sessions/permissions. HTTP cache stays ephemeral; no browser sync.
+          ".config/qutebrowser"
+          ".local/share/qutebrowser"
+        ]
+        ++ lib.optionals config.programs.librewolf.enable [
+          # Local extension state/bookmarks, not Sync. LibreWolf's own
+          # clear-on-close policy still controls cookies and site storage.
+          ".librewolf"
         ];
 
         files = [
           ".claude.json"
         ];
       };
-    }
+    })
   ];
 }

@@ -16,6 +16,7 @@ _: {
           hunspellDicts.en_GB-ize # Oxford spelling (-ize)
           hunspellDicts.en_US
           hunspellDicts.es_ANY
+          kdePackages.okular # PDF comments, annotations, and interactive forms.
           nodejs_latest
           obsidian
           ripgrep-all

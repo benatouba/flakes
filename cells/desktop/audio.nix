@@ -8,7 +8,6 @@ _: {
           alsa.enable = true;
           alsa.support32Bit = true;
           pulse.enable = true;
-          jack.enable = true;
           wireplumber.extraConfig."99-raise-volume-limit" = {
             "monitor.alsa.rules" = [
               {
@@ -20,6 +19,7 @@ _: {
         };
 
         environment.systemPackages = with pkgs; [
+          pipewire.jack # Use pw-jack <application> for JACK clients without a global LD_LIBRARY_PATH.
           wireplumber
           alsa-lib
           alsa-utils

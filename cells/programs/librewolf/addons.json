@@ -1,0 +1,66 @@
+[
+  {
+    "name": "ublock-origin",
+    "version": "1.75.4",
+    "id": "uBlock0@raymondhill.net",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/5203014/ublock_origin-1.75.4.xpi",
+    "hash": "sha256-4t9QPM589QaRMGGMNJaV9ivd2564wYkVbQJyaa5K4mc=",
+    "license": "GPL-3.0-only"
+  },
+  {
+    "name": "bitwarden-password-manager",
+    "version": "2026.10.2",
+    "id": "{446900e4-71c2-419f-a6a7-df9c091e268b}",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/5198653/bitwarden_password_manager-2026.10.2.xpi",
+    "hash": "sha256-q/nXJz3VWsBYPsxpl/f3rj0p3hHirQpIOLgOK5QdqnM=",
+    "license": "https://addons.mozilla.org/en-US/firefox/addon/bitwarden-password-manager/license/"
+  },
+  {
+    "name": "vimium-c",
+    "version": "2.12.3",
+    "id": "vimium-c@gdh1995.cn",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/4474326/vimium_c-2.12.3.xpi",
+    "hash": "sha256-4aT4zBN5HfuYXCp40z3x6KQPI71uypIXFly3SACd9UA=",
+    "license": "MIT"
+  },
+  {
+    "name": "darkreader",
+    "version": "4.9.135",
+    "id": "addon@darkreader.org",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/5216111/darkreader-4.9.135.xpi",
+    "hash": "sha256-v+1FkdbMaYV/XtM6LTy/vFgR1bksQyPQc10vF1fi3OQ=",
+    "license": "MIT"
+  },
+  {
+    "name": "react-devtools",
+    "version": "8.0.0",
+    "id": "@react-devtools",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/5018049/react_devtools-8.0.0.xpi",
+    "hash": "sha256-rUKfCw25FKBQVZH3AWAAXXw+GnhlEow7+kY5LSi+NL4=",
+    "license": "MIT"
+  },
+  {
+    "name": "zotero-connector",
+    "version": "5.0.217",
+    "id": "zotero@chnm.gmu.edu",
+    "url": "https://www.zotero.org/download/connector/dl?browser=firefox&version=5.0.217",
+    "hash": "sha256-lF/XwOyO3VXC24NLL7JHEzPXMASUuWEtg/ky0lh3uDQ=",
+    "license": "AGPL-3.0-or-later"
+  },
+  {
+    "name": "colorzilla",
+    "version": "3.4resigned1",
+    "id": "{6AC85730-7D0F-4de0-B3FA-21142DD85326}",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/4270266/colorzilla-3.4resigned1.xpi",
+    "hash": "sha256-dXuvNdv5FLoqrV7BgI/LnzpPdDa0hUkPfqii32Rf6Zk=",
+    "license": "https://addons.mozilla.org/en-US/firefox/addon/colorzilla/license/"
+  },
+  {
+    "name": "undistracted",
+    "version": "3.5.4",
+    "id": "undistracted.developer@gmail.com",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/4447749/undistracted-3.5.4.xpi",
+    "hash": "sha256-GG8at9Uy9Zi0Xf+d3r8uyOacXONrewMEx5Y/mjaAgVQ=",
+    "license": "All Rights Reserved"
+  }
+]
