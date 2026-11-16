@@ -20,6 +20,22 @@ Its selection transport is NUL-separated so newline filenames cannot turn into
 additional attachments. aerc keeps its existing manual attachment-path entry:
 its picker API interprets filenames as glob patterns rather than literal paths.
 
+## Outgoing message size
+
+NeoMutt checks b-tu messages against its SMTP server's advertised **26,214,400-byte
+(25 MiB)** limit before invoking msmtpq. This measures the complete MIME message,
+including Base64 attachments and SMTP CRLF expansion, not just attachment sizes.
+An oversized send reports the measured size and excess in NeoMutt; nothing is
+queued. Reduce attachments or use an approved file-sharing link, then retry.
+
+The check is local and works offline. The confirmed limit is pinned in
+`cells/programs/mail.nix`; update it if the provider changes its limit. Other
+accounts retain their existing behavior until their limits are verified. This
+does not affect aerc's direct SMTP sends or messages already in the queue.
+NeoMutt waits for the send command so that a failed check is not mistaken for a
+successful send. An owner-only, unlinked temporary spool is closed on exit; the
+checker does not log message headers, recipients, or contents.
+
 ## Search across accounts
 
 notmuch indexes the existing Maildirs locally. It does not move mail or create

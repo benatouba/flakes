@@ -135,7 +135,14 @@ in
 
         # Default sendmail picks no msmtp account (wrong relay); pin each with `-a`
         # (forwarded by msmtpq, persisted per queued message).
-        msmtpSendmail = account: "msmtpq --account=${account} --read-envelope-from --read-recipients";
+        msmtpSendmail =
+          account:
+          # BTU advertises SIZE 26214400. Check the encoded message before msmtpq
+          # can turn a permanent size rejection into a successful enqueue.
+          lib.optionalString (
+            account == "b-tu"
+          ) "${pkgs.mail-tools}/bin/mail-send-size-check --max-bytes 26214400 -- "
+          + "${pkgs.msmtp}/bin/msmtpq --account=${account} --read-envelope-from --read-recipients";
 
         # %D uses these descriptions: the selectable Inbox is the account heading,
         # followed by indented folders in registration order.
@@ -377,6 +384,8 @@ in
               nm_default_uri = ''"notmuch://${config.accounts.email.maildirBasePath}"'';
               nm_exclude_tags = ''"deleted,spam"'';
               reverse_name = "yes";
+              # Wait for the size guard/queue exit code and show errors in compose.
+              sendmail_wait = "0";
             };
             extraConfig = ''
               unalternative_order *

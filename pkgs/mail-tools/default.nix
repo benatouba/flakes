@@ -61,6 +61,12 @@ let
       exec ${pkgs.python3}/bin/python3 ${./html.py} "$@"
     '';
   };
+  sendSize = pkgs.writeShellApplication {
+    name = "mail-send-size-check";
+    text = ''
+      exec ${pkgs.python3}/bin/python3 ${./send-size.py} "$@"
+    '';
+  };
   check = pkgs.writeShellApplication {
     name = "check-mail-tools";
     runtimeInputs = [
@@ -80,9 +86,11 @@ let
       mkdir -p "$HOME"
       export MAIL_SAVED_SEARCHES=${./searches.json}
       export MAIL_ROUTING_CONFIG=${routingFixture}
+      export MAIL_SIZE_CHECK_SCRIPT=${./send-size.py}
       mypy --cache-dir "$work/mypy" ${./attachment-picker.py}
       mypy --cache-dir "$work/mypy" ${./calendar-import.py}
       mypy --cache-dir "$work/mypy" ${./html.py}
+      mypy --cache-dir "$work/mypy" ${./send-size.py}
       python3 -m unittest discover -s ${./tests} -v
     '';
   };
@@ -93,6 +101,7 @@ let
       index
       calendarImport
       html
+      sendSize
     ];
     passthru.calendar = calendarPackage;
     passthru.check = check;
