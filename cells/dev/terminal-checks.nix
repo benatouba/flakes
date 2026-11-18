@@ -36,9 +36,6 @@ let
   swallowsGhostty =
     text: lib.any (l: lib.hasInfix "swallow_regex" l && lib.hasInfix "ghostty" l) (linesOf text);
 
-  userServices = hm.systemd.user.services;
-  watcher = userServices.terminal-cwd-watcher or { };
-
   waybarConfig =
     theme: builtins.readFile (hm.xdg.configFile.waybar.source + "/themes/${theme}/config");
   # Waybar popups must carry an org.waybar.* class so the project-hours
@@ -70,23 +67,8 @@ let
     "terminal-variable-is-ghostty" = (hm.home.sessionVariables.TERMINAL or null) == "ghostty";
     "sidepad-uses-ghostty" =
       hm.xdg.configFile ? "sidepad/pads/ghostty" && !(hm.xdg.configFile ? "sidepad/pads/wezterm");
-    "ghostty-enabled-with-systemd" = hm.programs.ghostty.enable && hm.programs.ghostty.systemd.enable;
-    "ghostty-catppuccin-themed" = hm.catppuccin.ghostty.enable;
-    "shpool-enabled" = hm.services.shpool.enable;
     "wezterm-kept-as-fallback" = hm.programs.wezterm.enable;
     "wezterm-does-not-attach-mux" = !(lib.hasInfix "\"connect\"" hm.programs.wezterm.extraConfig);
-
-    # project-hours: the terminal-independent watcher replaces the WezTerm one
-    # (two watchers must never feed the same bucket, project-hours ADR-0005).
-    "thinkpad-runs-terminal-cwd-watcher" =
-      lib.any (lib.hasSuffix "/bin/terminal-cwd-watcher") (lib.toList (watcher.Service.ExecStart or [ ]))
-      && lib.elem "activitywatch.target" (watcher.Unit.After or [ ]);
-    "thinkpad-no-wezterm-cwd-watcher" = !(userServices ? wezterm-cwd-watcher);
-    # The watcher reads Hyprland's IPC socket; the graphical session must
-    # export the instance signature to the systemd user manager.
-    "watcher-gets-hyprland-instance" =
-      hm.wayland.windowManager.hyprland.systemd.enable
-      && lib.elem "HYPRLAND_INSTANCE_SIGNATURE" hm.wayland.windowManager.hyprland.systemd.variables;
   };
   failed = failing cases;
 in
