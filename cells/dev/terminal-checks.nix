@@ -41,6 +41,13 @@ let
 
   waybarConfig =
     theme: builtins.readFile (hm.xdg.configFile.waybar.source + "/themes/${theme}/config");
+  # Waybar popups must carry an org.waybar.* class so the project-hours
+  # watcher ignores them and Hyprland can float them.
+  waybarPopupsClassed =
+    theme:
+    lib.all (lib.hasInfix "--class=org.waybar.") (
+      lib.filter (lib.hasInfix "ghostty ") (linesOf (waybarConfig theme))
+    );
 
   cases = {
     "hyprland-terminal-not-wezterm" = weztermLaunchers hyprland == [ ];
@@ -56,6 +63,8 @@ let
     "hyprland-tiles-ghostty" = lib.hasInfix "com\\.mitchellh\\.ghostty" (legacy "rules.conf");
     "waybar-catppuccin-not-wezterm" = !(mentionsWezterm (waybarConfig "catppuccin"));
     "waybar-default-not-wezterm" = !(mentionsWezterm (waybarConfig "default"));
+    "waybar-catppuccin-popups-classed" = waybarPopupsClassed "catppuccin";
+    "waybar-default-popups-classed" = waybarPopupsClassed "default";
     "terminal-exec-defaults-to-ghostty" =
       nixos.xdg.terminal-exec.settings.default == [ "com.mitchellh.ghostty.desktop" ];
     "terminal-variable-is-ghostty" = (hm.home.sessionVariables.TERMINAL or null) == "ghostty";
