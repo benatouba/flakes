@@ -5,7 +5,7 @@ _: {
     {
       xdg.terminal-exec = {
         enable = true;
-        settings.default = [ "org.wezfurlong.wezterm.desktop" ];
+        settings.default = [ "com.mitchellh.ghostty.desktop" ];
       };
     }
   ];

@@ -30,7 +30,6 @@ in
           config.window_decorations = "NONE"
           config.use_resize_increments = true
           config.adjust_window_size_when_changing_font_size = false
-          config.default_gui_startup_args = { "connect", "unix" }
 
           config.color_scheme = "${theme.weztermColorScheme}"
 
