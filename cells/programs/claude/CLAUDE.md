@@ -30,7 +30,8 @@ Apply these conventions to every software project unless the repository’s own 
 - Use TypeScript where the repository supports it. Keep dependencies minimal, maintainable, license-compatible, and pinned through the lock file.
 
 ## Git
-- Run project tests as pre-commit hooks, set up via `devenv.nix` and `prek`.
+- Run project formatting, whitespace, linting as pre-commit hooks, set up via `devenv.nix` and `prek`.
+- Set up testing for CI and run it after implementation.
 - If tests are run on `git commit`, another run beforehand is not necessary.
 - Do not state that commits were done by a model or that AI or `Claude Code` were used.
 - Only push branches when they are complete. We need to save time on CI runs.
