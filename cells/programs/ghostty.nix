@@ -107,9 +107,6 @@ in
             background-opacity = 0.95;
             window-decoration = "none";
             window-show-tab-bar = "never";
-            # Ghostty documents this as macOS-only; kept to mirror WezTerm's
-            # use_resize_increments where it applies.
-            window-step-resize = true;
             bell-features = "no-audio,no-system";
             scrollbar = "system";
             # Same history as WezTerm's scrollback_lines; the default byte cap still applies.
