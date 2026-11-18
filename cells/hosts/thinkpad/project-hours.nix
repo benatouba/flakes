@@ -19,7 +19,11 @@ _: {
                 "--prefix"
                 "PATH"
                 ":"
-                (lib.makeBinPath [ pkgs.git ])
+                # git for project roots; ps (procps) for the terminal watcher.
+                (lib.makeBinPath [
+                  pkgs.git
+                  pkgs.procps
+                ])
               ];
             });
       in

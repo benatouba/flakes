@@ -24,6 +24,7 @@ let
       && lib.elem "activitywatch.target" (watcher.Unit.After or [ ]);
     "thinkpad-no-wezterm-cwd-watcher" = !(userServices ? wezterm-cwd-watcher);
     "watcher-path-has-git" = lib.hasInfix "-git-" wrapperPath;
+    "watcher-path-has-ps" = lib.hasInfix "-procps-" wrapperPath;
     # The watcher reads Hyprland's IPC socket; the graphical session must
     # export the instance signature to the systemd user manager.
     "watcher-gets-hyprland-instance" =
