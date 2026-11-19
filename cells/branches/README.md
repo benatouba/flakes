@@ -17,6 +17,7 @@ Hosts select branches by name instead of importing feature files directly.
 - `finance`: Beancount ledger automation, Fava UI, and Paperless-oriented finance ingestion (needs `paperless`).
 - `paperless`: Paperless-ngx document management, PDF tools, sync, and local backup services (needs `secrets`).
 - `matrix`: Matrix homeserver services and bridges.
+- `whatsapp`: local `wa-bridge` for whatsapp.nvim (needs `desktop`; no service or listening port).
 - `wger`: Wger workout manager stack (PostgreSQL, Redis, web, nginx, celery, backups; needs `secrets`).
 
 A branch may declare `needs = [ "other" ]`; host resolution throws when a
