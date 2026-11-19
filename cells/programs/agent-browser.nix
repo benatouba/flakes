@@ -22,13 +22,6 @@ _: {
           args = "--no-sandbox,--disable-gpu,--disable-dev-shm-usage";
         };
 
-        # One link serves Claude Code and OpenCode (Claude-compat path).
-        # Do NOT also link under ~/.config/opencode/skills (dupes).
-        home.file.".claude/skills/agent-browser" = {
-          source = "${pkgs.agent-browser}/skills/agent-browser";
-          force = true;
-        };
-
         # ~/.claude.json is CLI-owned; register idempotently via `claude mcp add`.
         # Activation PATH lacks the user profile, so prefix it or registration never fires.
         home.activation.registerAgentBrowserClaudeMcp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -40,16 +33,11 @@ _: {
           fi
         '';
 
-        # Guard against drift like the opencode module does: config must stay
-        # a nix-store symlink, skill must stay a directory symlink.
+        # The shared skills catalog checks the skill link separately.
         home.activation.checkAgentBrowserManaged = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
           ab_config="${config.home.homeDirectory}/.agent-browser/config.json"
-          ab_skill="${config.home.homeDirectory}/.claude/skills/agent-browser"
           if [ -e "$ab_config" ] && [ ! -L "$ab_config" ]; then
             echo "[home-manager][agent-browser] warning: $ab_config is not a symlink (possible drift)" >&2
-          fi
-          if [ -e "$ab_skill" ] && [ ! -L "$ab_skill" ]; then
-            echo "[home-manager][agent-browser] warning: $ab_skill is not a symlink (possible drift)" >&2
           fi
         '';
       }

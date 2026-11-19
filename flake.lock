@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "ai-developer-guide": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789023836,
+        "narHash": "sha256-gW61iCypznYaOF3tpBI9qrLkPrh/Z+QFtuPkuDJfkcM=",
+        "owner": "dwmkerr",
+        "repo": "ai-developer-guide",
+        "rev": "e6b7b4ef5f70b96743c253327b86a750907b9bc8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dwmkerr",
+        "repo": "ai-developer-guide",
+        "type": "github"
+      }
+    },
     "aquamarine": {
       "inputs": {
         "hyprutils": [
@@ -69,6 +85,22 @@
       "original": {
         "owner": "sadjow",
         "repo": "claude-code-nix",
+        "type": "github"
+      }
+    },
+    "cloudflare-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794930949,
+        "narHash": "sha256-A3tzJg4lXaQz4RN0d+N/nKwNm4DqUzG1S0w5l6FKWCg=",
+        "owner": "cloudflare",
+        "repo": "skills",
+        "rev": "5108325ecceabc899c761e07aa617b09c02445ee",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cloudflare",
+        "repo": "skills",
         "type": "github"
       }
     },
@@ -814,6 +846,22 @@
         "type": "github"
       }
     },
+    "openai-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1782268572,
+        "narHash": "sha256-t4oGnFg0YpxJaQiFpgTiwYhaFoZK6wPDiqvHoG0bXiU=",
+        "owner": "openai",
+        "repo": "skills",
+        "rev": "49f948faa9258a0c61caceaf225e179651397431",
+        "type": "github"
+      },
+      "original": {
+        "owner": "openai",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "pre-commit-hooks": {
       "inputs": {
         "flake-compat": "flake-compat_2",
@@ -858,8 +906,10 @@
     },
     "root": {
       "inputs": {
+        "ai-developer-guide": "ai-developer-guide",
         "catppuccin": "catppuccin",
         "claude-code": "claude-code",
+        "cloudflare-skills": "cloudflare-skills",
         "flake-parts": "flake-parts",
         "git-hooks-nix": "git-hooks-nix",
         "granola": "granola",
@@ -874,9 +924,27 @@
         "nixos-generators": "nixos-generators",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_4",
+        "openai-skills": "openai-skills",
         "project-hours": "project-hours",
+        "scientific-agent-skills": "scientific-agent-skills",
         "sops-nix": "sops-nix",
         "vercel-skills": "vercel-skills"
+      }
+    },
+    "scientific-agent-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794820764,
+        "narHash": "sha256-VdBhkQDttOQ5HKGopsNywoTbVGowl1JCzJtIQ6KtWew=",
+        "owner": "K-Dense-AI",
+        "repo": "scientific-agent-skills",
+        "rev": "ec59a29a03d5c40f73ab40878df04860bc00e876",
+        "type": "github"
+      },
+      "original": {
+        "owner": "K-Dense-AI",
+        "repo": "scientific-agent-skills",
+        "type": "github"
       }
     },
     "sops-nix": {

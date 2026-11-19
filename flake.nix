@@ -34,6 +34,22 @@
       url = "github:mattpocock/skills";
       flake = false;
     };
+    cloudflare-skills = {
+      url = "github:cloudflare/skills";
+      flake = false;
+    };
+    ai-developer-guide = {
+      url = "github:dwmkerr/ai-developer-guide";
+      flake = false;
+    };
+    scientific-agent-skills = {
+      url = "github:K-Dense-AI/scientific-agent-skills";
+      flake = false;
+    };
+    openai-skills = {
+      url = "github:openai/skills";
+      flake = false;
+    };
     hyprland = {
       url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -65,7 +81,6 @@
       url = "git+ssh://git@github.com/benatouba/project-hours";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Branch-tracking; `nix flake update vercel-skills` pulls latest.
     vercel-skills = {
       url = "github:vercel-labs/skills";
       flake = false;
