@@ -20,6 +20,7 @@ in
     branches = [
       "desktop"
       "printing"
+      "whatsapp"
     ];
     nixosModules = [ ];
     hardwareModules = [
