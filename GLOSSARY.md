@@ -26,3 +26,10 @@ _Avoid_: host config, machine module
 **Dendritic**:
 The rule that hosts select branches by name and never import feature files directly.
 _Avoid_: layered, hierarchical
+
+## Research workflow
+
+**Run manifest**:
+A record of one analysis attempt: what actually ran, its input and environment
+identities, what it produced, and what was verified.
+_Avoid_: chat transcript, context index

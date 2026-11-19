@@ -4,7 +4,7 @@
   "plugins": [
     // Requires a V2-compatible release; renaming this key does not port the plugin.
     "envsitter-guard@latest",
-    "@tarquinen/opencode-dcp@latest",
+    "@contextMode@",
   ],
   "lsp": true,
   "mcp": {
@@ -111,6 +111,9 @@
     // Hosted Jev calls may transmit their input externally.
     // Ask for each tool invocation so its payload can be reviewed.
     { "action": "jev_*", "resource": "*", "effect": "ask" },
+
+    // Context Mode upgrades are owned by the flake.
+    { "action": "ctx_upgrade", "resource": "*", "effect": "deny" },
 
     // Preserve V1's default prompt for access outside the project.
     // V2 otherwise allows external_directory access by default.

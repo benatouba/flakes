@@ -32,6 +32,7 @@ _: {
           # Do not depend on the shared OpenCode service's PATH. The personal
           # branch exposes the wrapper only when its SOPS key is configured.
           source = pkgs.replaceVars ./opencode/opencode.jsonc {
+            contextMode = pkgs.context-mode-agent;
             jevMcpServer = lib.optionalString (jevMcp != null) ''
               "jev": ${
                 builtins.toJSON {
