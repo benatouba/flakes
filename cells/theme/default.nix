@@ -25,6 +25,8 @@ in
             inherit (theme.cursor) flavor accent;
           };
           kvantum.enable = true;
+          # Opt-in (autoEnable = false); follows theme.flavor like the rest.
+          ghostty.enable = true;
         };
 
         home = {

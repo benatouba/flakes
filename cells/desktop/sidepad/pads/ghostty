@@ -1,0 +1,6 @@
+# Sidepad configuration for Ghostty
+# Ghostty needs `--class=` and a GTK application ID (with a dot), so the class
+# is passed in SIDEPAD_APP and sidepad runs it verbatim for non-default classes.
+SIDEPAD_APP="ghostty --gtk-single-instance=false --class=dotfiles.sidepad"
+SIDEPAD_CLASS="dotfiles.sidepad"
+SIDEPAD_OPTIONS="--width 1000"

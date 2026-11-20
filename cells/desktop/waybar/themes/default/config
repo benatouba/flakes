@@ -90,18 +90,18 @@
     "cpu": {
         "format": "{usage}% ",
         "tooltip": false,
-        "on-click": "wezterm start -- btop"
+        "on-click": "ghostty --gtk-single-instance=false --class=org.waybar.btop -e btop"
     },
     "memory": {
         "format": "{}% ",
-        "on-click": "wezterm start -- btop"
+        "on-click": "ghostty --gtk-single-instance=false --class=org.waybar.btop -e btop"
     },
     "temperature": {
         "critical-threshold": 80,
         // "format-critical": "{temperatureC}°C {icon}",
         "format": "{temperatureC}°C {icon}",
         "format-icons": ["", "", ""],
-        "on-click": "wezterm start -- btop"
+        "on-click": "ghostty --gtk-single-instance=false --class=org.waybar.btop -e btop"
     },
     "backlight": {
         // "device": "acpi_video1",
@@ -121,7 +121,7 @@
         "format-charging": "{capacity}% ",
         "format-plugged": "{capacity}% ",
         "format-alt": "{time} {icon}",
-        "on-click": "wezterm start -- btop",
+        "on-click": "ghostty --gtk-single-instance=false --class=org.waybar.btop -e btop",
         "on-click-right": "~/.config/hypr/scripts/toggle-charge.sh",
         // "format-good": "", // An empty format will hide the module
         // "format-full": "",
@@ -129,7 +129,7 @@
     },
     "battery#bat2": {
         "bat": "BAT2",
-        "on-click": "wezterm start -- btop",
+        "on-click": "ghostty --gtk-single-instance=false --class=org.waybar.btop -e btop",
         "on-click-right": "~/.config/hypr/scripts/toggle-charge.sh"
     },
     "network": {

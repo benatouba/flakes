@@ -19,7 +19,11 @@ _: {
                 "--prefix"
                 "PATH"
                 ":"
-                (lib.makeBinPath [ pkgs.git ])
+                # git for project roots; ps (procps) for the terminal watcher.
+                (lib.makeBinPath [
+                  pkgs.git
+                  pkgs.procps
+                ])
               ];
             });
       in
@@ -53,9 +57,12 @@ _: {
           match-app-id = ".*"
         '';
 
-        systemd.user.services.wezterm-cwd-watcher = {
+        # Terminal-independent (project-hours ADR-0005): Hyprland focus + tty atime.
+        # Needs HYPRLAND_INSTANCE_SIGNATURE, which Hyprland's HM systemd integration
+        # imports into the user manager before graphical-session.target starts.
+        systemd.user.services.terminal-cwd-watcher = {
           Unit = {
-            Description = "wezterm focused-pane cwd -> ActivityWatch heartbeat";
+            Description = "focused terminal cwd -> ActivityWatch heartbeat";
             PartOf = [ "graphical-session.target" ];
             # Start after ActivityWatch so cold boot doesn't crash-loop
             # (ensure_bucket() isn't retried).
@@ -65,7 +72,7 @@ _: {
             ];
           };
           Service = {
-            ExecStart = "${projectHours}/bin/wezterm-cwd-watcher";
+            ExecStart = "${projectHours}/bin/terminal-cwd-watcher";
             Restart = "on-failure";
           };
           Install.WantedBy = [ "graphical-session.target" ];

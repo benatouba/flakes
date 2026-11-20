@@ -311,7 +311,7 @@ let
       workspace = "name:terminal";
       monitor = "DP-1";
       persistent = true;
-      on_created_empty = "wezterm connect unix";
+      on_created_empty = "ghostty-session";
     }
     {
       workspace = "name:email";
@@ -328,25 +328,16 @@ let
     {
       workspace = "name:coding";
       monitor = "DP-1";
-      on_created_empty = "wezterm";
+      on_created_empty = "ghostty";
     }
     {
       workspace = "special";
-      on_created_empty = "wezterm connect unix";
+      on_created_empty = "ghostty-session";
     }
   ];
 
-  # Most former exec-once entries are now systemd user units (restart on failure,
-  # unlike exec-once); only self-daemonising wezterm-mux-server stays here.
-  autostartLua = lib.concatStringsSep "\n" (
-    map
-      (command: ''
-        hl.exec_cmd(${luaString command})
-      '')
-      [
-        "wezterm-mux-server --daemonize --cwd ~/"
-      ]
-  );
+  # Former exec-once entries are systemd user units (restart on failure, unlike
+  # exec-once); terminal sessions live in shpool (cells/programs/ghostty.nix).
 
   hyprlandLua = ''
     ${colorVars}
@@ -355,7 +346,8 @@ let
 
     local mainMod = "SUPER"
     local browser = "brave"
-    local terminal = "wezterm connect unix"
+    local terminal = "ghostty-session"
+    local terminalPicker = "ghostty-session pick"
     local scriptsDir = os.getenv("HOME") .. "/.config/hypr/scripts"
 
     local function resize_active(x, y)
@@ -421,7 +413,7 @@ let
         focus_on_activate = true,
         disable_hyprland_logo = true,
         enable_swallow = true,
-        swallow_regex = "^(org\\.wezterm).*$",
+        swallow_regex = "^(org\\.wezfurlong\\.wezterm|com\\.mitchellh\\.ghostty).*$",
       },
       input = {
         kb_layout = "de,us",
@@ -471,12 +463,9 @@ let
 
     ${workspaceLua}
 
-    hl.on("hyprland.start", function()
-      ${autostartLua}
-    end)
-
     hl.bind(mainMod .. " + d", hl.dsp.exec_cmd("pkill rofi || rofi -show combi"))
     hl.bind("CTRL + ALT + t", hl.dsp.exec_cmd(terminal))
+    hl.bind("CTRL + ALT + SHIFT + t", hl.dsp.exec_cmd(terminalPicker))
     hl.bind(mainMod .. " + Q", hl.dsp.window.close())
     hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exit())
     hl.bind(mainMod .. " + Space", hl.dsp.window.float({ action = "toggle" }))
@@ -743,7 +732,7 @@ in
           source = ./sidepad/sidepad;
           executable = true;
         };
-        xdg.configFile."sidepad/pads/wezterm".source = ./sidepad/pads/wezterm;
+        xdg.configFile."sidepad/pads/ghostty".source = ./sidepad/pads/ghostty;
       }
     )
   ];

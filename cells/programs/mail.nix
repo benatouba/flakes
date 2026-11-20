@@ -1074,9 +1074,10 @@ in
           };
         };
 
-        # Temporary ncurses direct-color workaround for WezTerm/xterm-256color.
-        # Retest frequently, especially after NeoMutt, ncurses or WezTerm updates:
-        # run `env TERM=wezterm neomutt` and `env TERM=xterm-256color neomutt`
+        # Temporary ncurses direct-color workaround for Ghostty/WezTerm/xterm-256color.
+        # Retest frequently, especially after NeoMutt, ncurses, Ghostty or WezTerm updates:
+        # run `env TERM=xterm-ghostty neomutt`, `env TERM=wezterm neomutt` and
+        # `env TERM=xterm-256color neomutt`
         # (env bypasses this alias). Remove it when the hex theme works without it.
         home.shellAliases.neomutt = "TERM=xterm-direct neomutt";
 
