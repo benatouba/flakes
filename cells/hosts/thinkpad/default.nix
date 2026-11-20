@@ -49,6 +49,9 @@ in
             hostName = "thinkpad";
           };
 
+          # The user timer cannot upload until explicitly armed after a restore test.
+          services.btu-owncloud-backup.enable = true;
+
           # Unencrypted disk: random per-boot swap key (hibernation must stay off).
           # by-partuuid is mandatory — the UUID is erased on every boot.
           swapDevices = lib.mkForce [
