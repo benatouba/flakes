@@ -2,16 +2,29 @@
 {
   config.my.branches.desktop.hmModules = [
     (
-      { pkgs, ... }:
+      {
+        config,
+        lib,
+        pkgs,
+        ...
+      }:
       let
         claude = inputs.claude-code.packages.${pkgs.stdenv.hostPlatform.system}.default;
+        # Declared by shell/claude-gh-token.nix only when the secret exists.
+        ghTokenPath = config.sops.secrets.github_token_claude.path or null;
+        # Read at launch, so every entry point (terminal, IDE, URL handler)
+        # gets the scoped token and the value never enters the Nix store.
+        ghTokenArgs = lib.optionalString (ghTokenPath != null) ''
+          --run 'f=${ghTokenPath}; if [ -r "$f" ]; then export GH_TOKEN="$(< "$f")"; fi'
+        '';
         wrappedClaude = pkgs.symlinkJoin {
           name = "claude-code-with-context-mode";
           paths = [ claude ];
           nativeBuildInputs = [ pkgs.makeWrapper ];
           postBuild = ''
             wrapProgram "$out/bin/claude" \
-              --prefix CLAUDE_CODE_PLUGIN_DIRS : "${pkgs.context-mode-agent}"
+              --prefix CLAUDE_CODE_PLUGIN_DIRS : "${pkgs.context-mode-agent}" \
+              ${ghTokenArgs}
           '';
         };
       in

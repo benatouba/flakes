@@ -129,5 +129,53 @@
     { "action": "external_directory", "resource": "~/.local/share/nvim/**", "effect": "allow" },
     { "action": "external_directory", "resource": "~/.claude/skills/**", "effect": "allow" },
     { "action": "external_directory", "resource": "/tmp/**", "effect": "allow" },
+
+    // Key material and decrypted secrets: never read, edit or touch by path.
+    // These are guardrails, not a sandbox: OpenCode has no OS isolation, so
+    // a shell command that hides the path (e.g. inside a script) is not caught.
+    // ssh itself keeps working through the agent; only file access is denied.
+    { "action": "read", "resource": "~/.ssh/**", "effect": "deny" },
+    { "action": "read", "resource": "~/.config/sops/**", "effect": "deny" },
+    { "action": "read", "resource": "~/.config/sops-nix/**", "effect": "deny" },
+    { "action": "read", "resource": "~/.local/secrets/**", "effect": "deny" },
+    { "action": "read", "resource": "/run/user/*/secrets*/**", "effect": "deny" },
+    { "action": "edit", "resource": "~/.ssh/**", "effect": "deny" },
+    { "action": "edit", "resource": "~/.config/sops/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "~/.ssh/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "~/.config/sops/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "~/.config/sops-nix/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "~/.local/secrets/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "/run/user/*/secrets*/**", "effect": "deny" },
+    // Persisted state and the Btrfs top level hold further copies of keys;
+    // the rest of /persist and /mnt stays readable.
+    { "action": "external_directory", "resource": "/persist/sops/**", "effect": "deny" },
+    { "action": "read", "resource": "/persist/sops/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "/persist/home/*/.ssh/**", "effect": "deny" },
+    { "action": "read", "resource": "/persist/home/*/.ssh/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "/persist/home/*/ssh_dms/**", "effect": "deny" },
+    { "action": "read", "resource": "/persist/home/*/ssh_dms/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "/persist/home/*/.config/sops*/**", "effect": "deny" },
+    { "action": "read", "resource": "/persist/home/*/.config/sops*/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "/persist/home/*/.local/secrets/**", "effect": "deny" },
+    { "action": "read", "resource": "/persist/home/*/.local/secrets/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "/mnt/@home/*/.ssh/**", "effect": "deny" },
+    { "action": "read", "resource": "/mnt/@home/*/.ssh/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "/mnt/@home/*/ssh_dms/**", "effect": "deny" },
+    { "action": "read", "resource": "/mnt/@home/*/ssh_dms/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "/mnt/@home/*/.config/sops*/**", "effect": "deny" },
+    { "action": "read", "resource": "/mnt/@home/*/.config/sops*/**", "effect": "deny" },
+    { "action": "external_directory", "resource": "/mnt/@home/*/.local/secrets/**", "effect": "deny" },
+    { "action": "read", "resource": "/mnt/@home/*/.local/secrets/**", "effect": "deny" },
+
+    // Environment files may hold credentials; templates stay readable.
+    { "action": "read", "resource": "*.env", "effect": "deny" },
+    { "action": "read", "resource": "*.env.*", "effect": "deny" },
+    { "action": "read", "resource": "*.envrc", "effect": "deny" },
+    { "action": "read", "resource": "*.env.example", "effect": "allow" },
+    { "action": "edit", "resource": "*.env", "effect": "deny" },
+    { "action": "edit", "resource": "*.envrc", "effect": "deny" },
+    // Catches `cat .env`, `grep … .envrc` etc.; also blocks harmless commands
+    // that merely mention `.env` (e.g. `--env-file .env`).
+    { "action": "shell", "resource": "*.env*", "effect": "deny" },
   ],
 }
