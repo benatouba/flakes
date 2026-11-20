@@ -184,7 +184,6 @@ let
           mode = "preferred";
           position = "auto-left";
           scale = "1.00";
-          mirror = "eDP-1";
         }
         {
           output = "X11-1";
@@ -196,6 +195,12 @@ let
           output = "desc:BNQ BenQ GL2580 JCJ07368019";
           mode = "1920x1080";
           position = "auto-right";
+          scale = "1";
+        }
+        {
+          output = "desc:Samsung Electric Company C27FG7x";
+          mode = "1920x1080@120";
+          position = "auto-left";
           scale = "1";
         }
         {
@@ -221,13 +226,6 @@ let
           mode = "preferred";
           position = "auto-left";
           scale = "1";
-        }
-        {
-          output = "";
-          mode = "preferred";
-          position = "auto";
-          scale = "1";
-          mirror = "eDP-1";
         }
         {
           output = "";
@@ -311,7 +309,7 @@ let
       workspace = "name:terminal";
       monitor = "DP-1";
       persistent = true;
-      on_created_empty = "ghostty-session";
+      on_created_empty = "ghostty";
     }
     {
       workspace = "name:email";
@@ -332,12 +330,9 @@ let
     }
     {
       workspace = "special";
-      on_created_empty = "ghostty-session";
+      on_created_empty = "ghostty";
     }
   ];
-
-  # Former exec-once entries are systemd user units (restart on failure, unlike
-  # exec-once); terminal sessions live in shpool (cells/programs/ghostty.nix).
 
   hyprlandLua = ''
     ${colorVars}
@@ -346,8 +341,7 @@ let
 
     local mainMod = "SUPER"
     local browser = "brave"
-    local terminal = "ghostty-session"
-    local terminalPicker = "ghostty-session pick"
+    local terminal = "ghostty"
     local scriptsDir = os.getenv("HOME") .. "/.config/hypr/scripts"
 
     local function resize_active(x, y)
@@ -465,7 +459,6 @@ let
 
     hl.bind(mainMod .. " + d", hl.dsp.exec_cmd("pkill rofi || rofi -show combi"))
     hl.bind("CTRL + ALT + t", hl.dsp.exec_cmd(terminal))
-    hl.bind("CTRL + ALT + SHIFT + t", hl.dsp.exec_cmd(terminalPicker))
     hl.bind(mainMod .. " + Q", hl.dsp.window.close())
     hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exit())
     hl.bind(mainMod .. " + Space", hl.dsp.window.float({ action = "toggle" }))

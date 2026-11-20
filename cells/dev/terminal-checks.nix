@@ -1,4 +1,4 @@
-# Eval-time check that Ghostty (with shpool sessions) is the default desktop
+# Eval-time check that Ghostty is the default desktop
 # terminal on thinkpad and WezTerm is only a fallback. Each case names one
 # place WezTerm used to be the default, so a regression is legible.
 {
@@ -49,10 +49,13 @@ let
   cases = {
     "hyprland-terminal-not-wezterm" = weztermLaunchers hyprland == [ ];
     "hyprland-legacy-terminal-not-wezterm" = weztermLaunchers legacyAll == [ ];
-    "hyprland-terminal-uses-session-launcher" =
-      lib.hasInfix "local terminal = \"ghostty-session\"" hyprland;
-    "hyprland-picker-keybind" = lib.hasInfix "CTRL + ALT + SHIFT + t" hyprland;
-    "hyprland-legacy-picker-keybind" = lib.hasInfix "CTRL ALT SHIFT, t" legacyAll;
+    "hyprland-launches-ghostty-directly" =
+      lib.hasInfix "local terminal = \"ghostty\"" hyprland
+      && lib.hasInfix ''["name:terminal"] = "ghostty",'' hyprland;
+    "legacy-hyprland-launches-ghostty-directly" = builtins.elem "$terminal = ghostty" (
+      linesOf legacyAll
+    );
+    "shpool-is-disabled" = !hm.services.shpool.enable;
     "no-wezterm-mux-autostart" = !(lib.hasInfix "wezterm-mux-server" hyprland);
     "no-legacy-wezterm-mux-autostart" = !(lib.hasInfix "wezterm-mux-server" legacyAll);
     "hyprland-swallows-ghostty" = swallowsGhostty hyprland;

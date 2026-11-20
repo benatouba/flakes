@@ -50,6 +50,12 @@ in
           ];
         };
 
+        # Set this in every interactive shell, even if it inherits Home Manager's
+        # session-variable guard from an older login.
+        programs.zsh.initContent = lib.mkBefore ''
+          NVIM_HOME_MANAGER_BIN=${lib.escapeShellArg "${config.home.profileDirectory}/bin/nvim"}
+        '';
+
         xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink nvimConfigPath;
       }
     )

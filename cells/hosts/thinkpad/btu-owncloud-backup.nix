@@ -21,6 +21,29 @@
         dav = config.sops.secrets."${name}/webdav-config".path;
         remote = "btu-personal:thinkpad-restic";
         maxBytes = 100000000;
+        excludedPaths = [
+          ".git"
+          ".devenv"
+          ".venv"
+          "node_modules"
+          "*.lock"
+          "*.lockb"
+          "package-lock.json"
+          "npm-shrinkwrap.json"
+          "pnpm-lock.yaml"
+          "packages.lock.json"
+        ];
+        excludedRoots = [
+          "${homeDirectory}/documents/education"
+          "${homeDirectory}/projects/soga"
+        ];
+        findExclusions =
+          lib.concatMapStringsSep " -o " (path: "-path ${lib.escapeShellArg "*/${path}"}") excludedPaths
+          + " -o "
+          + lib.concatMapStringsSep " -o " (path: "-path ${lib.escapeShellArg path}") excludedRoots;
+        resticExclusions = lib.concatMapStringsSep " " (path: "--exclude ${lib.escapeShellArg path}") (
+          excludedPaths ++ excludedRoots
+        );
         rclone = pkgs.writeShellScript "btu-personal-rclone" ''
           exec ${pkgs.coreutils}/bin/env -i HOME=${lib.escapeShellArg homeDirectory} \
             SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
@@ -88,9 +111,10 @@
             preflight() {
               check_sources
               # Conservative estimate before deduplication and compression.
-              estimate=$(find -P "''${sources[@]}" -name .git -prune -o \
+              estimate=$(find -P "''${sources[@]}" \( ${findExclusions} \) -prune -o \
                 -type f ! -size +${toString maxBytes}c -printf '%s\n' |
-                awk '{ total += $1 } END { printf "%.0f\n", total }')
+                awk '{ total += $1 } END { printf "%.0f\n", total }') ||
+                fail "Could not scan all backup sources; repository was not initialized."
               free=$(${rclone} about btu-personal: --json | jq -er '.free | select(type == "number" and . >= 0)')
               printf 'Eligible file bytes: %s; ownCloud free bytes: %s\n' "$estimate" "$free"
               (( free >= estimate + 100000000 )) || fail "Insufficient space for the estimated initial backup and 100 MB headroom."
@@ -107,7 +131,7 @@
                 ;;
               backup)
                 check_sources
-                restic backup --exclude .git --exclude-larger-than ${toString maxBytes} "''${sources[@]}"
+                restic backup ${resticExclusions} --exclude-larger-than ${toString maxBytes} "''${sources[@]}"
                 ;;
               snapshots|check)
                 restic "$1"

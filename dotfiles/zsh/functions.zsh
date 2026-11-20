@@ -46,12 +46,13 @@ function y() {
 }
 
 function nvimvenv {
+  local nvim_bin="${NVIM_HOME_MANAGER_BIN:-nvim}"
   if [[ -e "$VIRTUAL_ENV" && -f "$VIRTUAL_ENV/bin/activate" ]]; then
     source "$VIRTUAL_ENV/bin/activate"
-    command nvim "$@"
+    command "$nvim_bin" "$@"
     deactivate
   else
-    command nvim "$@"
+    command "$nvim_bin" "$@"
   fi
 }
 
